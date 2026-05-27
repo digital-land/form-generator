@@ -1,0 +1,5996 @@
+from schema.schema_tree import (
+    BooleanField,
+    EnumField,
+    EnumOption,
+    schema_node_root_classes,
+    SchemaNode,
+    StringField,
+)
+
+
+class PhoneNumbers(SchemaNode):
+    number = StringField(display="Phone number", description="A phone number", max_length=None)
+    contact_priority = EnumField(
+        display="Contact priority",
+        description="The priority of a number",
+        select_options=[
+            EnumOption(key="primary", label="Primary", description="The preferred item to use"),
+            EnumOption(
+                key="secondary",
+                label="Secondary",
+                description="The option to use if primary is not working",
+            ),
+        ],
+    )
+
+    _ref = "phone-numbers"
+    _display = "Phone number"
+    _description = "A substructure for recording a phone number "
+
+
+class ContactDetails(SchemaNode):
+    email = StringField(
+        display="Email",
+        description="The email address that can be used for electronic correspondence with the individual",
+        max_length=None,
+    )
+
+    _ref = "contact-details"
+    _display = "Contact details"
+    _description = "A substructure for recording contact details "
+    _descendants = [PhoneNumbers]
+
+
+class AgentContact(SchemaNode):
+    agent_reference = StringField(
+        display="Agent reference", description="A reference to an agent object", max_length=None
+    )
+
+    _ref = "agent-contact"
+    _display = "Agent contact details"
+    _description = "Name and contact information if an agent is being used."
+    _descendants = [ContactDetails]
+
+
+class Person(SchemaNode):
+    title = StringField(display="Title", description="The title of the individual", max_length=None)
+    first_name = StringField(
+        display="First Name", description="The first name of the individual", max_length=None
+    )
+    last_name = StringField(
+        display="Last Name", description="The last name of the individual", max_length=None
+    )
+    address_text = StringField(
+        display="Address Text",
+        description="Flexible field for capturing addresses",
+        max_length=None,
+    )
+    postcode = StringField(display="Postcode", description="The postal code", max_length=None)
+
+    _ref = "person"
+    _display = "Person obj"
+    _description = "Details of an individual "
+
+
+class Agent(SchemaNode):
+    reference = StringField(
+        display="Reference", description="A unique reference for the data item", max_length=None
+    )
+    company = StringField(
+        display="Company",
+        description="The name of a company (that the agent works for)",
+        max_length=None,
+    )
+    user_role = EnumField(
+        display="User role",
+        description="The role of the named individual. Agent or proxy",
+        select_options=[
+            EnumOption(
+                key="agent",
+                label="Agent",
+                description="A professional agent working for the applicant",
+            ),
+            EnumOption(
+                key="proxy",
+                label="Proxy",
+                description="An individual working on behalf of the applicant but not in a professional capacity",
+            ),
+        ],
+    )
+
+    _ref = "agent"
+    _display = "Agent obj"
+    _description = "Details of the agent acting on behalf of the applicant, including name and organisation if applicable "
+    _descendants = [Person]
+
+
+class AgentDetails(SchemaNode):
+
+    _ref = "agent-details"
+    _display = "Agent details"
+    _description = "Name and contact information if an agent is being used."
+    _descendants = [Agent]
+
+
+class ApplicantContact(SchemaNode):
+    applicant_reference = StringField(
+        display="Applicant reference",
+        description="Reference to match contact details to a named individual from the applicant details component",
+        max_length=None,
+    )
+
+    _ref = "applicant-contact"
+    _display = "Applicant contact details"
+    _description = "Telephone number and email address of the applicant."
+    _descendants = [ContactDetails]
+
+
+class Applicants(SchemaNode):
+    reference = StringField(
+        display="Reference", description="A unique reference for the data item", max_length=None
+    )
+
+    _ref = "applicants"
+    _display = "Applicant"
+    _description = "Details of an individual applicant for the planning application, including their personal information and contact details "
+    _descendants = [Person]
+
+
+class ApplicantDetails(SchemaNode):
+
+    _ref = "applicant-details"
+    _display = "Applicant details"
+    _description = "Name and contact information for the parties making the application."
+    _descendants = [Applicants]
+
+
+class BngConditionExemptionReasons(SchemaNode):
+    exemption_type = EnumField(
+        display="Exemption type",
+        description="The type of biodiversity gain exemption from the bng-exemption-type enum",
+        select_options=[
+            EnumOption(
+                key="pre-commencement",
+                label="Submitted before BNG commencement",
+                description="Planning applications submitted before the Biodiversity Net Gain rules took effect (need to add the effective date)",
+            ),
+            EnumOption(
+                key="small-sites",
+                label="Small sites exemption",
+                description="Temporary exemption for non-major developments.",
+            ),
+            EnumOption(
+                key="de-minimis",
+                label="De minimis exemption",
+                description="Development below the minimum threshold for BNG requirements.",
+            ),
+            EnumOption(
+                key="self-build",
+                label="Self-build and custom build",
+                description="Self-build or custom build development projects.",
+            ),
+            EnumOption(
+                key="gain-site",
+                label="Biodiversity gain site",
+                description="Development of a registered biodiversity gain site.",
+            ),
+            EnumOption(
+                key="retrospective",
+                label="Retrospective planning permission",
+                description="Applications for retrospective planning permission.",
+            ),
+            EnumOption(
+                key="hs2",
+                label="High Speed Railway development",
+                description="Development related to the High Speed Railway (HS2).",
+            ),
+        ],
+    )
+    reason = StringField(display="Reason", description="A textual reason", max_length=None)
+
+    _ref = "bng-condition-exemption-reasons"
+    _display = "BNG exemption reason"
+    _description = "Reason why Biodiversity Net Gain does not apply, referencing specific exemptions or transitional arrangements "
+
+
+class HabitatLossDetails(SchemaNode):
+    loss_date = StringField(
+        display="Loss date",
+        description="Date the activity causing habitat loss or degradation occurred",
+        max_length=None,
+    )
+    pre_loss_biodiversity_value = StringField(
+        display="Pre loss biodiversity value",
+        description="Biodiversity value immediately before habitat loss or degradation occurred, measured in Habitat Biodiversity Units",
+        max_length=None,
+    )
+    supporting_evidence = StringField(
+        display="Supporting evidence",
+        description="Description or reference to supporting documents for habitat loss or degradation evidence",
+        max_length=None,
+    )
+
+    _ref = "habitat-loss-details"
+    _display = "Habitat loss details"
+    _description = (
+        "Details about habitat loss or degradation events that occurred after January 30, 2020 "
+    )
+
+
+class SupportingDocuments(SchemaNode):
+    reference = StringField(
+        display="Reference", description="A unique reference for the data item", max_length=None
+    )
+    details = StringField(
+        display="Details",
+        description="Additional details or information about an item",
+        max_length=None,
+    )
+
+    _ref = "supporting-documents"
+    _display = "Supporting document"
+    _description = "Reference to a supporting document already listed in application.documents "
+
+
+class BngDetails(SchemaNode):
+    pre_development_date = StringField(
+        display="Pre development date",
+        description="Date of pre-development biodiversity value calculation, must align with application or justified earlier date",
+        max_length=None,
+    )
+    pre_development_biodiversity_value = StringField(
+        display="Pre development biodiversity value",
+        description="Calculated biodiversity value in Habitat Biodiversity Units",
+        max_length=None,
+    )
+    earlier_date_reason = StringField(
+        display="Earlier date reason",
+        description="Reason for using a pre-development date that is earlier than the application submission",
+        max_length=None,
+    )
+    habitat_loss_after_2020 = BooleanField(
+        display="Habitat loss after 2020",
+        description="Indicates whether there has been degradation of onsite habitat(s) after 30 Jan 2020",
+    )
+    metric_publication_date = StringField(
+        display="Metric publication date",
+        description="Publication date of the biodiversity metric tool used for calculations",
+        max_length=None,
+    )
+    irreplaceable_habitats = BooleanField(
+        display="Irreplaceable habitats",
+        description="Indicates whether the site contains any irreplaceable habitats",
+    )
+    irreplaceable_habitats_details = StringField(
+        display="Irreplaceable habitats details",
+        description="Description and references for any irreplaceable habitats identified on the site",
+        max_length=None,
+    )
+
+    _ref = "bng-details"
+    _display = "Biodiversity net gain details"
+    _description = "Details about the biodiversity net gain assessment including pre-development value, habitat loss information, and required supporting documents "
+    _descendants = [HabitatLossDetails, SupportingDocuments]
+
+
+class Bng(SchemaNode):
+    bng_exempt = BooleanField(
+        display="Biodiversity gain exemption",
+        description="Statement whether the biodiversity gain condition will apply if permission is granted. Householder applicants need to confirm the biodiversity gain condition does not apply.",
+    )
+    bng_condition_applies = BooleanField(
+        display="Biodiversity gain condition applies",
+        description="Does the applicant believe the Biodiversity Gain Condition applies to this application",
+    )
+
+    _ref = "bng"
+    _display = "Biodiversity net gain"
+    _description = (
+        "How any natural habitats on the development site will be improved by the proposed works."
+    )
+    _descendants = [BngConditionExemptionReasons, BngDetails]
+
+
+class Checklist(SchemaNode):
+    national_req_types = StringField(
+        display="National requirement types",
+        description="List of the document types required for the given application type",
+        max_length=None,
+    )
+
+    _ref = "checklist"
+    _display = "Checklist"
+    _description = "Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation."
+
+
+class ConflictOfInterest(SchemaNode):
+    conflict_to_declare = BooleanField(
+        display="Conflict to declare",
+        description="Indicates whether any named applicant or agent has a relationship to the planning authority that must be declared",
+    )
+    conflict_person_name = StringField(
+        display="Conflict person name",
+        description="Name of the individual with the conflict of interest that matches one of the names provided in applicants/agent section",
+        max_length=None,
+    )
+    conflict_details = StringField(
+        display="Conflict details",
+        description="Details of the conflict of interest including name, role and how the individual is related to the planning authority",
+        max_length=None,
+    )
+
+    _ref = "conflict-of-interest"
+    _display = "Conflict of interest"
+    _description = "Details of any conflict of interest that may exist between the applicant and planning authority."
+
+
+class Declaration(SchemaNode):
+    name = StringField(display="Name", description="A name of a person", max_length=None)
+    declaration_confirmed = BooleanField(
+        display="Declaration confirmed",
+        description="Confirms the applicant or agent has reviewed and validated the information provided in the application",
+    )
+    declaration_date = StringField(
+        display="Declaration date", description="The date the declaration was made", max_length=None
+    )
+
+    _ref = "declaration"
+    _display = "Declaration"
+    _description = "Signed and dated verification of the application's accuracy."
+
+
+class ExistingEmployees(SchemaNode):
+    full_time = StringField(
+        display="Full-time", description="Number of full-time employees", max_length=None
+    )
+    part_time = StringField(
+        display="Part-time", description="Number of part-time employees", max_length=None
+    )
+    total_fte = StringField(
+        display="Total FTE", description="Total full-time equivalent (FTE)", max_length=None
+    )
+
+    _ref = "existing-employees"
+    _display = "Employees"
+    _description = "Employee count information including full-time, part-time, and total full-time equivalent (FTE) calculations "
+
+
+class ProposedEmployees(SchemaNode):
+    full_time = StringField(
+        display="Full-time", description="Number of full-time employees", max_length=None
+    )
+    part_time = StringField(
+        display="Part-time", description="Number of part-time employees", max_length=None
+    )
+    total_fte = StringField(
+        display="Total FTE", description="Total full-time equivalent (FTE)", max_length=None
+    )
+
+    _ref = "proposed-employees"
+    _display = "Employees"
+    _description = "Employee count information including full-time, part-time, and total full-time equivalent (FTE) calculations "
+
+
+class Employment(SchemaNode):
+
+    _ref = "employment"
+    _display = "Employment"
+    _description = "How the proposed development will impact existing and proposed employee numbers"
+    _descendants = [ExistingEmployees, ProposedEmployees]
+
+
+class ExistingUseDetails(SchemaNode):
+    use = EnumField(
+        display="Use",
+        description="A use class or type of use",
+        select_options=[
+            EnumOption(
+                key="b2",
+                label="B2 – General Industrial",
+                description="Industrial uses not falling within Class E.",
+            ),
+            EnumOption(
+                key="b8",
+                label="B8 – Storage and Distribution",
+                description="Warehousing and storage.",
+            ),
+            EnumOption(
+                key="c1",
+                label="C1 – Hotels",
+                description="Includes hotels, boarding houses, and guest houses.",
+            ),
+            EnumOption(
+                key="c2",
+                label="C2 – Residential Institutions",
+                description="Care homes, hospitals, and boarding schools.",
+            ),
+            EnumOption(
+                key="c2a",
+                label="C2A – Secure Residential Institutions",
+                description="Prisons, young offender institutions.",
+            ),
+            EnumOption(
+                key="c3",
+                label="C3 – Dwellinghouses",
+                description="Sole or main residence used by people forming a single household.",
+            ),
+            EnumOption(
+                key="c4",
+                label="C4 – Houses in multiple occupation",
+                description="Defined in the Housing Act 2004 (with the exclusion of converted block of flats).",
+            ),
+            EnumOption(
+                key="e-a",
+                label="E(a) – Retail (other than hot food)",
+                description="Shops and other retail services.",
+            ),
+            EnumOption(
+                key="e-b",
+                label="E(b) – Food and Drink",
+                description="Premises mostly for on-site consumption.",
+            ),
+            EnumOption(
+                key="e-c-i",
+                label="E(c)(i) – Financial Services",
+                description="Banks, building societies, and credit unions.",
+            ),
+            EnumOption(
+                key="e-c-ii",
+                label="E(c)(ii) – Professional Services",
+                description="Non-health/medical services (e.g., accountants, solicitors).",
+            ),
+            EnumOption(
+                key="e-c-iii",
+                label="E(c)(iii) – Any Other Service",
+                description="Non-retail services to the public.",
+            ),
+            EnumOption(
+                key="e-d",
+                label="E(d) – Indoor Sports and Recreation",
+                description="Excludes motorised or firearms activities.",
+            ),
+            EnumOption(
+                key="e-e",
+                label="E(e) – Medical or Health Services",
+                description="Clinics and health centres.",
+            ),
+            EnumOption(
+                key="e-f",
+                label="E(f) – Creche, Day Nursery",
+                description="Facilities for childcare.",
+            ),
+            EnumOption(
+                key="e-g-i",
+                label="E(g)(i) – Office",
+                description="For operational or administrative functions.",
+            ),
+            EnumOption(
+                key="e-g-ii",
+                label="E(g)(ii) – Research and Development",
+                description="Development of products or processes.",
+            ),
+            EnumOption(
+                key="e-g-iii",
+                label="E(g)(iii) – Industrial Process",
+                description="Processes that can operate within a residential area.",
+            ),
+            EnumOption(
+                key="f1-a",
+                label="F1(a) – Education",
+                description="Schools, colleges, and training centres.",
+            ),
+            EnumOption(
+                key="f1-b",
+                label="F1(b) – Display of Works of Art",
+                description="Galleries (excluding commercial galleries).",
+            ),
+            EnumOption(key="f1-c", label="F1(c) – Museum", description="Non-commercial museums."),
+            EnumOption(
+                key="f1-d",
+                label="F1(d) – Public Library",
+                description="Libraries open to the public.",
+            ),
+            EnumOption(
+                key="f1-e",
+                label="F1(e) – Public Hall/Exhibition Hall",
+                description="Community spaces for events.",
+            ),
+            EnumOption(
+                key="f1-f",
+                label="F1(f) – Public Worship/Religious Instruction",
+                description="Churches, mosques, synagogues.",
+            ),
+            EnumOption(key="f1-g", label="F1(g) – Law Court", description="Court facilities."),
+            EnumOption(
+                key="f2-a",
+                label="F2(a) – Local Community Shop",
+                description="Shop under 280 sqm with no similar facility nearby.",
+            ),
+            EnumOption(
+                key="f2-b",
+                label="F2(b) – Community Hall",
+                description="Halls for local community use.",
+            ),
+            EnumOption(
+                key="f2-c",
+                label="F2(c) – Outdoor Sport/Recreation",
+                description="Excludes motorised sports.",
+            ),
+            EnumOption(
+                key="f2-d",
+                label="F2(d) – Indoor/Outdoor Swimming Pool",
+                description="Includes skating rinks.",
+            ),
+            EnumOption(
+                key="sui",
+                label="Sui generis",
+                description="Uses that do not fall within any defined use class and are considered unique. For example, theatres, nightclubs, scrap yards and mineral extraction",
+            ),
+            EnumOption(
+                key="other",
+                label="Other (Please Specify)",
+                description="Free text required if selected.",
+            ),
+        ],
+    )
+    use_details = StringField(
+        display="Use details", description="Further detail of the use", max_length=None
+    )
+    land_part = StringField(
+        display="Land part",
+        description="Which part of the land the use relates to",
+        max_length=None,
+    )
+
+    _ref = "existing-use-details"
+    _display = "Existing use detail"
+    _description = "Information about a specific existing use on the site, including use class, additional details, and which part of the land it relates to "
+
+
+class ExistingUse(SchemaNode):
+    site_vacant = BooleanField(display="Site vacant", description="Is the site currently vacant")
+    last_use_details = StringField(
+        display="Last use details",
+        description="Description of the last use of the site",
+        max_length=None,
+    )
+    last_use_end_date = StringField(
+        display="Last use end date",
+        description="Date the last use ended (YYYY-MM-DD format)",
+        max_length=None,
+    )
+    is_contaminated_land = BooleanField(
+        display="Is contaminated land", description="Is the site known to be contaminated?"
+    )
+    is_suspected_contaminated_land = BooleanField(
+        display="Is suspected contaminated land",
+        description="Is the site suspected of contamination?",
+    )
+    proposed_use_contamination_risk = BooleanField(
+        display="Proposed use contamination risk",
+        description="Is the proposed use vulnerable to the presence of contamination?",
+    )
+    contamination_assessment = StringField(
+        display="Contamination assessment",
+        description="Reference to contamination assessment document",
+        max_length=None,
+    )
+
+    _ref = "existing-use"
+    _display = "Existing use"
+    _description = "How the site is currently being used."
+    _descendants = [ExistingUseDetails]
+
+
+class FloodRiskAssessment(SchemaNode):
+    flood_risk_area = BooleanField(
+        display="Flood risk area", description="Is the site within an area at risk of flooding?"
+    )
+    data_provided_by = EnumField(
+        display="Data provided by",
+        description="Who provided the data: Applicant or System/Service?",
+        select_options=[
+            EnumOption(
+                key="applicant",
+                label="Applicant",
+                description="Information provided by the applicant",
+            ),
+            EnumOption(
+                key="system",
+                label="System/Service",
+                description="Information calculated or determined by the system or external service",
+            ),
+        ],
+    )
+    flood_risk_assessment = StringField(
+        display="Flood risk assessment",
+        description="Reference of the flood risk assessment document",
+        max_length=None,
+    )
+    within_20m_watercourse = BooleanField(
+        display="Within 20m watercourse",
+        description="Whether the development is within 20 metres of a watercourse",
+    )
+    increases_flood_risk = BooleanField(
+        display="Increases flood risk", description="Whether the development increases flood risk"
+    )
+    surface_water_disposal = EnumField(
+        display="Surface water disposal",
+        description="Method for disposing of surface water",
+        select_options=[
+            EnumOption(
+                key="sustainable-drainage",
+                label="Sustainable drainage system",
+                description="System designed to manage surface water sustainably.",
+            ),
+            EnumOption(
+                key="soakaway",
+                label="Soakaway",
+                description="Underground pit allowing water to drain naturally.",
+            ),
+            EnumOption(
+                key="main-sewer",
+                label="Main sewer",
+                description="Surface water directed into the main sewer system.",
+            ),
+            EnumOption(
+                key="existing-watercourse",
+                label="Existing watercourse",
+                description="Water discharged into an existing river, stream, or canal.",
+            ),
+            EnumOption(
+                key="pond-lake",
+                label="Pond/lake",
+                description="Surface water discharged into a pond or lake.",
+            ),
+        ],
+    )
+
+    _ref = "flood-risk-assessment"
+    _display = "Flood risk assessment"
+    _description = "Results of any flood risk assessments made for the development site"
+
+
+class TimeRanges(SchemaNode):
+    open_time = StringField(display="Open time", description="Opening time", max_length=None)
+    close_time = StringField(display="Close time", description="Closing time", max_length=None)
+
+    _ref = "time-ranges"
+    _display = "Time range"
+    _description = "Time range structure for opening and closing times"
+
+
+class OperationalTimes(SchemaNode):
+    schedule_days = EnumField(
+        display="Schedule days",
+        description="List of days or day categories that a schedule entry applies to",
+        select_options=[
+            EnumOption(key="monday", label="Monday", description=""),
+            EnumOption(key="tuesday", label="Tuesday", description=""),
+            EnumOption(key="wednesday", label="Wednesday", description=""),
+            EnumOption(key="thursday", label="Thursday", description=""),
+            EnumOption(key="friday", label="Friday", description=""),
+            EnumOption(key="saturday", label="Saturday", description=""),
+            EnumOption(key="sunday", label="Sunday", description=""),
+            EnumOption(key="bank-holiday", label="Bank holiday", description=""),
+        ],
+    )
+    closed = BooleanField(
+        display="Closed", description="True or False - explicitly state when closed"
+    )
+
+    _ref = "operational-times"
+    _display = "Operational times"
+    _description = "Opening times structure for operational hours by day"
+    _descendants = [TimeRanges]
+
+
+class HoursOfOperation(SchemaNode):
+    use = EnumField(
+        display="Use",
+        description="A use class or type of use",
+        select_options=[
+            EnumOption(
+                key="b2",
+                label="B2 – General Industrial",
+                description="Industrial uses not falling within Class E.",
+            ),
+            EnumOption(
+                key="b8",
+                label="B8 – Storage and Distribution",
+                description="Warehousing and storage.",
+            ),
+            EnumOption(
+                key="c1",
+                label="C1 – Hotels",
+                description="Includes hotels, boarding houses, and guest houses.",
+            ),
+            EnumOption(
+                key="c2",
+                label="C2 – Residential Institutions",
+                description="Care homes, hospitals, and boarding schools.",
+            ),
+            EnumOption(
+                key="c2a",
+                label="C2A – Secure Residential Institutions",
+                description="Prisons, young offender institutions.",
+            ),
+            EnumOption(
+                key="c3",
+                label="C3 – Dwellinghouses",
+                description="Sole or main residence used by people forming a single household.",
+            ),
+            EnumOption(
+                key="c4",
+                label="C4 – Houses in multiple occupation",
+                description="Defined in the Housing Act 2004 (with the exclusion of converted block of flats).",
+            ),
+            EnumOption(
+                key="e-a",
+                label="E(a) – Retail (other than hot food)",
+                description="Shops and other retail services.",
+            ),
+            EnumOption(
+                key="e-b",
+                label="E(b) – Food and Drink",
+                description="Premises mostly for on-site consumption.",
+            ),
+            EnumOption(
+                key="e-c-i",
+                label="E(c)(i) – Financial Services",
+                description="Banks, building societies, and credit unions.",
+            ),
+            EnumOption(
+                key="e-c-ii",
+                label="E(c)(ii) – Professional Services",
+                description="Non-health/medical services (e.g., accountants, solicitors).",
+            ),
+            EnumOption(
+                key="e-c-iii",
+                label="E(c)(iii) – Any Other Service",
+                description="Non-retail services to the public.",
+            ),
+            EnumOption(
+                key="e-d",
+                label="E(d) – Indoor Sports and Recreation",
+                description="Excludes motorised or firearms activities.",
+            ),
+            EnumOption(
+                key="e-e",
+                label="E(e) – Medical or Health Services",
+                description="Clinics and health centres.",
+            ),
+            EnumOption(
+                key="e-f",
+                label="E(f) – Creche, Day Nursery",
+                description="Facilities for childcare.",
+            ),
+            EnumOption(
+                key="e-g-i",
+                label="E(g)(i) – Office",
+                description="For operational or administrative functions.",
+            ),
+            EnumOption(
+                key="e-g-ii",
+                label="E(g)(ii) – Research and Development",
+                description="Development of products or processes.",
+            ),
+            EnumOption(
+                key="e-g-iii",
+                label="E(g)(iii) – Industrial Process",
+                description="Processes that can operate within a residential area.",
+            ),
+            EnumOption(
+                key="f1-a",
+                label="F1(a) – Education",
+                description="Schools, colleges, and training centres.",
+            ),
+            EnumOption(
+                key="f1-b",
+                label="F1(b) – Display of Works of Art",
+                description="Galleries (excluding commercial galleries).",
+            ),
+            EnumOption(key="f1-c", label="F1(c) – Museum", description="Non-commercial museums."),
+            EnumOption(
+                key="f1-d",
+                label="F1(d) – Public Library",
+                description="Libraries open to the public.",
+            ),
+            EnumOption(
+                key="f1-e",
+                label="F1(e) – Public Hall/Exhibition Hall",
+                description="Community spaces for events.",
+            ),
+            EnumOption(
+                key="f1-f",
+                label="F1(f) – Public Worship/Religious Instruction",
+                description="Churches, mosques, synagogues.",
+            ),
+            EnumOption(key="f1-g", label="F1(g) – Law Court", description="Court facilities."),
+            EnumOption(
+                key="f2-a",
+                label="F2(a) – Local Community Shop",
+                description="Shop under 280 sqm with no similar facility nearby.",
+            ),
+            EnumOption(
+                key="f2-b",
+                label="F2(b) – Community Hall",
+                description="Halls for local community use.",
+            ),
+            EnumOption(
+                key="f2-c",
+                label="F2(c) – Outdoor Sport/Recreation",
+                description="Excludes motorised sports.",
+            ),
+            EnumOption(
+                key="f2-d",
+                label="F2(d) – Indoor/Outdoor Swimming Pool",
+                description="Includes skating rinks.",
+            ),
+            EnumOption(
+                key="sui",
+                label="Sui generis",
+                description="Uses that do not fall within any defined use class and are considered unique. For example, theatres, nightclubs, scrap yards and mineral extraction",
+            ),
+            EnumOption(
+                key="other",
+                label="Other (Please Specify)",
+                description="Free text required if selected.",
+            ),
+        ],
+    )
+    use_other = StringField(
+        display="Use other", description='Specify use if use is "other"', max_length=None
+    )
+    hours_not_known = BooleanField(
+        display="Hours not known",
+        description="Applicant states they do not know the hours of operation",
+    )
+
+    _ref = "hours-of-operation"
+    _display = "Hours of operation"
+    _description = "Hours of operation structure for non-residential use"
+    _descendants = [OperationalTimes]
+
+
+class HrsOperation(SchemaNode):
+    additional_information = StringField(
+        display="Additional information",
+        description="Any additional information (such as hours of use of other machinery within the site-generators, pumps, etc)",
+        max_length=None,
+    )
+
+    _ref = "hrs-operation"
+    _display = "Hours of operation"
+    _description = (
+        "Proposed operating hours if the proposed development is intended for non-residential use."
+    )
+    _descendants = [HoursOfOperation]
+
+
+class FloorspaceDetails(SchemaNode):
+    use = EnumField(
+        display="Use",
+        description="A use class or type of use",
+        select_options=[
+            EnumOption(
+                key="b2",
+                label="B2 – General Industrial",
+                description="Industrial uses not falling within Class E.",
+            ),
+            EnumOption(
+                key="b8",
+                label="B8 – Storage and Distribution",
+                description="Warehousing and storage.",
+            ),
+            EnumOption(
+                key="c1",
+                label="C1 – Hotels",
+                description="Includes hotels, boarding houses, and guest houses.",
+            ),
+            EnumOption(
+                key="c2",
+                label="C2 – Residential Institutions",
+                description="Care homes, hospitals, and boarding schools.",
+            ),
+            EnumOption(
+                key="c2a",
+                label="C2A – Secure Residential Institutions",
+                description="Prisons, young offender institutions.",
+            ),
+            EnumOption(
+                key="c3",
+                label="C3 – Dwellinghouses",
+                description="Sole or main residence used by people forming a single household.",
+            ),
+            EnumOption(
+                key="c4",
+                label="C4 – Houses in multiple occupation",
+                description="Defined in the Housing Act 2004 (with the exclusion of converted block of flats).",
+            ),
+            EnumOption(
+                key="e-a",
+                label="E(a) – Retail (other than hot food)",
+                description="Shops and other retail services.",
+            ),
+            EnumOption(
+                key="e-b",
+                label="E(b) – Food and Drink",
+                description="Premises mostly for on-site consumption.",
+            ),
+            EnumOption(
+                key="e-c-i",
+                label="E(c)(i) – Financial Services",
+                description="Banks, building societies, and credit unions.",
+            ),
+            EnumOption(
+                key="e-c-ii",
+                label="E(c)(ii) – Professional Services",
+                description="Non-health/medical services (e.g., accountants, solicitors).",
+            ),
+            EnumOption(
+                key="e-c-iii",
+                label="E(c)(iii) – Any Other Service",
+                description="Non-retail services to the public.",
+            ),
+            EnumOption(
+                key="e-d",
+                label="E(d) – Indoor Sports and Recreation",
+                description="Excludes motorised or firearms activities.",
+            ),
+            EnumOption(
+                key="e-e",
+                label="E(e) – Medical or Health Services",
+                description="Clinics and health centres.",
+            ),
+            EnumOption(
+                key="e-f",
+                label="E(f) – Creche, Day Nursery",
+                description="Facilities for childcare.",
+            ),
+            EnumOption(
+                key="e-g-i",
+                label="E(g)(i) – Office",
+                description="For operational or administrative functions.",
+            ),
+            EnumOption(
+                key="e-g-ii",
+                label="E(g)(ii) – Research and Development",
+                description="Development of products or processes.",
+            ),
+            EnumOption(
+                key="e-g-iii",
+                label="E(g)(iii) – Industrial Process",
+                description="Processes that can operate within a residential area.",
+            ),
+            EnumOption(
+                key="f1-a",
+                label="F1(a) – Education",
+                description="Schools, colleges, and training centres.",
+            ),
+            EnumOption(
+                key="f1-b",
+                label="F1(b) – Display of Works of Art",
+                description="Galleries (excluding commercial galleries).",
+            ),
+            EnumOption(key="f1-c", label="F1(c) – Museum", description="Non-commercial museums."),
+            EnumOption(
+                key="f1-d",
+                label="F1(d) – Public Library",
+                description="Libraries open to the public.",
+            ),
+            EnumOption(
+                key="f1-e",
+                label="F1(e) – Public Hall/Exhibition Hall",
+                description="Community spaces for events.",
+            ),
+            EnumOption(
+                key="f1-f",
+                label="F1(f) – Public Worship/Religious Instruction",
+                description="Churches, mosques, synagogues.",
+            ),
+            EnumOption(key="f1-g", label="F1(g) – Law Court", description="Court facilities."),
+            EnumOption(
+                key="f2-a",
+                label="F2(a) – Local Community Shop",
+                description="Shop under 280 sqm with no similar facility nearby.",
+            ),
+            EnumOption(
+                key="f2-b",
+                label="F2(b) – Community Hall",
+                description="Halls for local community use.",
+            ),
+            EnumOption(
+                key="f2-c",
+                label="F2(c) – Outdoor Sport/Recreation",
+                description="Excludes motorised sports.",
+            ),
+            EnumOption(
+                key="f2-d",
+                label="F2(d) – Indoor/Outdoor Swimming Pool",
+                description="Includes skating rinks.",
+            ),
+            EnumOption(
+                key="sui",
+                label="Sui generis",
+                description="Uses that do not fall within any defined use class and are considered unique. For example, theatres, nightclubs, scrap yards and mineral extraction",
+            ),
+            EnumOption(
+                key="other",
+                label="Other (Please Specify)",
+                description="Free text required if selected.",
+            ),
+        ],
+    )
+    specified_use = StringField(
+        display="Specified use",
+        description="A specified use if no applicable use class is available",
+        max_length=None,
+    )
+    existing_gross_floorspace = StringField(
+        display="Existing gross floorspace",
+        description="Existing gross internal floorspace, in sqm",
+        max_length=None,
+    )
+    floorspace_lost = StringField(
+        display="Floorspace lost",
+        description="Gross floorspace to be lost by change of use, in sqm",
+        max_length=None,
+    )
+    total_gross_proposed = StringField(
+        display="Total gross proposed",
+        description="Total gross internal floorspace proposed, in sqm",
+        max_length=None,
+    )
+    net_additional_floorspace = StringField(
+        display="Net additional floorspace",
+        description="Net additional gross internal floorspace, in sqm",
+        max_length=None,
+    )
+
+    _ref = "floorspace-details"
+    _display = "Floorspace details"
+    _description = "Details of non-residential floorspace changes by use class including existing, lost, and proposed amounts"
+
+
+class FloorspaceDetailsOutline(SchemaNode):
+    use = EnumField(
+        display="Use",
+        description="A use class or type of use",
+        select_options=[
+            EnumOption(
+                key="b2",
+                label="B2 – General Industrial",
+                description="Industrial uses not falling within Class E.",
+            ),
+            EnumOption(
+                key="b8",
+                label="B8 – Storage and Distribution",
+                description="Warehousing and storage.",
+            ),
+            EnumOption(
+                key="c1",
+                label="C1 – Hotels",
+                description="Includes hotels, boarding houses, and guest houses.",
+            ),
+            EnumOption(
+                key="c2",
+                label="C2 – Residential Institutions",
+                description="Care homes, hospitals, and boarding schools.",
+            ),
+            EnumOption(
+                key="c2a",
+                label="C2A – Secure Residential Institutions",
+                description="Prisons, young offender institutions.",
+            ),
+            EnumOption(
+                key="c3",
+                label="C3 – Dwellinghouses",
+                description="Sole or main residence used by people forming a single household.",
+            ),
+            EnumOption(
+                key="c4",
+                label="C4 – Houses in multiple occupation",
+                description="Defined in the Housing Act 2004 (with the exclusion of converted block of flats).",
+            ),
+            EnumOption(
+                key="e-a",
+                label="E(a) – Retail (other than hot food)",
+                description="Shops and other retail services.",
+            ),
+            EnumOption(
+                key="e-b",
+                label="E(b) – Food and Drink",
+                description="Premises mostly for on-site consumption.",
+            ),
+            EnumOption(
+                key="e-c-i",
+                label="E(c)(i) – Financial Services",
+                description="Banks, building societies, and credit unions.",
+            ),
+            EnumOption(
+                key="e-c-ii",
+                label="E(c)(ii) – Professional Services",
+                description="Non-health/medical services (e.g., accountants, solicitors).",
+            ),
+            EnumOption(
+                key="e-c-iii",
+                label="E(c)(iii) – Any Other Service",
+                description="Non-retail services to the public.",
+            ),
+            EnumOption(
+                key="e-d",
+                label="E(d) – Indoor Sports and Recreation",
+                description="Excludes motorised or firearms activities.",
+            ),
+            EnumOption(
+                key="e-e",
+                label="E(e) – Medical or Health Services",
+                description="Clinics and health centres.",
+            ),
+            EnumOption(
+                key="e-f",
+                label="E(f) – Creche, Day Nursery",
+                description="Facilities for childcare.",
+            ),
+            EnumOption(
+                key="e-g-i",
+                label="E(g)(i) – Office",
+                description="For operational or administrative functions.",
+            ),
+            EnumOption(
+                key="e-g-ii",
+                label="E(g)(ii) – Research and Development",
+                description="Development of products or processes.",
+            ),
+            EnumOption(
+                key="e-g-iii",
+                label="E(g)(iii) – Industrial Process",
+                description="Processes that can operate within a residential area.",
+            ),
+            EnumOption(
+                key="f1-a",
+                label="F1(a) – Education",
+                description="Schools, colleges, and training centres.",
+            ),
+            EnumOption(
+                key="f1-b",
+                label="F1(b) – Display of Works of Art",
+                description="Galleries (excluding commercial galleries).",
+            ),
+            EnumOption(key="f1-c", label="F1(c) – Museum", description="Non-commercial museums."),
+            EnumOption(
+                key="f1-d",
+                label="F1(d) – Public Library",
+                description="Libraries open to the public.",
+            ),
+            EnumOption(
+                key="f1-e",
+                label="F1(e) – Public Hall/Exhibition Hall",
+                description="Community spaces for events.",
+            ),
+            EnumOption(
+                key="f1-f",
+                label="F1(f) – Public Worship/Religious Instruction",
+                description="Churches, mosques, synagogues.",
+            ),
+            EnumOption(key="f1-g", label="F1(g) – Law Court", description="Court facilities."),
+            EnumOption(
+                key="f2-a",
+                label="F2(a) – Local Community Shop",
+                description="Shop under 280 sqm with no similar facility nearby.",
+            ),
+            EnumOption(
+                key="f2-b",
+                label="F2(b) – Community Hall",
+                description="Halls for local community use.",
+            ),
+            EnumOption(
+                key="f2-c",
+                label="F2(c) – Outdoor Sport/Recreation",
+                description="Excludes motorised sports.",
+            ),
+            EnumOption(
+                key="f2-d",
+                label="F2(d) – Indoor/Outdoor Swimming Pool",
+                description="Includes skating rinks.",
+            ),
+            EnumOption(
+                key="sui",
+                label="Sui generis",
+                description="Uses that do not fall within any defined use class and are considered unique. For example, theatres, nightclubs, scrap yards and mineral extraction",
+            ),
+            EnumOption(
+                key="other",
+                label="Other (Please Specify)",
+                description="Free text required if selected.",
+            ),
+        ],
+    )
+    specified_use = StringField(
+        display="Specified use",
+        description="A specified use if no applicable use class is available",
+        max_length=None,
+    )
+    not_applicable = BooleanField(
+        display="Not applicable", description="Whether the facility is not applicable"
+    )
+    existing_gross_floorspace = StringField(
+        display="Existing gross floorspace",
+        description="Existing gross internal floorspace, in sqm",
+        max_length=None,
+    )
+    is_floorspace_lost_known = BooleanField(
+        display="Is floorspace lost known",
+        description="Whether the amount of floorspace to be lost is known",
+    )
+    floorspace_lost = StringField(
+        display="Floorspace lost",
+        description="Gross floorspace to be lost by change of use, in sqm",
+        max_length=None,
+    )
+    is_total_gross_proposed_known = BooleanField(
+        display="Is total gross proposed known",
+        description="Whether the total gross proposed floorspace is known",
+    )
+    total_gross_proposed = StringField(
+        display="Total gross proposed",
+        description="Total gross internal floorspace proposed, in sqm",
+        max_length=None,
+    )
+    net_additional_floorspace = StringField(
+        display="Net additional floorspace",
+        description="Net additional gross internal floorspace, in sqm",
+        max_length=None,
+    )
+
+    _ref = "floorspace-details-outline"
+    _display = "Floorspace details"
+    _description = "Details of non-residential floorspace changes by use class including existing, lost, and proposed amounts. Specifically for outline applications"
+
+
+class RoomDetails(SchemaNode):
+    use_class_accommodation = EnumField(
+        display="Use class for accommodation",
+        description="Type of non-residential use class referring to accommodation uses",
+        select_options=[
+            EnumOption(
+                key="c1",
+                label="C1 – Hotels",
+                description="Includes hotels, boarding houses, and guest houses.",
+            ),
+            EnumOption(
+                key="c2",
+                label="C2 – Residential Institutions",
+                description="Care homes, hospitals, and boarding schools.",
+            ),
+            EnumOption(
+                key="c2a",
+                label="C2A – Secure Residential Institutions",
+                description="Prisons, young offender institutions.",
+            ),
+            EnumOption(
+                key="other",
+                label="Other (Please Specify)",
+                description="Free text required if selected.",
+            ),
+        ],
+    )
+    use_other = StringField(
+        display="Use other", description='Specify use if use is "other"', max_length=None
+    )
+    existing_rooms_lost = StringField(
+        display="Existing rooms lost",
+        description="Existing rooms to be lost by change of use",
+        max_length=None,
+    )
+    total_rooms_proposed = StringField(
+        display="Total rooms proposed",
+        description="Total rooms proposed (including change of use)",
+        max_length=None,
+    )
+    net_additional_rooms = StringField(
+        display="Net additional rooms",
+        description="Net additional rooms following development",
+        max_length=None,
+    )
+
+    _ref = "room-details"
+    _display = "Room details"
+    _description = "Details of room changes for hotels, residential institutions and hostels (C1, C2, C2A use classes)"
+
+
+class RoomDetailsOutline(SchemaNode):
+    use_class_accommodation = EnumField(
+        display="Use class for accommodation",
+        description="Type of non-residential use class referring to accommodation uses",
+        select_options=[
+            EnumOption(
+                key="c1",
+                label="C1 – Hotels",
+                description="Includes hotels, boarding houses, and guest houses.",
+            ),
+            EnumOption(
+                key="c2",
+                label="C2 – Residential Institutions",
+                description="Care homes, hospitals, and boarding schools.",
+            ),
+            EnumOption(
+                key="c2a",
+                label="C2A – Secure Residential Institutions",
+                description="Prisons, young offender institutions.",
+            ),
+            EnumOption(
+                key="other",
+                label="Other (Please Specify)",
+                description="Free text required if selected.",
+            ),
+        ],
+    )
+    use_other = StringField(
+        display="Use other", description='Specify use if use is "other"', max_length=None
+    )
+    not_applicable = BooleanField(
+        display="Not applicable", description="Whether the facility is not applicable"
+    )
+    is_existing_rooms_lost_known = BooleanField(
+        display="Is existing rooms lost known",
+        description="Whether the total existing rooms that will be lost is known",
+    )
+    existing_rooms_lost = StringField(
+        display="Existing rooms lost",
+        description="Existing rooms to be lost by change of use",
+        max_length=None,
+    )
+    is_total_rooms_proposed_known = BooleanField(
+        display="Is total rooms proposed known",
+        description="Whether the total rooms proposed is known",
+    )
+    total_rooms_proposed = StringField(
+        display="Total rooms proposed",
+        description="Total rooms proposed (including change of use)",
+        max_length=None,
+    )
+    net_additional_rooms = StringField(
+        display="Net additional rooms",
+        description="Net additional rooms following development",
+        max_length=None,
+    )
+
+    _ref = "room-details-outline"
+    _display = "Room details"
+    _description = "Details of room changes for hotels, residential institutions and hostels (C1, C2, C2A use classes)"
+
+
+class NonResFloorspace(SchemaNode):
+    non_residential_change = BooleanField(
+        display="Non residential change",
+        description="Does the proposal involve the loss, gain, or change of non-residential floorspace?",
+    )
+    non_residential_change_outline = EnumField(
+        display="Non residential change",
+        description="Does the proposal involve the loss, gain, or change of non-residential floorspace?",
+        select_options=[
+            EnumOption(key="yes", label="Yes", description="Affirmative response"),
+            EnumOption(key="no", label="No", description="Negative response  "),
+            EnumOption(
+                key="unknown",
+                label="Unknown",
+                description="Status is not known or cannot be determined",
+            ),
+        ],
+    )
+
+    _ref = "non-res-floorspace"
+    _display = "Non residential floorspace"
+    _description = "Details of changes to non-residential floorspace in the proposed development."
+    _descendants = [FloorspaceDetails, FloorspaceDetailsOutline, RoomDetails, RoomDetailsOutline]
+
+
+class OwnersAndTenants(SchemaNode):
+    notice_date = StringField(
+        display="Notice date",
+        description="Date when notice was served to an owner or tenant",
+        max_length=None,
+    )
+
+    _ref = "owners-and-tenants"
+    _display = "Notified person"
+    _description = "Details of a person that has been notified (often owners and agricultural tenants of the land)"
+    _descendants = [Person]
+
+
+class LbcOwners(SchemaNode):
+    notice_date = StringField(
+        display="Notice date",
+        description="Date when notice was served to an owner or tenant",
+        max_length=None,
+    )
+
+    _ref = "lbc-owners"
+    _display = "Notified person"
+    _description = "Details of a person that has been notified (often owners and agricultural tenants of the land)"
+    _descendants = [Person]
+
+
+class NewspaperNotices(SchemaNode):
+    newspaper_name = StringField(
+        display="Newspaper name",
+        description="Name of the newspaper where the ownership notice was published",
+        max_length=None,
+    )
+    publication_date = StringField(
+        display="Publication date",
+        description="Date when the ownership notice was published in the newspaper",
+        max_length=None,
+    )
+
+    _ref = "newspaper-notices"
+    _display = "Newspaper notice"
+    _description = "Details of the newspaper notice published for unknown owners/tenants"
+
+
+class OwnershipCerts(SchemaNode):
+    sole_owner = BooleanField(
+        display="Sole owner", description="Is the applicant the sole owner of the land?"
+    )
+    agricultural_tenants = BooleanField(
+        display="Agricultural tenants",
+        description="Are there any agricultural tenants on the land?",
+    )
+    steps_taken = StringField(
+        display="Steps taken",
+        description="Description of steps taken to identify unknown owners or tenants",
+        max_length=None,
+    )
+    ownership_cert_option = EnumField(
+        display="Ownership certificate type",
+        description="The type of ownership certificate based on ownership and tenancy status",
+        select_options=[
+            EnumOption(
+                key="certificate-a",
+                label="Certificate A",
+                description="Applicant is the sole owner of the land and there are no agricultural tenants.",
+            ),
+            EnumOption(
+                key="certificate-b",
+                label="Certificate B",
+                description="Applicant knows all other owners or agricultural tenants and has notified them.",
+            ),
+            EnumOption(
+                key="certificate-c",
+                label="Certificate C",
+                description="Applicant knows some of the other owners or agricultural tenants and has notified those they know.",
+            ),
+            EnumOption(
+                key="certificate-d",
+                label="Certificate D",
+                description="Applicant does not know any of the other owners or agricultural tenants.",
+            ),
+        ],
+    )
+    applicant_signature = StringField(
+        display="Applicant signature",
+        description="Digital signature of the applicant",
+        max_length=None,
+    )
+    agent_signature = StringField(
+        display="Agent signature",
+        description="Digital signature of the agent (if applicable)",
+        max_length=None,
+    )
+    declaration_date = StringField(
+        display="Declaration date", description="The date the declaration was made", max_length=None
+    )
+
+    _ref = "ownership-certs"
+    _display = "Ownership certificates and agricultural land declaration"
+    _description = "Who will be affected by the proposal and whether they have been notified, such as agricultural tenants"
+    _descendants = [OwnersAndTenants, LbcOwners, NewspaperNotices]
+
+
+class PreAppAdvice(SchemaNode):
+    advice_sought = BooleanField(
+        display="Pre-application advice sought",
+        description="Whether pre-application advice has been sought from the planning authority",
+    )
+    officer_name = StringField(
+        display="Officer name",
+        description="Name of the planning officer who provided the pre-application advice",
+        max_length=None,
+    )
+    reference = StringField(
+        display="Reference", description="A unique reference for the data item", max_length=None
+    )
+    advice_date = StringField(
+        display="Advice date",
+        description="Date when pre-application advice was received, in YYYY-MM-DD format",
+        max_length=None,
+    )
+    advice_summary = StringField(
+        display="Advice summary",
+        description="Summary of the pre-application advice received from the planning authority",
+        max_length=None,
+    )
+
+    _ref = "pre-app-advice"
+    _display = "Pre-application advice"
+    _description = (
+        "Details of pre-application advice previously received from the planning authority"
+    )
+
+
+class WasteManagement(SchemaNode):
+    waste_management_facility_type = EnumField(
+        display="Waste management facility type",
+        description="Type of waste management facility being described in this entry",
+        select_options=[
+            EnumOption(
+                key="inert-landfill",
+                label="Inert Landfill",
+                description="Disposal site for inert waste materials.",
+            ),
+            EnumOption(
+                key="non-hazardous-landfill",
+                label="Non-Hazardous Landfill",
+                description="Landfill for non-hazardous waste.",
+            ),
+            EnumOption(
+                key="hazardous-landfill",
+                label="Hazardous Landfill",
+                description="Landfill site for hazardous waste.",
+            ),
+            EnumOption(
+                key="energy-waste-incineration",
+                label="Energy from Waste Incineration",
+                description="Incineration facility generating energy from waste.",
+            ),
+            EnumOption(
+                key="other-incineration",
+                label="Other Incineration",
+                description="Non-energy-producing incineration sites.",
+            ),
+            EnumOption(
+                key="landfill-gas-plant",
+                label="Landfill Gas Generation Plant",
+                description="Plant generating energy from landfill gas.",
+            ),
+            EnumOption(
+                key="pyrolysis-gasification",
+                label="Pyrolysis/Gasification",
+                description="Facilities using pyrolysis or gasification processes.",
+            ),
+            EnumOption(
+                key="metal-recycling",
+                label="Metal Recycling Site",
+                description="Site for recycling metals.",
+            ),
+            EnumOption(
+                key="transfer-stations",
+                label="Transfer Stations",
+                description="Facilities for sorting and transferring waste.",
+            ),
+            EnumOption(
+                key="mrf",
+                label="Material Recovery Facility (MRF)",
+                description="Facility for sorting recyclable materials.",
+            ),
+            EnumOption(
+                key="household-amenity-site",
+                label="Household Civic Amenity Sites",
+                description="Public waste disposal sites for households.",
+            ),
+            EnumOption(
+                key="open-windrow-composting",
+                label="Open Windrow Composting",
+                description="Outdoor composting of biodegradable waste.",
+            ),
+            EnumOption(
+                key="in-vessel-composting",
+                label="In-Vessel Composting",
+                description="Enclosed composting for controlled conditions.",
+            ),
+            EnumOption(
+                key="anaerobic-digestion",
+                label="Anaerobic Digestion",
+                description="Plant for organic waste decomposition without oxygen.",
+            ),
+            EnumOption(
+                key="mbt",
+                label="Mechanical, Biological, or Thermal (MBT)",
+                description="Combined waste treatment facility.",
+            ),
+            EnumOption(
+                key="sewage-treatment",
+                label="Sewage Treatment Works",
+                description="Plant for treating wastewater.",
+            ),
+            EnumOption(
+                key="other-treatment",
+                label="Other Treatment",
+                description="Any other waste treatment not listed.",
+            ),
+            EnumOption(
+                key="construction-recycling",
+                label="Recycling Facilities for Construction Waste",
+                description="Sites recycling construction and demolition waste.",
+            ),
+            EnumOption(
+                key="waste-storage",
+                label="Storage of Waste",
+                description="Facilities for storing waste before processing.",
+            ),
+            EnumOption(
+                key="other-waste-management",
+                label="Other Waste Management",
+                description="Any other waste management facility not listed.",
+            ),
+            EnumOption(
+                key="other-developments",
+                label="Other Developments",
+                description="Any other related developments.",
+            ),
+        ],
+    )
+    total_capacity = StringField(
+        display="Total capacity",
+        description="Total capacity of void in cubic metres (or tonnes/litres)",
+        max_length=None,
+    )
+    unit_type = EnumField(
+        display="Unit type",
+        description="Unit for capacity/throughput (e.g. cubic metres, tonnes, litres)",
+        select_options=[
+            EnumOption(
+                key="cubic-metres",
+                label="Cubic metres",
+                description="Measured by volume in cubic metres",
+            ),
+            EnumOption(key="tonnes", label="Tonnes", description="Measured by mass in tonnes"),
+            EnumOption(key="litres", label="Litres", description="Measured by volume in litres"),
+        ],
+    )
+    annual_throughput = StringField(
+        display="Annual throughput",
+        description="Maximum annual operational throughput in tonnes/litres",
+        max_length=None,
+    )
+    unit_type = EnumField(
+        display="Unit type",
+        description="Unit for capacity/throughput (e.g. cubic metres, tonnes, litres)",
+        select_options=[
+            EnumOption(
+                key="cubic-metres",
+                label="Cubic metres",
+                description="Measured by volume in cubic metres",
+            ),
+            EnumOption(key="tonnes", label="Tonnes", description="Measured by mass in tonnes"),
+            EnumOption(key="litres", label="Litres", description="Measured by volume in litres"),
+        ],
+    )
+
+    _ref = "waste-management"
+    _display = "Waste management"
+    _description = "Details of applicable waste management facilities including type, capacity, and throughput information. "
+
+
+class WasteStreams(SchemaNode):
+    municipal = StringField(
+        display="Municipal",
+        description="Maximum throughput for municipal waste (annual throughput in tonnes/litres)",
+        max_length=None,
+    )
+    construction_demolition = StringField(
+        display="Construction demolition",
+        description="Maximum throughput for construction and demolition waste (annual throughput in tonnes/litres)",
+        max_length=None,
+    )
+    commercial_industrial = StringField(
+        display="Commercial industrial",
+        description="Maximum throughput for commercial and industrial waste (annual throughput in tonnes/litres)",
+        max_length=None,
+    )
+    hazardous = StringField(
+        display="Hazardous",
+        description="Maximum throughput for hazardous waste (annual throughput in tonnes/litres)",
+        max_length=None,
+    )
+
+    _ref = "waste-streams"
+    _display = "Waste streams"
+    _description = "Annual throughput for different types of waste streams "
+
+
+class ProcessesMachineryWaste(SchemaNode):
+    site_activity_details = StringField(
+        display="Site activity details",
+        description="Description of activities, processes, and end products including site operations, plant, ventilation, and machinery",
+        max_length=None,
+    )
+    proposal_waste_management = BooleanField(
+        display="Proposal waste management",
+        description="Whether the proposal involves any waste management facility that is relevant to the proposal",
+    )
+
+    _ref = "processes-machinery-waste"
+    _display = "Processes machinery waste"
+    _description = "How waste will be managed on the site "
+    _descendants = [WasteManagement, WasteStreams]
+
+
+class RelatedApplication(SchemaNode):
+    reference = StringField(
+        display="Reference", description="A unique reference for the data item", max_length=None
+    )
+    description = StringField(
+        display="Description",
+        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        max_length=None,
+    )
+    decision_date = StringField(
+        display="Decision date",
+        description="The date when the decision was made, in YYYY-MM-DD format",
+        max_length=None,
+    )
+
+    _ref = "related-application"
+    _display = "Related application details"
+    _description = "Details about a related application including its reference, description and decision date "
+
+
+class ProposalDetails(SchemaNode):
+    description = StringField(
+        display="Description",
+        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        max_length=None,
+    )
+    reserved_matters = EnumField(
+        display="Reserved matters",
+        description="Identifies which reserved matters are being submitted for approval as part of this application",
+        select_options=[
+            EnumOption(key="access", label="Access", description=""),
+            EnumOption(key="appearance", label="Appearance", description=""),
+            EnumOption(key="landscaping", label="Landscaping", description=""),
+            EnumOption(key="layout", label="Layout", description=""),
+            EnumOption(key="scale", label="Scale", description=""),
+        ],
+    )
+    proposal_started = BooleanField(
+        display="Proposal started", description="Has any work on the proposal already been started"
+    )
+    proposal_started_date = StringField(
+        display="Proposal start date",
+        description="The date when work on the proposal started, in YYYY-MM-DD format",
+        max_length=None,
+    )
+    proposal_completed = BooleanField(
+        display="Proposal completed",
+        description="Has any work on the proposal already been completed",
+    )
+    proposal_completed_date = StringField(
+        display="Proposal completion date",
+        description="The date when work on the proposal was completed, in YYYY-MM-DD format",
+        max_length=None,
+    )
+    pip_reference = StringField(
+        display="PIP reference",
+        description="Reference number for the Planning in Principle (PIP) application this relates to",
+        max_length=None,
+    )
+    is_psi = BooleanField(
+        display="Is public service infrastructure",
+        description="For applications made on or after 1 August 2021, is the proposal for public service infrastructure development",
+    )
+
+    _ref = "proposal-details"
+    _display = "Description of the proposal"
+    _description = "What development, works or change of use is proposed"
+    _descendants = [RelatedApplication]
+
+
+class UnitsPerBedroomNo(SchemaNode):
+    no_bedrooms_unknown = BooleanField(
+        display="No bedrooms unknown",
+        description="Set to true when counting units where bedroom number is unknown",
+    )
+    no_of_bedrooms = StringField(
+        display="Number of bedrooms", description="The number of bedrooms in unit", max_length=None
+    )
+    units = StringField(
+        display="Units", description="The number of units of that bedroom count", max_length=None
+    )
+
+    _ref = "units-per-bedroom-no"
+    _display = "Bedroom count"
+    _description = (
+        "Structure for counting units by bedroom number, allowing for unknown bedroom counts "
+    )
+
+
+class ExistingUnitBreakdown(SchemaNode):
+    units_unknown = BooleanField(
+        display="Units unknown", description="Whether the number of units is unknown"
+    )
+    total_units = StringField(
+        display="Total units", description="Total number of units", max_length=None
+    )
+
+    _ref = "existing-unit-breakdown"
+    _display = "Unit quantities"
+    _description = "Structure for defining quantities of units, either as unknown or broken down by bedroom count "
+    _descendants = [UnitsPerBedroomNo]
+
+
+class ProposedUnitBreakdown(SchemaNode):
+    units_unknown = BooleanField(
+        display="Units unknown", description="Whether the number of units is unknown"
+    )
+    total_units = StringField(
+        display="Total units", description="Total number of units", max_length=None
+    )
+
+    _ref = "proposed-unit-breakdown"
+    _display = "Unit quantities"
+    _description = "Structure for defining quantities of units, either as unknown or broken down by bedroom count "
+    _descendants = [UnitsPerBedroomNo]
+
+
+class ResidentialUnitSummary(SchemaNode):
+    tenure_type = EnumField(
+        display="Tenure type",
+        description="Category of housing tenure",
+        select_options=[
+            EnumOption(
+                key="market-housing",
+                label="Market Housing",
+                description="Private housing for sale or rent.",
+            ),
+            EnumOption(
+                key="social-rented",
+                label="Social Rented Housing",
+                description="Public/social housing at below-market rents.",
+            ),
+            EnumOption(
+                key="intermediate-housing",
+                label="Intermediate Housing",
+                description="Housing with rents or ownership costs between social housing and market housing.",
+            ),
+            EnumOption(
+                key="key-worker-housing",
+                label="Key Worker Housing",
+                description="Housing for essential workers (e.g. teachers, NHS staff).",
+            ),
+            EnumOption(
+                key="affordable-rent",
+                label="Social, Affordable, or Intermediate Rent",
+                description="Housing for below-market rent.",
+            ),
+            EnumOption(
+                key="home-ownership",
+                label="Affordable Home Ownership",
+                description="Shared ownership or similar schemes.",
+            ),
+            EnumOption(
+                key="starter-homes",
+                label="Starter Homes",
+                description="Discounted homes for first-time buyers.",
+            ),
+            EnumOption(
+                key="custom-build",
+                label="Self-Build and Custom Build",
+                description="Homes built or commissioned by individuals.",
+            ),
+            EnumOption(
+                key="market-for-sale",
+                label="Market for sale",
+                description="Market housing for sale.",
+            ),
+            EnumOption(
+                key="market-for-rent",
+                label="Market for rent",
+                description="Market housing for rent.",
+            ),
+            EnumOption(
+                key="shared-equity",
+                label="Shared Equity",
+                description="Shared equity affordable home ownership product.",
+            ),
+            EnumOption(
+                key="affordable-rent-not-lar-bm",
+                label="Affordable Rent (not at LAR benchmark rents)",
+                description="Affordable rent product not set at London Affordable Rent benchmark rents.",
+            ),
+            EnumOption(
+                key="discount-market-sale",
+                label="Discount Market Sale",
+                description="Discounted market sale product.",
+            ),
+            EnumOption(
+                key="discount-market-rent",
+                label="Discount Market Rent",
+                description="Discounted market rent product.",
+            ),
+            EnumOption(key="social-rent", label="Social Rent", description="Social rent product."),
+            EnumOption(
+                key="intermediate-other",
+                label="Intermediate Other",
+                description="Other intermediate housing product.",
+            ),
+            EnumOption(
+                key="discount-market-llr",
+                label="Discount Market Rent (charged at London Living Rents)",
+                description="Discount market rent product charged at London Living Rent levels.",
+            ),
+            EnumOption(
+                key="london-living-rent",
+                label="London Living Rent",
+                description="London Living Rent product.",
+            ),
+            EnumOption(
+                key="london-shared-ownership",
+                label="London Shared Ownership",
+                description="London shared ownership product.",
+            ),
+            EnumOption(
+                key="london-affordable-rent",
+                label="London Affordable Rent",
+                description="London Affordable Rent product.",
+            ),
+        ],
+    )
+    housing_type = EnumField(
+        display="Housing type",
+        description="Type of housing",
+        select_options=[
+            EnumOption(
+                key="houses",
+                label="Houses",
+                description="Detached, semi-detached, or terraced houses.",
+            ),
+            EnumOption(
+                key="flats-maisonettes",
+                label="Flats/Maisonettes",
+                description="Self-contained apartments or maisonettes.",
+            ),
+            EnumOption(
+                key="sheltered-housing",
+                label="Sheltered Housing",
+                description="Housing with support for older or disabled people.",
+            ),
+            EnumOption(
+                key="bedsit-studio", label="Bedsit/Studio", description="Single-room living spaces."
+            ),
+            EnumOption(
+                key="cluster-flats",
+                label="Cluster Flats",
+                description="Flats with shared communal areas.",
+            ),
+            EnumOption(
+                key="other", label="Other", description="Any other housing type not listed."
+            ),
+            EnumOption(
+                key="live-work-units",
+                label="Live-Work Units",
+                description="Properties combining residential and workspace.",
+            ),
+            EnumOption(
+                key="unknown", label="Unknown", description="When the type of housing is uncertain."
+            ),
+            EnumOption(
+                key="terraced-home", label="Terraced Home", description="Terraced house type."
+            ),
+            EnumOption(
+                key="house-or-bungalow",
+                label="House or Bungalow",
+                description="House or bungalow type.",
+            ),
+            EnumOption(
+                key="semi-detached-home",
+                label="Semi Detached Home",
+                description="Semi-detached house type.",
+            ),
+            EnumOption(
+                key="flat-apartment-maisonette",
+                label="Flat Apartment Maisonette",
+                description="Flat apartment or maisonette type.",
+            ),
+            EnumOption(key="co-living-unit", label="Co Living Unit", description="Co-living unit."),
+            EnumOption(key="hmo", label="HMO", description="House in multiple occupation."),
+            EnumOption(
+                key="student-accommodation",
+                label="Student Accommodation",
+                description="Student accommodation.",
+            ),
+            EnumOption(
+                key="communal-space",
+                label="Communal Space",
+                description="Communal space associated with residential use.",
+            ),
+        ],
+    )
+
+    _ref = "residential-unit-summary"
+    _display = "Residential unit summary"
+    _description = "Breakdown of residential unit counts by tenure and housing type, with optional unit breakdowns "
+    _descendants = [ExistingUnitBreakdown, ProposedUnitBreakdown]
+
+
+class ResUnits(SchemaNode):
+    will_residential_units_change = BooleanField(
+        display="Residential unit change",
+        description="Proposal includes the gain, loss or change of use of residential units",
+    )
+    total_existing_units = StringField(
+        display="Total existing units",
+        description="The total number of existing units",
+        max_length=None,
+    )
+    total_proposed_units = StringField(
+        display="Total proposed units",
+        description="The total number of proposed units",
+        max_length=None,
+    )
+    net_change = StringField(
+        display="Net change", description="Calculated net change in units", max_length=None
+    )
+
+    _ref = "res-units"
+    _display = "Residential units"
+    _description = (
+        "Details of the residential units that make up both the current and proposed development."
+    )
+    _descendants = [ResidentialUnitSummary]
+
+
+class SiteArea(SchemaNode):
+    site_area_in_hectares = StringField(
+        display="Site area in hectares",
+        description="The size of the site in hectares",
+        max_length=None,
+    )
+    site_area_provided_by = EnumField(
+        display="Site area provided by",
+        description="Who provided the site area value",
+        select_options=[
+            EnumOption(
+                key="applicant",
+                label="Applicant",
+                description="Information provided by the applicant",
+            ),
+            EnumOption(
+                key="system",
+                label="System/Service",
+                description="Information calculated or determined by the system or external service",
+            ),
+        ],
+    )
+
+    _ref = "site-area"
+    _display = "Site area"
+    _description = "How big the site is including relevant measurements"
+
+
+class SiteLocations(SchemaNode):
+    site_boundary = StringField(
+        display="Site boundary",
+        description="Geometry of the site of the development, typically in GeoJSON format",
+        max_length=None,
+    )
+    address_text = StringField(
+        display="Address Text",
+        description="Flexible field for capturing addresses",
+        max_length=None,
+    )
+    postcode = StringField(display="Postcode", description="The postal code", max_length=None)
+    easting = StringField(
+        display="Easting",
+        description="Easting coordinate in British National Grid (EPSG:27700)",
+        max_length=None,
+    )
+    northing = StringField(
+        display="Northing",
+        description="Northing coordinate in British National Grid (EPSG:27700)",
+        max_length=None,
+    )
+    latitude = StringField(
+        display="Latitude", description="Latitude coordinate in WGS84 (EPSG:4326)", max_length=None
+    )
+    longitude = StringField(
+        display="Longitude",
+        description="Longitude coordinate in WGS84 (EPSG:4326)",
+        max_length=None,
+    )
+    description = StringField(
+        display="Description",
+        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        max_length=None,
+    )
+    uprns = StringField(
+        display="UPRNs",
+        description="Unique Property Reference Numbers (UPRNs) for properties within the site boundary",
+        max_length=None,
+    )
+
+    _ref = "site-locations"
+    _display = "Site location"
+    _description = "Details about the location of a development site, including its boundary, address, and/or coordinates "
+
+
+class SiteDetails(SchemaNode):
+
+    _ref = "site-details"
+    _display = "Site details"
+    _description = "Where the proposed development will be built."
+    _descendants = [SiteLocations]
+
+
+class OtherContact(SchemaNode):
+    fullname = StringField(
+        display="Full name", description="The complete name of a person", max_length=None
+    )
+    number = StringField(display="Phone number", description="A phone number", max_length=None)
+    email = StringField(
+        display="Email",
+        description="The email address that can be used for electronic correspondence with the individual",
+        max_length=None,
+    )
+
+    _ref = "other-contact"
+    _display = "Other contact"
+    _description = (
+        "Details of another contact person for site visits when not using the applicant or agent "
+    )
+
+
+class SiteVisit(SchemaNode):
+    can_be_seen_from = BooleanField(
+        display="Site seen from public area",
+        description="Can site be seen from a public road, public footpath, bridleway or other public land",
+    )
+    contact_type = EnumField(
+        display="Site visit contact type",
+        description="Indicates who the authority should contact to arrange a site visit",
+        select_options=[
+            EnumOption(
+                key="applicant", label="Applicant", description="The applicant of the application"
+            ),
+            EnumOption(key="agent", label="Agent", description="The agent who completed the form"),
+        ],
+    )
+    contact_reference = StringField(
+        display="Contact reference",
+        description="The reference of the applicant or agent who should be contacted for site visits",
+        max_length=None,
+    )
+
+    _ref = "site-visit"
+    _display = "Site Visit Details"
+    _description = "Information to help the planning authority arrange a site visit"
+    _descendants = [OtherContact]
+
+
+class OutlineAll(SchemaNode):
+
+    _ref = "outline-all"
+    _display = "Outline Planning Permission with All Matters Reserved"
+    _description = "Outline planning permission with all matters reserved"
+    _descendants = [
+        AgentContact,
+        AgentDetails,
+        ApplicantContact,
+        ApplicantDetails,
+        Bng,
+        Checklist,
+        ConflictOfInterest,
+        Declaration,
+        Employment,
+        ExistingUse,
+        FloodRiskAssessment,
+        HrsOperation,
+        NonResFloorspace,
+        OwnershipCerts,
+        PreAppAdvice,
+        ProcessesMachineryWaste,
+        ProposalDetails,
+        ResUnits,
+        SiteArea,
+        SiteDetails,
+        SiteVisit,
+    ]
+
+
+class AccessRightsOfWay(SchemaNode):
+    new_altered_vehicle = EnumField(
+        display="New or altered vehicle access",
+        description="Is a new or altered vehicle access proposed to/from the public highway",
+        select_options=[
+            EnumOption(key="true", label="True", description="The statement is true"),
+            EnumOption(key="false", label="False", description="The statement is false"),
+            EnumOption(key="unknown", label="Unknown", description="The answer is unknown"),
+        ],
+    )
+    new_altered_pedestrian = EnumField(
+        display="New or altered pedestrian access",
+        description="Is a new or altered pedestrian access proposed to/from the public highway",
+        select_options=[
+            EnumOption(key="true", label="True", description="The statement is true"),
+            EnumOption(key="false", label="False", description="The statement is false"),
+            EnumOption(key="unknown", label="Unknown", description="The answer is unknown"),
+        ],
+    )
+    change_right_of_way = EnumField(
+        display="Change to right of way",
+        description="Will the proposal change public rights of way (diversion/extinguishment/creation)",
+        select_options=[
+            EnumOption(key="true", label="True", description="The statement is true"),
+            EnumOption(key="false", label="False", description="The statement is false"),
+            EnumOption(key="unknown", label="Unknown", description="The answer is unknown"),
+        ],
+    )
+    new_right_of_way = EnumField(
+        display="New right of way",
+        description="Will new public rights of way be provided within or adjacent to the site",
+        select_options=[
+            EnumOption(key="true", label="True", description="The statement is true"),
+            EnumOption(key="false", label="False", description="The statement is false"),
+            EnumOption(key="unknown", label="Unknown", description="The answer is unknown"),
+        ],
+    )
+    new_public_road = EnumField(
+        display="New public road",
+        description="Will new public roads be provided within the site",
+        select_options=[
+            EnumOption(key="true", label="True", description="The statement is true"),
+            EnumOption(key="false", label="False", description="The statement is false"),
+            EnumOption(key="unknown", label="Unknown", description="The answer is unknown"),
+        ],
+    )
+    temp_right_of_way = EnumField(
+        display="Temporary right of way changes",
+        description="Are temporary changes to rights of way needed while the site is worked",
+        select_options=[
+            EnumOption(key="true", label="True", description="The statement is true"),
+            EnumOption(key="false", label="False", description="The statement is false"),
+            EnumOption(key="unknown", label="Unknown", description="The answer is unknown"),
+        ],
+    )
+    future_new_right_of_way = EnumField(
+        display="Future new right of way",
+        description="Will new public rights of way be provided after extraction?",
+        select_options=[
+            EnumOption(key="true", label="True", description="The statement is true"),
+            EnumOption(key="false", label="False", description="The statement is false"),
+            EnumOption(key="unknown", label="Unknown", description="The answer is unknown"),
+        ],
+    )
+
+    _ref = "access-rights-of-way"
+    _display = "Access and rights of way"
+    _description = "Details of any changes the proposed development would make to existing access arrangements or public rights of way"
+    _descendants = [SupportingDocuments]
+
+
+class BioGeoArchCon(SchemaNode):
+    protected_species_impact = EnumField(
+        display="Protected species impact",
+        description="Where is there a likelihood of protected and priority species being affected?",
+        select_options=[
+            EnumOption(key="on-development-site", label="On development site", description=""),
+            EnumOption(key="adjacent-to-site", label="On adjacent site", description=""),
+        ],
+    )
+    biodiversity_features_impact = EnumField(
+        display="Biodiversity features impact",
+        description="Where is there a likelihood of important habitats or biodiversity features being affected?",
+        select_options=[
+            EnumOption(key="on-development-site", label="On development site", description=""),
+            EnumOption(key="adjacent-to-site", label="On adjacent site", description=""),
+        ],
+    )
+    geological_features_impact = EnumField(
+        display="Geological features impact",
+        description="Where is there a likelihood of features of geological conservation importance being affected?",
+        select_options=[
+            EnumOption(key="on-development-site", label="On development site", description=""),
+            EnumOption(key="adjacent-to-site", label="On adjacent site", description=""),
+        ],
+    )
+    archaeological_features_impact = EnumField(
+        display="Archaeological features impact",
+        description="Where is there a likelihood of features of archaeological conservation importance being affected?",
+        select_options=[
+            EnumOption(key="on-development-site", label="On development site", description=""),
+            EnumOption(key="adjacent-to-site", label="On adjacent site", description=""),
+        ],
+    )
+
+    _ref = "bio-geo-arch-con"
+    _display = "Biodiversity, geological and archaeological conservation"
+    _description = "Details of potential impacts to the biodiversity of the site, or any noteable archaeological or geological features."
+
+
+class FoulSewage(SchemaNode):
+    has_new_disposal_arrangements = BooleanField(
+        display="Has new disposal arrangements",
+        description="Does the proposal include any new foul sewage disposal arrangments",
+    )
+    foul_sewage_disposal_types = EnumField(
+        display="Foul sewage disposal types",
+        description="List of ways foul sewage will be disposed of",
+        select_options=[
+            EnumOption(key="mains-sewer", label="Mains sewer", description=""),
+            EnumOption(key="cess-pit", label="Cess pit", description=""),
+            EnumOption(key="septic-tank", label="Septic tank", description=""),
+            EnumOption(key="package-treatment", label="Package treatment plant", description=""),
+            EnumOption(key="other", label="Other", description=""),
+        ],
+    )
+    produce_foul_sewage = BooleanField(
+        display="Produce foul sewage",
+        description="Whether the proposed development will produce any foul sewage",
+    )
+    connect_to_drainage_system = BooleanField(
+        display="Connect to drainage system",
+        description="Whether the proposal needs to connect to the existing drainage system",
+    )
+    connect_to_drainage_system_oil_gas = EnumField(
+        display="Connect to drainage system (oil and gas)",
+        description="Whether the proposal needs to connect to the existing drainage system (oil and gas applications)",
+        select_options=[
+            EnumOption(key="yes", label="Yes", description="Affirmative response"),
+            EnumOption(key="no", label="No", description="Negative response  "),
+            EnumOption(
+                key="unknown",
+                label="Unknown",
+                description="Status is not known or cannot be determined",
+            ),
+        ],
+    )
+
+    _ref = "foul-sewage"
+    _display = "Foul sewage disposal"
+    _description = "How waste water will leave the property as part of the proposed development"
+    _descendants = [SupportingDocuments]
+
+
+class SubstanceTypes(SchemaNode):
+    hazardous_substance_type = EnumField(
+        display="Hazardous substance type",
+        description="Reference of hazardous substance type from predefined list",
+        select_options=[
+            EnumOption(key="acrylonitrile", label="Acrylonitrile", description=""),
+            EnumOption(key="ammonia", label="Ammonia", description=""),
+            EnumOption(key="bromine", label="Bromine", description=""),
+            EnumOption(key="chlorine", label="Chlorine", description=""),
+            EnumOption(key="ethylene-oxide", label="Ethylene oxide", description=""),
+            EnumOption(key="flour", label="Flour", description=""),
+            EnumOption(key="hydrogen-cyanide", label="Hydrogen cyanide", description=""),
+            EnumOption(key="liquid-oxygen", label="Liquid oxygen", description=""),
+            EnumOption(key="liquid-petroleum-gas", label="Liquid petroleum gas", description=""),
+            EnumOption(key="phosgene", label="Phosgene", description=""),
+            EnumOption(key="refined-white-sugar", label="Refined white sugar", description=""),
+            EnumOption(key="sulphur-dioxide", label="Sulphur dioxide", description=""),
+        ],
+    )
+    hazardous_substance_other = StringField(
+        display="Hazardous substance other",
+        description="The specific name of the hazardous substance if other is selected",
+        max_length=None,
+    )
+    amount = StringField(
+        display="Amount",
+        description="The total amount due for the application fee",
+        max_length=None,
+    )
+
+    _ref = "substance-types"
+    _display = "Hazardous substance"
+    _description = "Information about a specific hazardous substance including its type, name (if other), and quantity in tonnes "
+
+
+class HazSubstances(SchemaNode):
+    involves_hazardous_substances = EnumField(
+        display="Involves hazardous substances",
+        description="Indicates if hazardous substances are involved in the proposal",
+        select_options=[
+            EnumOption(key="yes", label="Yes", description="Affirmative response"),
+            EnumOption(key="no", label="No", description="Negative response"),
+            EnumOption(
+                key="not-applicable",
+                label="Not Applicable",
+                description="Response not applicable or not provided",
+            ),
+        ],
+    )
+    hazardous_sub_consent_req = BooleanField(
+        display="Hazardous substance consent required",
+        description="Does the proposal involve the use or storage of any substances requiring hazardous substances consent",
+    )
+    hazardous_sub_consent_details = StringField(
+        display="Hazardous substance consent details",
+        description="Details of hazardous substance consent requirements",
+        max_length=None,
+    )
+
+    _ref = "haz-substances"
+    _display = "Hazardous substances"
+    _description = (
+        "Details of hazardous substances requiring consent used as part of the development"
+    )
+    _descendants = [SubstanceTypes]
+
+
+class BuildingElements(SchemaNode):
+    building_element_type = EnumField(
+        display="Building element type",
+        description="The part of building the materials relate to, such as walls, roofs, windows, or doors",
+        select_options=[
+            EnumOption(
+                key="walls",
+                label="Walls",
+                description="A vertical construction that bounds or subdivides spaces",
+            ),
+            EnumOption(
+                key="roof",
+                label="Roof",
+                description="A covering of the top part of a building, it protects the building against the effects of weather",
+            ),
+            EnumOption(key="windows", label="Windows", description=""),
+            EnumOption(key="doors", label="Doors", description=""),
+            EnumOption(key="boundary-treatments", label="Boundary treatments", description=""),
+            EnumOption(
+                key="vehicle-access-hard-standings",
+                label="Vehicle access and hard-standings",
+                description="",
+            ),
+            EnumOption(key="lighting", label="Lighting", description=""),
+            EnumOption(key="external-walls", label="External walls", description=""),
+            EnumOption(key="roof-covering", label="Roof covering", description=""),
+            EnumOption(key="chimney", label="Chimney", description=""),
+            EnumOption(key="external-doors", label="External doors", description=""),
+            EnumOption(key="ceilings", label="Ceilings", description=""),
+            EnumOption(key="internal-walls", label="Internal walls", description=""),
+            EnumOption(key="floors", label="Floors", description=""),
+            EnumOption(key="internal-doors", label="Internal doors", description=""),
+            EnumOption(key="rainwater-goods", label="Rainwater goods", description=""),
+            EnumOption(key="other", label="Other", description=""),
+        ],
+    )
+    existing_materials = StringField(
+        display="Existing materials",
+        description="Description of the materials currently used for this building element",
+        max_length=None,
+    )
+    proposed_materials = StringField(
+        display="Proposed materials",
+        description="Description of the materials proposed for this building element as part of the development",
+        max_length=None,
+    )
+    materials_not_known = BooleanField(
+        display="Materials not known",
+        description="Indicates the materials for this building element are not yet known",
+    )
+
+    _ref = "building-elements"
+    _display = "Building element"
+    _description = "Describes the materials used for a specific part of a building, such as walls, roof, windows or doors "
+
+
+class Materials(SchemaNode):
+    proposal_material_details = BooleanField(
+        display="Proposal material details",
+        description="Whether the proposal involves material details that need to be provided",
+    )
+    providing_additional_material_information = BooleanField(
+        display="Providing additional material information",
+        description="Is the applicant providing additional materials information on submitted plan(s)/drawing(s)/design and access statement?",
+    )
+
+    _ref = "materials"
+    _display = "Materials"
+    _description = "What materials are being used for the proposed development"
+    _descendants = [BuildingElements, SupportingDocuments]
+
+
+class TradeEffluent(SchemaNode):
+    is_disposal_required = BooleanField(
+        display="Disposal required",
+        description="Does the proposal involve the disposal of trade effluents or waste (true/false)",
+    )
+    description = StringField(
+        display="Description",
+        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        max_length=None,
+    )
+
+    _ref = "trade-effluent"
+    _display = "Trade effluent"
+    _description = "Details of any liquid waste produced by industial processes on the proposed site, and how it will be diposed of."
+
+
+class FallingTreesDocument(SchemaNode):
+    reference = StringField(
+        display="Reference", description="A unique reference for the data item", max_length=None
+    )
+    details = StringField(
+        display="Details",
+        description="Additional details or information about an item",
+        max_length=None,
+    )
+
+    _ref = "falling-trees-document"
+    _display = "Supporting document"
+    _description = "Reference to a supporting document already listed in application.documents "
+
+
+class TreeRemovalPlan(SchemaNode):
+    reference = StringField(
+        display="Reference", description="A unique reference for the data item", max_length=None
+    )
+    details = StringField(
+        display="Details",
+        description="Additional details or information about an item",
+        max_length=None,
+    )
+
+    _ref = "tree-removal-plan"
+    _display = "Supporting document"
+    _description = "Reference to a supporting document already listed in application.documents "
+
+
+class TreesHedges(SchemaNode):
+    trees_on_site = BooleanField(
+        display="Trees on site",
+        description="Whether trees or hedges are present on the proposed development site",
+    )
+    trees_on_adj_land = BooleanField(
+        display="Trees on adjacent land",
+        description="Whether trees or hedges on land adjacent to the proposed development site could influence the development or might be important as part of the local landscape character",
+    )
+    has_falling_trees_risk = BooleanField(
+        display="Falling trees risk",
+        description="Whether there are falling trees on-premises or adjacent premises that are a risk to the development",
+    )
+    tree_removal = BooleanField(
+        display="Tree removal", description="Whether trees or hedges need to be pruned or removed"
+    )
+
+    _ref = "trees-hedges"
+    _display = "Trees and hedges information"
+    _description = (
+        "Details of trees and/or hedges that will be affected by the proposed development"
+    )
+    _descendants = [FallingTreesDocument, TreeRemovalPlan]
+
+
+class ParkingSpaces(SchemaNode):
+    parking_space_type = EnumField(
+        display="Parking space type",
+        description="Type of parking space or vehicle type",
+        select_options=[
+            EnumOption(
+                key="car-space",
+                label="Cars",
+                description="Standard on-site parking spaces for cars.",
+            ),
+            EnumOption(
+                key="light-goods-vehicle-space",
+                label="Light Goods/Public Carrier Vehicles",
+                description="Vans, delivery vehicles, and public carriers.",
+            ),
+            EnumOption(
+                key="motorcycle-space",
+                label="Motorcycles",
+                description="Spaces designated for motorbikes.",
+            ),
+            EnumOption(
+                key="disability-space",
+                label="Disability Space",
+                description="Accessible parking spaces.",
+            ),
+            EnumOption(
+                key="cycle-space",
+                label="Cycle Space",
+                description="Bicycle parking, including racks or shelters.",
+            ),
+            EnumOption(
+                key="blue-badge-space",
+                label="Blue Badge Spaces",
+                description="Parking spaces reserved for blue badge holders.",
+            ),
+            EnumOption(key="bus", label="Bus", description="Parking bays or laybys for buses."),
+            EnumOption(
+                key="car-club",
+                label="Car Club",
+                description="Parking spaces allocated for car club vehicles.",
+            ),
+            EnumOption(
+                key="resi-off-street",
+                label="Resi Only Off Street Parking",
+                description="Private off-street parking for residents only.",
+            ),
+            EnumOption(
+                key="other",
+                label="Other",
+                description="Other parking types not covered by the defined categories.",
+            ),
+        ],
+    )
+    vehicle_type_other = StringField(
+        display="Vehicle type other",
+        description="Vehicle type when parking space type is 'other'",
+        max_length=None,
+    )
+    total_existing = StringField(
+        display="Total existing",
+        description="Total number of existing parking spaces",
+        max_length=None,
+    )
+    total_proposed = StringField(
+        display="Total proposed",
+        description="Total number of proposed parking spaces",
+        max_length=None,
+    )
+    unknown_proposed = StringField(
+        display="Unknown proposed",
+        description="If proposed parking spaces is unknown",
+        max_length=None,
+    )
+    difference_in_spaces = StringField(
+        display="Difference in spaces",
+        description="Net change in parking spaces (proposed minus existing)",
+        max_length=None,
+    )
+
+    _ref = "parking-spaces"
+    _display = "Parking space"
+    _description = "Information about parking spaces by vehicle type, including existing and proposed counts with net change calculations "
+
+
+class VehicleParking(SchemaNode):
+
+    _ref = "vehicle-parking"
+    _display = "Vehicle parking"
+    _description = "Details of current parking facilities at the site and any changes that would be made by the proposed development."
+    _descendants = [ParkingSpaces]
+
+
+class WasteStorageCollection(SchemaNode):
+    needs_waste_storage_area = BooleanField(
+        display="Needs waste storage area",
+        description="Does the proposal require a waste storage area",
+    )
+    needs_waste_storage_area_outline = EnumField(
+        display="Needs waste storage area",
+        description="Does the proposal require a waste storage area?",
+        select_options=[
+            EnumOption(key="yes", label="Yes", description="Affirmative response"),
+            EnumOption(key="no", label="No", description="Negative response  "),
+            EnumOption(
+                key="unknown",
+                label="Unknown",
+                description="Status is not known or cannot be determined",
+            ),
+        ],
+    )
+    waste_storage_area_details = StringField(
+        display="Waste storage area details",
+        description="Details of the waste storage area including location, size, design and access arrangements",
+        max_length=None,
+    )
+    separate_recycling_arrangements = BooleanField(
+        display="Separate recycling arrangements",
+        description="Does the proposal include separate recycling arrangements",
+    )
+    separate_recycling_arrangements_outline = EnumField(
+        display="Separate recycling arrangements (outline)",
+        description="Does the proposal include separate recycling arrangements?",
+        select_options=[
+            EnumOption(key="yes", label="Yes", description="Affirmative response"),
+            EnumOption(key="no", label="No", description="Negative response  "),
+            EnumOption(
+                key="unknown",
+                label="Unknown",
+                description="Status is not known or cannot be determined",
+            ),
+        ],
+    )
+    separate_recycling_arrangements_details = StringField(
+        display="Separate recycling arrangements details",
+        description="Details of the recycling arrangements including types of materials, collection methods and storage facilities",
+        max_length=None,
+    )
+
+    _ref = "waste-storage-collection"
+    _display = "Waste storage and collection"
+    _description = (
+        "Any waste storage or recycling arrangements are in place, such as waste storage areas"
+    )
+
+
+class TechnicalDetailsConsent(SchemaNode):
+
+    _ref = "technical-details-consent"
+    _display = "Technical details consent"
+    _description = "Technical Details Consent (TDC) is the second stage of the 'Permission in Principle' (PiP) process in planning, primarily for housing-led development. It follows the initial 'Permission in Principle' stage, which establishes whether a site is suitable in principle for development. TDC assesses the detailed design, layout, and other technical aspects of the proposed development. "
+    _descendants = [
+        AccessRightsOfWay,
+        AgentContact,
+        AgentDetails,
+        ApplicantContact,
+        ApplicantDetails,
+        BioGeoArchCon,
+        Bng,
+        Checklist,
+        ConflictOfInterest,
+        Declaration,
+        Employment,
+        ExistingUse,
+        FloodRiskAssessment,
+        FoulSewage,
+        HazSubstances,
+        HrsOperation,
+        Materials,
+        NonResFloorspace,
+        OwnershipCerts,
+        PreAppAdvice,
+        ProcessesMachineryWaste,
+        ProposalDetails,
+        ResUnits,
+        SiteArea,
+        SiteDetails,
+        SiteVisit,
+        TradeEffluent,
+        TreesHedges,
+        VehicleParking,
+        WasteStorageCollection,
+    ]
+
+
+class CommunityConsultation(SchemaNode):
+    have_consulted = BooleanField(
+        display="Have consulted", description="Whether community consultation has been carried out"
+    )
+    description = StringField(
+        display="Description",
+        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        max_length=None,
+    )
+
+    _ref = "community-consultation"
+    _display = "Community consultation"
+    _description = (
+        "What community consultation activities have taken place as part of the application"
+    )
+
+
+class Demolition(SchemaNode):
+    is_proposing_demolition = BooleanField(
+        display="Is propsing demolition",
+        description="The proposal includes partial or total demolition of a listed building?",
+    )
+    is_total_demolition = BooleanField(
+        display="Is total demolition",
+        description="Indicating whether the proposal involves total demolition of a listed building",
+    )
+    is_demolishing_building_in_curtilage = BooleanField(
+        display="Demolition building in curtilage",
+        description="True or False indicating whether the proposal involves demolition of a building in the curtilage of a listed building",
+    )
+    is_partial_demolition = BooleanField(
+        display="Demolition part",
+        description="True or False indicating whether the proposal involves partial demolition of a listed building",
+    )
+    listed_building_volume = StringField(
+        display="Listed building volume",
+        description="Volume of listed building in cubic metres",
+        max_length=None,
+    )
+    demolition_volume = StringField(
+        display="Demolition volume",
+        description="Volume of part to be demolished in cubic metres",
+        max_length=None,
+    )
+    part_built_date = StringField(
+        display="Part built date",
+        description="The approximate date the part to be removed was built, in YYYY-MM format.",
+        max_length=None,
+    )
+    description = StringField(
+        display="Description",
+        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        max_length=None,
+    )
+    reason = StringField(display="Reason", description="A textual reason", max_length=None)
+
+    _ref = "demolition"
+    _display = "Demolition"
+    _description = (
+        "Details of any demolition that needs to take place as part of the development proposal."
+    )
+
+
+class ImmunityFromListing(SchemaNode):
+    cert_of_immunity_sought = EnumField(
+        display="Certificate of immunity sought",
+        description="Has a certificate of immunity been sought",
+        select_options=[
+            EnumOption(key="yes", label="Yes", description="Affirmative response"),
+            EnumOption(key="no", label="No", description="Negative response  "),
+            EnumOption(
+                key="unknown",
+                label="Unknown",
+                description="Status is not known or cannot be determined",
+            ),
+        ],
+    )
+    application_result = StringField(
+        display="Application result",
+        description="Provide the result of the application for a certificate of immunity",
+        max_length=None,
+    )
+
+    _ref = "immunity-from-listing"
+    _display = "Immunity from listing"
+    _description = "Whether the applicant has obtained a Certificate of Immunity (COI) meaning the building in question cannot be listed"
+
+
+class DocumentReference(SchemaNode):
+    reference = StringField(
+        display="Reference", description="A unique reference for the data item", max_length=None
+    )
+    details = StringField(
+        display="Details",
+        description="Additional details or information about an item",
+        max_length=None,
+    )
+
+    _ref = "document-reference"
+    _display = "Supporting document"
+    _description = "Reference to a supporting document already listed in application.documents "
+
+
+class LbAlter(SchemaNode):
+    proposal_alter_lb = BooleanField(
+        display="Proposal alter listed building",
+        description="True or False if proposal includes alterations to a listed building",
+    )
+    proposal_alter_lb_types = EnumField(
+        display="Proposal alteration types",
+        description="Select from a list of listed building alteration types, select all that apply",
+        select_options=[
+            EnumOption(
+                key="interior",
+                label="Interior of building",
+                description="Works to the interior of the building",
+            ),
+            EnumOption(
+                key="exterior",
+                label="Exterior of building",
+                description="Works to the exterior of the building",
+            ),
+            EnumOption(
+                key="fixed",
+                label="Fixed structure or object",
+                description="Works to any structure or object fixed to the property (or buildings with the curtilage) internally or externally",
+            ),
+            EnumOption(
+                key="stripping",
+                label="Stripping out",
+                description="Stripping out of any internal wall, ceiling or floor finishes",
+            ),
+        ],
+    )
+
+    _ref = "lb-alter"
+    _display = "Listed building alterations"
+    _description = (
+        "Details of any changes being made to a listed building as part of development works"
+    )
+    _descendants = [DocumentReference]
+
+
+class LbGrade(SchemaNode):
+    listed_building_grade = StringField(
+        display="Listed building grade",
+        description='The grade of the listed building, selected from the listed-building-grade codelist or "don\'t know"',
+        max_length=None,
+    )
+    listed_building = StringField(
+        display="Listed building",
+        description="Listed building reference for cross-referencing with listed building records",
+        max_length=None,
+    )
+    provided_by = EnumField(
+        display="Provided by",
+        description="Whether the information was provided by the applicant or calculated by the system",
+        select_options=[
+            EnumOption(
+                key="applicant",
+                label="Applicant",
+                description="Information provided by the applicant",
+            ),
+            EnumOption(
+                key="system",
+                label="System/Service",
+                description="Information calculated or determined by the system or external service",
+            ),
+        ],
+    )
+
+    _ref = "lb-grade"
+    _display = "Listed building grade"
+    _description = "The grade of any listed building affected by the proposed development."
+
+
+class RelatedApplications(SchemaNode):
+    reference = StringField(
+        display="Reference", description="A unique reference for the data item", max_length=None
+    )
+    description = StringField(
+        display="Description",
+        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        max_length=None,
+    )
+    decision_date = StringField(
+        display="Decision date",
+        description="The date when the decision was made, in YYYY-MM-DD format",
+        max_length=None,
+    )
+
+    _ref = "related-applications"
+    _display = "Related application details"
+    _description = "Details about a related application including its reference, description and decision date "
+
+
+class RelatedApplicationsmodule(SchemaNode):
+    has_related_applications = BooleanField(
+        display="Has related applications",
+        description="Are there any related applications, previous proposals or demolitions for the site",
+    )
+
+    _ref = "related-applications"
+    _display = "Related applications"
+    _description = "Details of any other development proposals made for the site"
+    _descendants = [RelatedApplications]
+
+
+class Lbc(SchemaNode):
+
+    _ref = "lbc"
+    _display = "Listed building consent"
+    _description = "An application for works for the demolition of a listed building or for its alteration or extension in any manner which would affect its character as a building of special architectural or historic interest"
+    _descendants = [
+        AgentContact,
+        AgentDetails,
+        ApplicantContact,
+        ApplicantDetails,
+        Checklist,
+        CommunityConsultation,
+        ConflictOfInterest,
+        Declaration,
+        Demolition,
+        ImmunityFromListing,
+        LbAlter,
+        LbGrade,
+        Materials,
+        OwnershipCerts,
+        PreAppAdvice,
+        ProposalDetails,
+        RelatedApplicationsmodule,
+        SiteDetails,
+        SiteVisit,
+    ]
+
+
+class DescProposedWorksLbLdc(SchemaNode):
+    description = StringField(
+        display="Description",
+        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        max_length=None,
+    )
+
+    _ref = "desc-proposed-works-lb-ldc"
+    _display = "Description of proposed works for listed building lawful development certificate"
+    _description = "Details of development plans for the work to the listed building an applicant is seeking a lawful development certificate for"
+
+
+class GroundsForApplication(SchemaNode):
+    grounds_for_application = StringField(
+        display="Grounds for application",
+        description="Reason(s) why Certificate of Lawfulness of Proposed Works should be granted, including explanation of why listed building consent is not required ",
+        max_length=None,
+    )
+
+    _ref = "grounds-for-application"
+    _display = "Grounds for application"
+    _description = "Why a Certificate of Lawfulness of Propose Works is being requested."
+    _descendants = [SupportingDocuments]
+
+
+class OwnerDetails(SchemaNode):
+    informed_of_application = BooleanField(
+        display="Informed of application",
+        description="Whether the person has been informed of the application",
+    )
+
+    _ref = "owner-details"
+    _display = "LDC Owner Details"
+    _description = "Details of property owners for Listed Building Consent applications including their personal information and whether they have been informed of the application "
+    _descendants = [Person]
+
+
+class InterestedPersons(SchemaNode):
+    nature_of_interest = StringField(
+        display="Nature of interest",
+        description="Description of the nature of a person's interest in the property",
+        max_length=None,
+    )
+    informed_of_application = BooleanField(
+        display="Informed of application",
+        description="Whether the person has been informed of the application",
+    )
+    reason_not_informed = StringField(
+        display="Reason not informed",
+        description="Reason why a person was not informed of the application",
+        max_length=None,
+    )
+
+    _ref = "interested-persons"
+    _display = "LDC Interested Person"
+    _description = "Details of persons with an interest in the property for Listed Building Consent applications including their personal information, nature of interest, and notification status "
+    _descendants = [Person]
+
+
+class InterestDetails(SchemaNode):
+    applicant_interest = StringField(
+        display="Applicant interest",
+        description="Description of the applicant's interest in the land",
+        max_length=None,
+    )
+
+    _ref = "interest-details"
+    _display = "Interest details"
+    _description = (
+        "Names and contact details for all parties with an interest in the proposed develpoment."
+    )
+    _descendants = [OwnerDetails, InterestedPersons]
+
+
+class LdcProposedWorkLb(SchemaNode):
+
+    _ref = "ldc-proposed-work-lb"
+    _display = "LDC Proposed Work to a Listed Building"
+    _description = "Proposed work to a listed building"
+    _descendants = [
+        AgentContact,
+        AgentDetails,
+        ApplicantContact,
+        ApplicantDetails,
+        Checklist,
+        ConflictOfInterest,
+        Declaration,
+        DescProposedWorksLbLdc,
+        GroundsForApplication,
+        InterestDetails,
+        LbGrade,
+        PreAppAdvice,
+        SiteDetails,
+        SiteVisit,
+    ]
+
+
+class HedgerowRemoval(SchemaNode):
+    reason = StringField(display="Reason", description="A textual reason", max_length=None)
+    hedgerow_length = StringField(
+        display="Hedgerow length",
+        description="Total length, in metres, of hedgerow proposed for removal",
+        max_length=None,
+    )
+    hedgerow_less_than_30_years = BooleanField(
+        display="Hedgerow less than 30 years", description="Is the hedgerow less than 30 years old?"
+    )
+    planting_evidence_attached = BooleanField(
+        display="Planting evidence attached",
+        description="Is evidence of the date of planting attached?",
+    )
+    interest_declaration = EnumField(
+        display="Interest declaration",
+        description="The applicant's interest or ownership in the hedgerow",
+        select_options=[
+            EnumOption(
+                key="owner",
+                label="Owner",
+                description="The applicant is the freehold owner of the land concerned",
+            ),
+            EnumOption(
+                key="agricultural-tenant",
+                label="Agricultural tenant",
+                description="The applicant is the tenant of the agricultural holding concerned",
+            ),
+            EnumOption(
+                key="farm-business-tenant",
+                label="Farm business tenant",
+                description="The applicant is the tenant under the farm business tenancy concerned",
+            ),
+            EnumOption(
+                key="utility-operator",
+                label="Utility operator",
+                description="The applicant is acting for the utility operator concerned",
+            ),
+        ],
+    )
+
+    _ref = "hedgerow-removal"
+    _display = "Hedgerow removal notice"
+    _description = "Details of any hedgerows being removed as part of the development"
+    _descendants = [SupportingDocuments]
+
+
+class HedgerowRemovalapplication(SchemaNode):
+
+    _ref = "hedgerow-removal"
+    _display = "Hedgerow removal notice"
+    _description = "An application for anyone proposing to remove a hedgerow, or part of a hedgerow"
+    _descendants = [
+        ApplicantContact,
+        ApplicantDetails,
+        AgentContact,
+        AgentDetails,
+        Checklist,
+        Declaration,
+        HedgerowRemoval,
+        PreAppAdvice,
+        SiteDetails,
+        SiteVisit,
+    ]
+
+
+class PriorApproval(SchemaNode):
+
+    _ref = "prior-approval"
+    _display = "Prior approval"
+    _description = "This applies to developments with permitted development rights (where developments are granted planning permission by national legislation without the need to submit a planning application)"
+    _descendants = [
+        AgentContact,
+        AgentDetails,
+        ApplicantContact,
+        ApplicantDetails,
+        ConflictOfInterest,
+        Checklist,
+        Declaration,
+        SiteDetails,
+    ]
+
+
+class GroundsExistingUse(SchemaNode):
+    reason = StringField(display="Reason", description="A textual reason", max_length=None)
+    use = EnumField(
+        display="Use",
+        description="A use class or type of use",
+        select_options=[
+            EnumOption(
+                key="b2",
+                label="B2 – General Industrial",
+                description="Industrial uses not falling within Class E.",
+            ),
+            EnumOption(
+                key="b8",
+                label="B8 – Storage and Distribution",
+                description="Warehousing and storage.",
+            ),
+            EnumOption(
+                key="c1",
+                label="C1 – Hotels",
+                description="Includes hotels, boarding houses, and guest houses.",
+            ),
+            EnumOption(
+                key="c2",
+                label="C2 – Residential Institutions",
+                description="Care homes, hospitals, and boarding schools.",
+            ),
+            EnumOption(
+                key="c2a",
+                label="C2A – Secure Residential Institutions",
+                description="Prisons, young offender institutions.",
+            ),
+            EnumOption(
+                key="c3",
+                label="C3 – Dwellinghouses",
+                description="Sole or main residence used by people forming a single household.",
+            ),
+            EnumOption(
+                key="c4",
+                label="C4 – Houses in multiple occupation",
+                description="Defined in the Housing Act 2004 (with the exclusion of converted block of flats).",
+            ),
+            EnumOption(
+                key="e-a",
+                label="E(a) – Retail (other than hot food)",
+                description="Shops and other retail services.",
+            ),
+            EnumOption(
+                key="e-b",
+                label="E(b) – Food and Drink",
+                description="Premises mostly for on-site consumption.",
+            ),
+            EnumOption(
+                key="e-c-i",
+                label="E(c)(i) – Financial Services",
+                description="Banks, building societies, and credit unions.",
+            ),
+            EnumOption(
+                key="e-c-ii",
+                label="E(c)(ii) – Professional Services",
+                description="Non-health/medical services (e.g., accountants, solicitors).",
+            ),
+            EnumOption(
+                key="e-c-iii",
+                label="E(c)(iii) – Any Other Service",
+                description="Non-retail services to the public.",
+            ),
+            EnumOption(
+                key="e-d",
+                label="E(d) – Indoor Sports and Recreation",
+                description="Excludes motorised or firearms activities.",
+            ),
+            EnumOption(
+                key="e-e",
+                label="E(e) – Medical or Health Services",
+                description="Clinics and health centres.",
+            ),
+            EnumOption(
+                key="e-f",
+                label="E(f) – Creche, Day Nursery",
+                description="Facilities for childcare.",
+            ),
+            EnumOption(
+                key="e-g-i",
+                label="E(g)(i) – Office",
+                description="For operational or administrative functions.",
+            ),
+            EnumOption(
+                key="e-g-ii",
+                label="E(g)(ii) – Research and Development",
+                description="Development of products or processes.",
+            ),
+            EnumOption(
+                key="e-g-iii",
+                label="E(g)(iii) – Industrial Process",
+                description="Processes that can operate within a residential area.",
+            ),
+            EnumOption(
+                key="f1-a",
+                label="F1(a) – Education",
+                description="Schools, colleges, and training centres.",
+            ),
+            EnumOption(
+                key="f1-b",
+                label="F1(b) – Display of Works of Art",
+                description="Galleries (excluding commercial galleries).",
+            ),
+            EnumOption(key="f1-c", label="F1(c) – Museum", description="Non-commercial museums."),
+            EnumOption(
+                key="f1-d",
+                label="F1(d) – Public Library",
+                description="Libraries open to the public.",
+            ),
+            EnumOption(
+                key="f1-e",
+                label="F1(e) – Public Hall/Exhibition Hall",
+                description="Community spaces for events.",
+            ),
+            EnumOption(
+                key="f1-f",
+                label="F1(f) – Public Worship/Religious Instruction",
+                description="Churches, mosques, synagogues.",
+            ),
+            EnumOption(key="f1-g", label="F1(g) – Law Court", description="Court facilities."),
+            EnumOption(
+                key="f2-a",
+                label="F2(a) – Local Community Shop",
+                description="Shop under 280 sqm with no similar facility nearby.",
+            ),
+            EnumOption(
+                key="f2-b",
+                label="F2(b) – Community Hall",
+                description="Halls for local community use.",
+            ),
+            EnumOption(
+                key="f2-c",
+                label="F2(c) – Outdoor Sport/Recreation",
+                description="Excludes motorised sports.",
+            ),
+            EnumOption(
+                key="f2-d",
+                label="F2(d) – Indoor/Outdoor Swimming Pool",
+                description="Includes skating rinks.",
+            ),
+            EnumOption(
+                key="sui",
+                label="Sui generis",
+                description="Uses that do not fall within any defined use class and are considered unique. For example, theatres, nightclubs, scrap yards and mineral extraction",
+            ),
+            EnumOption(
+                key="other",
+                label="Other (Please Specify)",
+                description="Free text required if selected.",
+            ),
+        ],
+    )
+    specified_use = StringField(
+        display="Specified use",
+        description="A specified use if no applicable use class is available",
+        max_length=None,
+    )
+
+    _ref = "grounds-existing-use"
+    _display = "Grounds for application (information about the existing use(s))"
+    _description = "Supporting inforation for a Lawful Development Certificate application relating to how the site has most recently been used."
+    _descendants = [SupportingDocuments]
+
+
+class GroundsProposedUse(SchemaNode):
+    use = EnumField(
+        display="Use",
+        description="A use class or type of use",
+        select_options=[
+            EnumOption(
+                key="b2",
+                label="B2 – General Industrial",
+                description="Industrial uses not falling within Class E.",
+            ),
+            EnumOption(
+                key="b8",
+                label="B8 – Storage and Distribution",
+                description="Warehousing and storage.",
+            ),
+            EnumOption(
+                key="c1",
+                label="C1 – Hotels",
+                description="Includes hotels, boarding houses, and guest houses.",
+            ),
+            EnumOption(
+                key="c2",
+                label="C2 – Residential Institutions",
+                description="Care homes, hospitals, and boarding schools.",
+            ),
+            EnumOption(
+                key="c2a",
+                label="C2A – Secure Residential Institutions",
+                description="Prisons, young offender institutions.",
+            ),
+            EnumOption(
+                key="c3",
+                label="C3 – Dwellinghouses",
+                description="Sole or main residence used by people forming a single household.",
+            ),
+            EnumOption(
+                key="c4",
+                label="C4 – Houses in multiple occupation",
+                description="Defined in the Housing Act 2004 (with the exclusion of converted block of flats).",
+            ),
+            EnumOption(
+                key="e-a",
+                label="E(a) – Retail (other than hot food)",
+                description="Shops and other retail services.",
+            ),
+            EnumOption(
+                key="e-b",
+                label="E(b) – Food and Drink",
+                description="Premises mostly for on-site consumption.",
+            ),
+            EnumOption(
+                key="e-c-i",
+                label="E(c)(i) – Financial Services",
+                description="Banks, building societies, and credit unions.",
+            ),
+            EnumOption(
+                key="e-c-ii",
+                label="E(c)(ii) – Professional Services",
+                description="Non-health/medical services (e.g., accountants, solicitors).",
+            ),
+            EnumOption(
+                key="e-c-iii",
+                label="E(c)(iii) – Any Other Service",
+                description="Non-retail services to the public.",
+            ),
+            EnumOption(
+                key="e-d",
+                label="E(d) – Indoor Sports and Recreation",
+                description="Excludes motorised or firearms activities.",
+            ),
+            EnumOption(
+                key="e-e",
+                label="E(e) – Medical or Health Services",
+                description="Clinics and health centres.",
+            ),
+            EnumOption(
+                key="e-f",
+                label="E(f) – Creche, Day Nursery",
+                description="Facilities for childcare.",
+            ),
+            EnumOption(
+                key="e-g-i",
+                label="E(g)(i) – Office",
+                description="For operational or administrative functions.",
+            ),
+            EnumOption(
+                key="e-g-ii",
+                label="E(g)(ii) – Research and Development",
+                description="Development of products or processes.",
+            ),
+            EnumOption(
+                key="e-g-iii",
+                label="E(g)(iii) – Industrial Process",
+                description="Processes that can operate within a residential area.",
+            ),
+            EnumOption(
+                key="f1-a",
+                label="F1(a) – Education",
+                description="Schools, colleges, and training centres.",
+            ),
+            EnumOption(
+                key="f1-b",
+                label="F1(b) – Display of Works of Art",
+                description="Galleries (excluding commercial galleries).",
+            ),
+            EnumOption(key="f1-c", label="F1(c) – Museum", description="Non-commercial museums."),
+            EnumOption(
+                key="f1-d",
+                label="F1(d) – Public Library",
+                description="Libraries open to the public.",
+            ),
+            EnumOption(
+                key="f1-e",
+                label="F1(e) – Public Hall/Exhibition Hall",
+                description="Community spaces for events.",
+            ),
+            EnumOption(
+                key="f1-f",
+                label="F1(f) – Public Worship/Religious Instruction",
+                description="Churches, mosques, synagogues.",
+            ),
+            EnumOption(key="f1-g", label="F1(g) – Law Court", description="Court facilities."),
+            EnumOption(
+                key="f2-a",
+                label="F2(a) – Local Community Shop",
+                description="Shop under 280 sqm with no similar facility nearby.",
+            ),
+            EnumOption(
+                key="f2-b",
+                label="F2(b) – Community Hall",
+                description="Halls for local community use.",
+            ),
+            EnumOption(
+                key="f2-c",
+                label="F2(c) – Outdoor Sport/Recreation",
+                description="Excludes motorised sports.",
+            ),
+            EnumOption(
+                key="f2-d",
+                label="F2(d) – Indoor/Outdoor Swimming Pool",
+                description="Includes skating rinks.",
+            ),
+            EnumOption(
+                key="sui",
+                label="Sui generis",
+                description="Uses that do not fall within any defined use class and are considered unique. For example, theatres, nightclubs, scrap yards and mineral extraction",
+            ),
+            EnumOption(
+                key="other",
+                label="Other (Please Specify)",
+                description="Free text required if selected.",
+            ),
+        ],
+    )
+    specified_use = StringField(
+        display="Specified use",
+        description="A specified use if no applicable use class is available",
+        max_length=None,
+    )
+    operation_type = EnumField(
+        display="Operation type",
+        description="Whether the proposed use is temporary or permanent",
+        select_options=[
+            EnumOption(key="permanent", label="Permanent", description=""),
+            EnumOption(key="temporary", label="Temporary", description=""),
+        ],
+    )
+    temporary_details = StringField(
+        display="Temporary details",
+        description="Details of temporary use including duration and specific arrangements",
+        max_length=None,
+    )
+    reason = StringField(display="Reason", description="A textual reason", max_length=None)
+
+    _ref = "grounds-proposed-use"
+    _display = "Grounds for proposed use"
+    _description = "What the new site will be used for"
+
+
+class ProposalDetailsLdc(SchemaNode):
+    proposal_incl_building_operations = BooleanField(
+        display="Proposal incl building operations",
+        description="Does the proposal include building operations?",
+    )
+    proposal_building_operations_description = StringField(
+        display="Proposal building operations description",
+        description="Description of the building operations included in the proposal",
+        max_length=None,
+    )
+    proposal_incl_change_of_use = BooleanField(
+        display="Proposal incl change of use",
+        description="Does the proposal include a change of use?",
+    )
+    proposal_change_of_use_description = StringField(
+        display="Proposal change of use description",
+        description="Description of the change of use included in the proposal",
+        max_length=None,
+    )
+    proposal_existing_use_description = StringField(
+        display="Proposal existing use description",
+        description="Description of the existing use before the proposed change of use",
+        max_length=None,
+    )
+    proposal_existing_use_stop_date = StringField(
+        display="Proposal existing use stop date",
+        description="Date when the existing use stopped or will stop",
+        max_length=None,
+    )
+    proposal_started = BooleanField(
+        display="Proposal started", description="Has any work on the proposal already been started"
+    )
+
+    _ref = "proposal-details-ldc"
+    _display = "Proposal details LDC"
+    _description = "Details of why a Lawful Development Certificate is required."
+
+
+class LdcProspectiveUse(SchemaNode):
+
+    _ref = "ldc-prospective-use"
+    _display = "LDC Proposed Use"
+    _description = "Prospective use of the site"
+    _descendants = [
+        AgentContact,
+        AgentDetails,
+        ApplicantContact,
+        ApplicantDetails,
+        Checklist,
+        ConflictOfInterest,
+        Declaration,
+        GroundsExistingUse,
+        GroundsProposedUse,
+        InterestDetails,
+        PreAppAdvice,
+        ProposalDetailsLdc,
+        SiteDetails,
+        SiteVisit,
+    ]
+
+
+class ReplacementDrawings(SchemaNode):
+    old_drawing_reference = StringField(
+        display="Old drawing reference",
+        description="Reference of the old drawing being replaced",
+        max_length=None,
+    )
+    new_drawing_reference = StringField(
+        display="New drawing reference",
+        description="Reference for the new drawing that replaces the old drawing",
+        max_length=None,
+    )
+    reason = StringField(display="Reason", description="A textual reason", max_length=None)
+
+    _ref = "replacement-drawings"
+    _display = "Replacement drawing"
+    _description = "Details of an approved drawing being replaced by a new drawing, including references to both old and new drawings "
+
+
+class SupportingInfo(SchemaNode):
+
+    _ref = "supporting-info"
+    _display = "Supporting information"
+    _description = "Any additional information which will help with the planning application"
+    _descendants = [ReplacementDrawings]
+
+
+class ReservedMatters(SchemaNode):
+
+    _ref = "reserved-matters"
+    _display = "Reserved matters"
+    _description = "This application is only required when the applicant has already been granted outline planning permission. Reserved matters can include appearance, means of access, landscaping, layout and scale"
+    _descendants = [
+        AgentContact,
+        AgentDetails,
+        ApplicantContact,
+        ApplicantDetails,
+        Checklist,
+        ConflictOfInterest,
+        Declaration,
+        PreAppAdvice,
+        ProposalDetails,
+        SiteDetails,
+        SiteVisit,
+        SupportingInfo,
+    ]
+
+
+class DemolitionReason(SchemaNode):
+    reason = StringField(display="Reason", description="A textual reason", max_length=None)
+
+    _ref = "demolition-reason"
+    _display = "Demolition reason"
+    _description = "Why demolition is necessary at the development site"
+
+
+class DemolitionConArea(SchemaNode):
+
+    _ref = "demolition-con-area"
+    _display = "Planning permission for relevant demolition in a conservation area"
+    _description = "An application for planning permission involving the demolition of any unlisted building or structure in a conservation area if permission is required"
+    _descendants = [
+        ApplicantContact,
+        ApplicantDetails,
+        AgentContact,
+        AgentDetails,
+        Bng,
+        Checklist,
+        CommunityConsultation,
+        ConflictOfInterest,
+        Declaration,
+        DemolitionReason,
+        OwnershipCerts,
+        PreAppAdvice,
+        ProposalDetails,
+        RelatedApplicationsmodule,
+        SiteDetails,
+        SiteVisit,
+    ]
+
+
+class Tpo(SchemaNode):
+    tpo_reference = StringField(
+        display="TPO reference",
+        description="Reference for a Tree Preservation Order covering affected trees",
+        max_length=None,
+    )
+    tpo_provided_by = EnumField(
+        display="TPO provided by",
+        description="How was the list of TPO references generated - by the applicant or system/service",
+        select_options=[
+            EnumOption(
+                key="applicant",
+                label="Applicant",
+                description="Information provided by the applicant",
+            ),
+            EnumOption(
+                key="system",
+                label="System/Service",
+                description="Information calculated or determined by the system or external service",
+            ),
+        ],
+    )
+
+    _ref = "tpo"
+    _display = "Tree preservation order details"
+    _description = "Details of any Tree Preservation Orders (TPO) affecting the development site"
+
+
+class TreeDetails(SchemaNode):
+    reference = StringField(
+        display="Reference", description="A unique reference for the data item", max_length=None
+    )
+    species = StringField(display="Species", description="The species of the tree", max_length=None)
+    description_of_works = StringField(
+        display="Description of works",
+        description="Description of the nature of the work to be carried out on this tree",
+        max_length=None,
+    )
+    reason = StringField(display="Reason", description="A textual reason", max_length=None)
+    replanting_description = StringField(
+        display="Replanting description",
+        description="Details of replanting arrangements if applicable",
+        max_length=None,
+    )
+
+    _ref = "tree-details"
+    _display = "Tree details"
+    _description = "Detailed information about an individual tree including identification, species and proposed works "
+
+
+class TreeWorkDetails(SchemaNode):
+    description = StringField(
+        display="Description",
+        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        max_length=None,
+    )
+
+    _ref = "tree-work-details"
+    _display = "Identification of tree(s) and description of works"
+    _description = (
+        "Details of trees affected by the proposed development and what work is being done to them."
+    )
+    _descendants = [TreeDetails]
+
+
+class TreesAdditional(SchemaNode):
+    advice_from_authority = StringField(
+        display="Advice from authority",
+        description="Any advice provided on-site by a Local Planning Authority (LPA) officer",
+        max_length=None,
+    )
+    condition_concerns = BooleanField(
+        display="Condition concerns",
+        description="Whether there are concerns the tree(s) are diseased or might break or fall",
+    )
+    causing_subsidence = BooleanField(
+        display="Causing subsidence",
+        description="Whether subsidence damage is being caused by the tree(s)",
+    )
+    causing_structural_damage = BooleanField(
+        display="Causing structural damage",
+        description="Whether structural damage is being caused by the tree(s)",
+    )
+
+    _ref = "trees-additional"
+    _display = "Trees additional information"
+    _description = "Further details of any issues relating to trees on the site"
+    _descendants = [SupportingDocuments]
+
+
+class Owner(SchemaNode):
+
+    _ref = "owner"
+    _display = "Tree owner"
+    _description = (
+        "Details of a tree owner including their personal information and contact details "
+    )
+    _descendants = [Person, ContactDetails]
+
+
+class TreesOwnership(SchemaNode):
+    is_applicant_owner = BooleanField(
+        display="Is applicant owner",
+        description="Whether the applicant owns the trees affected by the proposed works",
+    )
+
+    _ref = "trees-ownership"
+    _display = "Trees ownership"
+    _description = "Who owns any trees affected by the proposed development."
+    _descendants = [Owner]
+
+
+class ConsentUnderTpo(SchemaNode):
+
+    _ref = "consent-under-tpo"
+    _display = "Consent under TPO"
+    _description = "An application that will affect a protected tree including those covered by a Tree Preservation Order (TPO) or those which grow in a conservation area"
+    _descendants = [
+        AgentContact,
+        AgentDetails,
+        ApplicantContact,
+        ApplicantDetails,
+        Checklist,
+        ConflictOfInterest,
+        Declaration,
+        Tpo,
+        TreeWorkDetails,
+        TreesAdditional,
+        TreesOwnership,
+    ]
+
+
+class OutlineSome(SchemaNode):
+
+    _ref = "outline-some"
+    _display = "Outline Planning Permission with Some Matters Reserved"
+    _description = "Outline planning permission with some matters reserved"
+    _descendants = [
+        AccessRightsOfWay,
+        AgentContact,
+        AgentDetails,
+        ApplicantContact,
+        ApplicantDetails,
+        BioGeoArchCon,
+        Bng,
+        Checklist,
+        ConflictOfInterest,
+        Declaration,
+        Employment,
+        ExistingUse,
+        FloodRiskAssessment,
+        FoulSewage,
+        HazSubstances,
+        HrsOperation,
+        Materials,
+        NonResFloorspace,
+        OwnershipCerts,
+        PreAppAdvice,
+        ProcessesMachineryWaste,
+        ProposalDetails,
+        ResUnits,
+        SiteArea,
+        SiteDetails,
+        SiteVisit,
+        TradeEffluent,
+        TreesHedges,
+        VehicleParking,
+        WasteStorageCollection,
+    ]
+
+
+class DescWorkImpactsRisks(SchemaNode):
+    description = StringField(
+        display="Description",
+        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        max_length=None,
+    )
+    dwellinghouse_height = StringField(
+        display="Dwellinghouse height",
+        description="Height from ground to highest point of roof in metres",
+        max_length=None,
+    )
+    proposed_height = StringField(
+        display="Proposed height",
+        description="Height once the additional storeys have been added in metres",
+        max_length=None,
+    )
+    impact_on_amenity = StringField(
+        display="Impact on amenity",
+        description="Details of the impacts on the amenity of any adjoining premises including overlooking, privacy and the loss of light including how these will be mitigated",
+        max_length=None,
+    )
+    air_traffic_defence_impacts = StringField(
+        display="Air traffic defence impacts",
+        description="Details of any air traffic and defence asset impacts, including how these will be mitigated",
+        max_length=None,
+    )
+    protected_view_impact = StringField(
+        display="Protected view impact",
+        description="Details of the impact on any protected view where relevant",
+        max_length=None,
+    )
+
+    _ref = "desc-work-impacts-risks"
+    _display = "Description of work impacts and risks"
+    _description = "How the proposed development may affect nearby amenities, air traffic, defence assets or protected views."
+
+
+class EligibilityCurrentBuilding(SchemaNode):
+    was_constructed_btw_1948_2018 = BooleanField(
+        display="Was constructed between 1948 and 2018",
+        description="Was the current building constructed between 1 July 1948 and 28 October 2018? If False, application cannot proceed.",
+    )
+    has_additional_storeys = BooleanField(
+        display="Additional storeys added",
+        description="Have additional storeys already been added to the original building? If True, application cannot proceed.",
+    )
+    was_use_granted_by_pdr = BooleanField(
+        display="Use granted by permitted development right",
+        description="Was the current use of the building granted by permitted development rights? If True, application cannot proceed.",
+    )
+    is_site_in_restricted_area = BooleanField(
+        display="Site in restricted area",
+        description="Is any part of the land or site located in a restricted area? If True, application cannot proceed.",
+    )
+
+    _ref = "eligibility-current-building"
+    _display = "Eligibility current building"
+    _description = "How the current building meets eligibity criteria"
+
+
+class EligibilityProposal(SchemaNode):
+    principal_part_only = BooleanField(
+        display="Principal part only",
+        description="Will the additional storeys be constructed only on the principal part of the building",
+    )
+    ceiling_height_exceeds_3m = BooleanField(
+        display="Ceiling height exceeds 3m",
+        description="Will the internal floor-to-ceiling height of any additional storey exceed 3 metres",
+    )
+    existing_ceiling_height_exceeds_3m = BooleanField(
+        display="Existing ceiling height exceeds 3m",
+        description="Will the internal floor-to-ceiling height of any existing storey exceed 3 metres",
+    )
+    building_height_exceeds_18m = BooleanField(
+        display="Building height exceeds 18m",
+        description="Will the height of the extended building exceed 18 metres",
+    )
+    roof_height_exceeds_3_5m = BooleanField(
+        display="Roof height exceeds 3.5m",
+        description="Will the roof exceed 3.5 metres above the highest part of the existing roof",
+    )
+    roof_height_exceeds_7m = BooleanField(
+        display="Roof height exceeds 7m",
+        description="Will the roof exceed 7 metres above the highest part of the existing roof",
+    )
+    is_dwelling_detached = BooleanField(
+        display="Dwelling detached", description="Is the dwelling detached"
+    )
+    extension_on_attached_dwelling = BooleanField(
+        display="Extension on attached dwelling",
+        description="Will the extension result in the highest part exceeding 3.5 metres above the attached roof",
+    )
+    extension_below_terrace_roof = BooleanField(
+        display="Extension below terrace roof",
+        description="Will the extension result in the highest part exceeding 3.5 metres above any roof in the terrace",
+    )
+    roof_pitch_matching = BooleanField(
+        display="Roof pitch matching",
+        description="Will the roof pitch of the extended dwelling match the existing roof pitch",
+    )
+    window_on_side_elevation = BooleanField(
+        display="Window on side elevation",
+        description="Will the development include a side elevation window or roof slope window",
+    )
+    materials_similar_exterior = BooleanField(
+        display="Materials similar exterior",
+        description="Will exterior materials be similar to those of the existing dwelling",
+    )
+    dwellinghouse_use = BooleanField(
+        display="Dwellinghouse use",
+        description="Will the extended dwelling remain as a Class C3 dwellinghouse or ancillary use",
+    )
+
+    _ref = "eligibility-proposal"
+    _display = "Eligibility proposal"
+    _description = "How the proposed development meets eligibility criteria"
+
+
+class EligibilityRelatedWorks(SchemaNode):
+    external_support_required = BooleanField(
+        display="External support required",
+        description="Will the proposed engineering works include external support structures or extend beyond the curtilage for wall or foundation strengthening",
+    )
+
+    _ref = "eligibility-related-works"
+    _display = "Eligibility related works"
+    _description = "Whether any related works such as scaffolding required will affect the eligibility of the planning proposal"
+
+
+class PaStorey(SchemaNode):
+
+    _ref = "pa-storey"
+    _display = "Additional storeys"
+    _description = "Enlargement of a dwellinghouse by construction of additional storeys"
+    _descendants = [
+        AgentContact,
+        AgentDetails,
+        ApplicantContact,
+        ApplicantDetails,
+        Checklist,
+        ConflictOfInterest,
+        Declaration,
+        DescWorkImpactsRisks,
+        EligibilityCurrentBuilding,
+        EligibilityProposal,
+        EligibilityRelatedWorks,
+        SiteDetails,
+    ]
+
+
+class NonResidentialUse(SchemaNode):
+    non_residential_measurement_type = EnumField(
+        display="Non-residential measurement type",
+        description="The type of value being provided for non-residential use - either floorspace or site-area",
+        select_options=[
+            EnumOption(
+                key="floorspace",
+                label="Floorspace",
+                description="The total floor area of the building",
+            ),
+            EnumOption(
+                key="site-area", label="Site area", description="The total area of the site"
+            ),
+        ],
+    )
+    exact_value = StringField(
+        display="Exact value",
+        description="Exact figure of non-residential use, measured in square metres for floorspace or hectares for site area",
+        max_length=None,
+    )
+    min = StringField(
+        display="Minimum value",
+        description="Lower bound of non-residential use, measured in square metres for floorspace or hectares for site area",
+        max_length=None,
+    )
+    max = StringField(
+        display="Maximum value",
+        description="Upper bound of non-residential use, measured in square metres for floorspace or hectares for site area",
+        max_length=None,
+    )
+
+    _ref = "non-residential-use"
+    _display = "Non-residential use"
+    _description = "Structure for defining non-residential use amounts, which can be expressed as floorspace or site area with exact values or ranges "
+
+
+class ProposalDetailsIncNonResidential(SchemaNode):
+    description = StringField(
+        display="Description",
+        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        max_length=None,
+    )
+    net_dwellings_min = StringField(
+        display="Net dwellings minimum",
+        description="The minimum number of net additional dwellings proposed as part of the development, accounting for any existing dwellings lost and new dwellings created",
+        max_length=None,
+    )
+    net_dwellings_max = StringField(
+        display="Net dwellings maximum",
+        description="The maximum number of net additional dwellings proposed as part of the development, allowing for flexibility in the final housing numbers",
+        max_length=None,
+    )
+
+    _ref = "proposal-details-inc-non-residential"
+    _display = "Description of the proposed development including any non-residential development"
+    _description = (
+        "Details of the residential and non-residential parts of the proposed development."
+    )
+    _descendants = [NonResidentialUse]
+
+
+class SiteAreacomponent(SchemaNode):
+    value = StringField(
+        display="Value",
+        description="Numeric value representing a measurement or quantity",
+        max_length=None,
+    )
+    unit = StringField(
+        display="Unit", description="Unit of measurement for a value", max_length=None
+    )
+    provided_by = EnumField(
+        display="Provided by",
+        description="Whether the information was provided by the applicant or calculated by the system",
+        select_options=[
+            EnumOption(
+                key="applicant",
+                label="Applicant",
+                description="Information provided by the applicant",
+            ),
+            EnumOption(
+                key="system",
+                label="System/Service",
+                description="Information calculated or determined by the system or external service",
+            ),
+        ],
+    )
+
+    _ref = "site-area"
+    _display = "Site area"
+    _description = "Information about the total area of a development site, including the measured value, unit, and source of the measurement "
+
+
+class Uses(SchemaNode):
+    use = EnumField(
+        display="Use",
+        description="A use class or type of use",
+        select_options=[
+            EnumOption(
+                key="b2",
+                label="B2 – General Industrial",
+                description="Industrial uses not falling within Class E.",
+            ),
+            EnumOption(
+                key="b8",
+                label="B8 – Storage and Distribution",
+                description="Warehousing and storage.",
+            ),
+            EnumOption(
+                key="c1",
+                label="C1 – Hotels",
+                description="Includes hotels, boarding houses, and guest houses.",
+            ),
+            EnumOption(
+                key="c2",
+                label="C2 – Residential Institutions",
+                description="Care homes, hospitals, and boarding schools.",
+            ),
+            EnumOption(
+                key="c2a",
+                label="C2A – Secure Residential Institutions",
+                description="Prisons, young offender institutions.",
+            ),
+            EnumOption(
+                key="c3",
+                label="C3 – Dwellinghouses",
+                description="Sole or main residence used by people forming a single household.",
+            ),
+            EnumOption(
+                key="c4",
+                label="C4 – Houses in multiple occupation",
+                description="Defined in the Housing Act 2004 (with the exclusion of converted block of flats).",
+            ),
+            EnumOption(
+                key="e-a",
+                label="E(a) – Retail (other than hot food)",
+                description="Shops and other retail services.",
+            ),
+            EnumOption(
+                key="e-b",
+                label="E(b) – Food and Drink",
+                description="Premises mostly for on-site consumption.",
+            ),
+            EnumOption(
+                key="e-c-i",
+                label="E(c)(i) – Financial Services",
+                description="Banks, building societies, and credit unions.",
+            ),
+            EnumOption(
+                key="e-c-ii",
+                label="E(c)(ii) – Professional Services",
+                description="Non-health/medical services (e.g., accountants, solicitors).",
+            ),
+            EnumOption(
+                key="e-c-iii",
+                label="E(c)(iii) – Any Other Service",
+                description="Non-retail services to the public.",
+            ),
+            EnumOption(
+                key="e-d",
+                label="E(d) – Indoor Sports and Recreation",
+                description="Excludes motorised or firearms activities.",
+            ),
+            EnumOption(
+                key="e-e",
+                label="E(e) – Medical or Health Services",
+                description="Clinics and health centres.",
+            ),
+            EnumOption(
+                key="e-f",
+                label="E(f) – Creche, Day Nursery",
+                description="Facilities for childcare.",
+            ),
+            EnumOption(
+                key="e-g-i",
+                label="E(g)(i) – Office",
+                description="For operational or administrative functions.",
+            ),
+            EnumOption(
+                key="e-g-ii",
+                label="E(g)(ii) – Research and Development",
+                description="Development of products or processes.",
+            ),
+            EnumOption(
+                key="e-g-iii",
+                label="E(g)(iii) – Industrial Process",
+                description="Processes that can operate within a residential area.",
+            ),
+            EnumOption(
+                key="f1-a",
+                label="F1(a) – Education",
+                description="Schools, colleges, and training centres.",
+            ),
+            EnumOption(
+                key="f1-b",
+                label="F1(b) – Display of Works of Art",
+                description="Galleries (excluding commercial galleries).",
+            ),
+            EnumOption(key="f1-c", label="F1(c) – Museum", description="Non-commercial museums."),
+            EnumOption(
+                key="f1-d",
+                label="F1(d) – Public Library",
+                description="Libraries open to the public.",
+            ),
+            EnumOption(
+                key="f1-e",
+                label="F1(e) – Public Hall/Exhibition Hall",
+                description="Community spaces for events.",
+            ),
+            EnumOption(
+                key="f1-f",
+                label="F1(f) – Public Worship/Religious Instruction",
+                description="Churches, mosques, synagogues.",
+            ),
+            EnumOption(key="f1-g", label="F1(g) – Law Court", description="Court facilities."),
+            EnumOption(
+                key="f2-a",
+                label="F2(a) – Local Community Shop",
+                description="Shop under 280 sqm with no similar facility nearby.",
+            ),
+            EnumOption(
+                key="f2-b",
+                label="F2(b) – Community Hall",
+                description="Halls for local community use.",
+            ),
+            EnumOption(
+                key="f2-c",
+                label="F2(c) – Outdoor Sport/Recreation",
+                description="Excludes motorised sports.",
+            ),
+            EnumOption(
+                key="f2-d",
+                label="F2(d) – Indoor/Outdoor Swimming Pool",
+                description="Includes skating rinks.",
+            ),
+            EnumOption(
+                key="sui",
+                label="Sui generis",
+                description="Uses that do not fall within any defined use class and are considered unique. For example, theatres, nightclubs, scrap yards and mineral extraction",
+            ),
+            EnumOption(
+                key="other",
+                label="Other (Please Specify)",
+                description="Free text required if selected.",
+            ),
+        ],
+    )
+    specified_use = StringField(
+        display="Specified use",
+        description="A specified use if no applicable use class is available",
+        max_length=None,
+    )
+
+    _ref = "uses"
+    _display = "Use"
+    _description = "A specific use class or type of use for a site or building "
+
+
+class ExistingUsecomponent(SchemaNode):
+    floorspace = StringField(
+        display="Floorspace",
+        description="Total floorspace for a use in square metres",
+        max_length=None,
+    )
+
+    _ref = "existing-use"
+    _display = "Existing use"
+    _description = "Information about the current use of a site, including the use classes and associated floorspace "
+    _descendants = [Uses]
+
+
+class SiteInfo(SchemaNode):
+    known_constraints = EnumField(
+        display="Known constraints",
+        description="A list of the known constraints affecting the site",
+        select_options=[
+            EnumOption(key="conservation-area", label="Conservation Area", description=""),
+            EnumOption(
+                key="aona-beauty", label="Area of Outstanding Natural Beauty", description=""
+            ),
+            EnumOption(
+                key="secretary-specified-area",
+                label="Secretary of State Protected Area",
+                description="",
+            ),
+            EnumOption(key="the-broads", label="The Broads", description=""),
+            EnumOption(key="national-park", label="National Park", description=""),
+            EnumOption(key="world-heritage-site", label="World Heritage Site", description=""),
+            EnumOption(
+                key="site-of-special-interest",
+                label="Site of Special Scientific Interest",
+                description="",
+            ),
+        ],
+    )
+
+    _ref = "site-info"
+    _display = "Site information"
+    _description = "Any additional relevant information about the development site."
+    _descendants = [SiteAreacomponent, ExistingUsecomponent, SupportingDocuments]
+
+
+class Pip(SchemaNode):
+
+    _ref = "pip"
+    _display = "Permission in principle"
+    _description = "An alternative way of getting planning permission for housing-led development which separates the consideration of matters of principle from the technical detail of the development"
+    _descendants = [
+        AgentDetails,
+        AgentContact,
+        ApplicantDetails,
+        ApplicantContact,
+        Checklist,
+        ConflictOfInterest,
+        Declaration,
+        ProposalDetailsIncNonResidential,
+        SiteDetails,
+        SiteInfo,
+    ]
+
+
+class ConRemoveVary(SchemaNode):
+    reason = StringField(display="Reason", description="A textual reason", max_length=None)
+    condition_change = StringField(
+        display="Condition change",
+        description="State how the condition should vary",
+        max_length=None,
+    )
+
+    _ref = "con-remove-vary"
+    _display = "Condition removal or variation"
+    _description = "Why the applicant is asking for planning conditions to be removed or changed."
+
+
+class DescYourProposal(SchemaNode):
+    condition_numbers = StringField(
+        display="Condition numbers",
+        description="List of condition numbers related to this application",
+        max_length=None,
+    )
+    original_application_type = StringField(
+        display="Original application type",
+        description="Type of original planning application",
+        max_length=None,
+    )
+    is_householder_development = BooleanField(
+        display="Is householder development",
+        description="Is the development to an existing dwelling-house or development within its curtilage (true/false)",
+    )
+    has_development_started = BooleanField(
+        display="Has development started", description="Whether the development has already started"
+    )
+    development_start_date = StringField(
+        display="Development start date",
+        description="Date when development started",
+        max_length=None,
+    )
+    has_development_completed = BooleanField(
+        display="Has development completed",
+        description="Whether the development has been completed",
+    )
+    development_completed_date = StringField(
+        display="Development completed date",
+        description="Date when development was completed",
+        max_length=None,
+    )
+
+    _ref = "desc-your-proposal"
+    _display = "Description of your proposal"
+    _description = (
+        "Written description of the proposed development including any additional relevant details."
+    )
+    _descendants = [RelatedApplication]
+
+
+class S73(SchemaNode):
+
+    _ref = "s73"
+    _display = "Removal or variation of a condition following grant of planning permission"
+    _description = "Applications for a removal or variation of a condition after planning permission has been granted"
+    _descendants = [
+        AgentContact,
+        AgentDetails,
+        ApplicantContact,
+        ApplicantDetails,
+        Checklist,
+        ConflictOfInterest,
+        ConRemoveVary,
+        Declaration,
+        DescYourProposal,
+        OwnershipCerts,
+        PreAppAdvice,
+        SiteDetails,
+        SiteVisit,
+    ]
+
+
+class Parking(SchemaNode):
+    is_existing_parking_affected = BooleanField(
+        display="Existing parking affected",
+        description="Will the proposed works affect existing car parking arrangements",
+    )
+    description = StringField(
+        display="Description",
+        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        max_length=None,
+    )
+
+    _ref = "parking"
+    _display = "Parking arrangements"
+    _description = (
+        "Details of any changes the proposed development would make to parking facilities."
+    )
+
+
+class Hh(SchemaNode):
+
+    _ref = "hh"
+    _display = "Householder planning application"
+    _description = "A simplified process for applications to alter or enlarge a single house (but not a flat), including works within the boundary/garden"
+    _descendants = [
+        AccessRightsOfWay,
+        AgentContact,
+        AgentDetails,
+        ApplicantContact,
+        ApplicantDetails,
+        Bng,
+        Checklist,
+        ConflictOfInterest,
+        Declaration,
+        Materials,
+        OwnershipCerts,
+        Parking,
+        PreAppAdvice,
+        ProposalDetails,
+        SiteDetails,
+        SiteVisit,
+        TreesHedges,
+    ]
+
+
+class Outline(SchemaNode):
+
+    _ref = "outline"
+    _display = "Outline planning"
+    _description = "Applications that are used to understand whether the basic nature of a development is viable"
+    _descendants = [
+        AgentContact,
+        AgentDetails,
+        ApplicantContact,
+        ApplicantDetails,
+        Bng,
+        Checklist,
+        ConflictOfInterest,
+        Declaration,
+        Employment,
+        ExistingUse,
+        FloodRiskAssessment,
+        HrsOperation,
+        NonResFloorspace,
+        OwnershipCerts,
+        PreAppAdvice,
+        ProcessesMachineryWaste,
+        ProposalDetails,
+        ResUnits,
+        SiteArea,
+        SiteDetails,
+        SiteVisit,
+    ]
+
+
+class DesignatedAreas(SchemaNode):
+    designations = EnumField(
+        display="Designations",
+        description="List of designated areas that apply to the site",
+        select_options=[
+            EnumOption(key="world-heritage-site", label="World Heritage Site", description=None),
+            EnumOption(key="national-park", label="National Park", description=None),
+            EnumOption(
+                key="area-outstanding-natural-beauty",
+                label="Area of Outstanding Natural Beauty (AONB)",
+                description=None,
+            ),
+            EnumOption(
+                key="site-special-scientific-interest",
+                label="Site of Special Scientific Interest (SSSI)",
+                description=None,
+            ),
+            EnumOption(
+                key="national-nature-reserve", label="National Nature Reserve", description=None
+            ),
+            EnumOption(key="conservation-area", label="Conservation Area", description=None),
+            EnumOption(
+                key="special-area-conservation",
+                label="Special Area of Conservation",
+                description=None,
+            ),
+            EnumOption(
+                key="special-protection-area",
+                label="Special Protection Area/Ramsar site",
+                description=None,
+            ),
+            EnumOption(key="green-belt", label="Green Belt", description=None),
+            EnumOption(
+                key="secretary-specified-area",
+                label="Secretary of State Protected Area",
+                description=None,
+            ),
+            EnumOption(key="the-broads", label="The Broads", description=None),
+        ],
+    )
+
+    _ref = "designated-areas"
+    _display = "Designated areas"
+    _description = "Details of any 'designated area' the develpoment site is on, such as a Conservation Area or National Park."
+
+
+class EquipMethod(SchemaNode):
+    equipment_plan = StringField(
+        display="Equipment plan",
+        description="Details of equipment to be used as part of the application including the maximum height and type of drilling rig to be used",
+        max_length=None,
+    )
+
+    _ref = "equip-method"
+    _display = "Equipment and method"
+    _description = "How oil and gas will be extracted as part of the proposed development."
+
+
+class PlansDrawingsSupportingMaterials(SchemaNode):
+    inspection_address = StringField(
+        display="Inspection address",
+        description="Full postal address where supporting material can be inspected",
+        max_length=None,
+    )
+
+    _ref = "plans-drawings-supporting-materials"
+    _display = "Plans, drawings and supporting materials"
+    _description = (
+        "Additional materials and specifications that form part of the planning application"
+    )
+    _descendants = [SupportingDocuments]
+
+
+class SiteOwner(SchemaNode):
+    fullname = StringField(
+        display="Full name", description="The complete name of a person", max_length=None
+    )
+    address_text = StringField(
+        display="Address Text",
+        description="Flexible field for capturing addresses",
+        max_length=None,
+    )
+
+    _ref = "site-owner"
+    _display = "Site owner"
+    _description = "Details of the owner of the development site including name and address "
+
+
+class SiteOwnership(SchemaNode):
+    applicant_interest = StringField(
+        display="Applicant interest",
+        description="Description of the applicant's interest in the land",
+        max_length=None,
+    )
+    applicant_interest_adjoining_land = StringField(
+        display="Applicant interest adjoining land",
+        description="Description of the applicant's interest in the adjacent land",
+        max_length=None,
+    )
+
+    _ref = "site-ownership"
+    _display = "Site ownership"
+    _description = (
+        "For oil and gas extraction developments, who owns or has an interest in the site."
+    )
+    _descendants = [SiteOwner]
+
+
+class StorageFacilities(SchemaNode):
+    storage_facilities_description = StringField(
+        display="Storage facilities description",
+        description="Details and proposed facilities for the storage of oil, fuel and chemicals and the proposed means of their protection",
+        max_length=None,
+    )
+
+    _ref = "storage-facilities"
+    _display = "Storage facilities"
+    _description = "For oil and gas extraction developments, how chemicals will be stored"
+
+
+class RelatedPermissions(SchemaNode):
+    reference = StringField(
+        display="Reference", description="A unique reference for the data item", max_length=None
+    )
+    oilgas_permission_type = EnumField(
+        display="Oil and gas permission type",
+        description="An oil and gas related permission type",
+        select_options=[
+            EnumOption(
+                key="oil-gas-full-permission",
+                label="Full planning permission for oil and gas working",
+                description="",
+            ),
+            EnumOption(
+                key="waste-full-permission",
+                label="Full planning permission for controlled waste",
+                description="",
+            ),
+            EnumOption(
+                key="renewal-unimplemented",
+                label="Renewal of unimplemented permission",
+                description="",
+            ),
+            EnumOption(
+                key="renewal-temporary", label="Renewal of temporary permission", description=""
+            ),
+            EnumOption(
+                key="extension-existing-site", label="Extension to an existing site", description=""
+            ),
+            EnumOption(
+                key="variation-condition", label="Variation of condition(s)", description=""
+            ),
+            EnumOption(
+                key="romp-review",
+                label="Review of conditions for Mineral Permissions (ROMPs)",
+                description="",
+            ),
+            EnumOption(
+                key="minerals-development",
+                label="Previous permissions for minerals development on the site",
+                description="",
+            ),
+        ],
+    )
+    decision_date = StringField(
+        display="Decision date",
+        description="The date when the decision was made, in YYYY-MM-DD format",
+        max_length=None,
+    )
+    condition_number = StringField(
+        display="Condition number",
+        description="Number of any condition being breached",
+        max_length=None,
+    )
+
+    _ref = "related-permissions"
+    _display = "Related permission-details"
+    _description = "Details about a related permission including the reference of the original application, type and decision date, and an option condition number/reference if varying "
+
+
+class RelatedProposals(SchemaNode):
+    reference = StringField(
+        display="Reference", description="A unique reference for the data item", max_length=None
+    )
+    application_type = StringField(
+        display="Application type", description="The type of planning application", max_length=None
+    )
+    decision_date = StringField(
+        display="Decision date",
+        description="The date when the decision was made, in YYYY-MM-DD format",
+        max_length=None,
+    )
+
+    _ref = "related-proposals"
+    _display = "Related proposal"
+    _description = (
+        "Details about a related proposal including its reference, type and decision date "
+    )
+
+
+class OilgasPermissionType(SchemaNode):
+    oilgas_permission_types = EnumField(
+        display="Oil and gas permission types",
+        description="List of permission types being applied for",
+        select_options=[
+            EnumOption(
+                key="oil-gas-full-permission",
+                label="Full planning permission for oil and gas working",
+                description="",
+            ),
+            EnumOption(
+                key="waste-full-permission",
+                label="Full planning permission for controlled waste",
+                description="",
+            ),
+            EnumOption(
+                key="renewal-unimplemented",
+                label="Renewal of unimplemented permission",
+                description="",
+            ),
+            EnumOption(
+                key="renewal-temporary", label="Renewal of temporary permission", description=""
+            ),
+            EnumOption(
+                key="extension-existing-site", label="Extension to an existing site", description=""
+            ),
+            EnumOption(
+                key="variation-condition", label="Variation of condition(s)", description=""
+            ),
+            EnumOption(
+                key="romp-review",
+                label="Review of conditions for Mineral Permissions (ROMPs)",
+                description="",
+            ),
+            EnumOption(
+                key="minerals-development",
+                label="Previous permissions for minerals development on the site",
+                description="",
+            ),
+        ],
+    )
+    other_details = StringField(
+        display="Other details",
+        description="Explanation if other ground is selected",
+        max_length=None,
+    )
+    will_consolidate_permissions = BooleanField(
+        display="Will consolidate permissions",
+        description="Is the applicant looking to consolidate permissions?",
+    )
+    details = StringField(
+        display="Details",
+        description="Additional details or information about an item",
+        max_length=None,
+    )
+
+    _ref = "oilgas-permission-type"
+    _display = "Oil and gas permission types"
+    _description = "Module for details about types of onshore oil and gas extraction permissions already received and applying for "
+    _descendants = [RelatedPermissions, RelatedProposals]
+
+
+class DevType(SchemaNode):
+    development_phase = EnumField(
+        display="Development phase",
+        description="Phases of oil and gas development the application covers",
+        select_options=[
+            EnumOption(
+                key="exploratory",
+                label="Exploratory Phase",
+                description="Initial drilling and testing for hydrocarbons.",
+            ),
+            EnumOption(
+                key="appraisal",
+                label="Appraisal Phase",
+                description="Further testing to determine viability.",
+            ),
+            EnumOption(
+                key="production",
+                label="Production Phase",
+                description="Full-scale extraction and production operations.",
+            ),
+        ],
+    )
+    description = StringField(
+        display="Description",
+        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        max_length=None,
+    )
+    quantity_cubic_metres = StringField(
+        display="Quantity cubic metres",
+        description="Quantity of oil or gas involved in cubic metres",
+        max_length=None,
+    )
+    permission_period_years = StringField(
+        display="Permission period years",
+        description="Period of permission sought in years",
+        max_length=None,
+    )
+    hydrocarbon_licence_block = StringField(
+        display="Hydrocarbon licence block",
+        description="Hydrocarbon licence block where the development is located",
+        max_length=None,
+    )
+    surface_site_area_hectares = StringField(
+        display="Surface site area hectares",
+        description="Surface site area in hectares",
+        max_length=None,
+    )
+    site_hectares_provided_by = EnumField(
+        display="Site hectares provided by",
+        description="Who provided the site hectares value (applicant or system)",
+        select_options=[
+            EnumOption(
+                key="applicant",
+                label="Applicant",
+                description="Information provided by the applicant",
+            ),
+            EnumOption(
+                key="system",
+                label="System/Service",
+                description="Information calculated or determined by the system or external service",
+            ),
+        ],
+    )
+    environmental_statement = BooleanField(
+        display="Environmental statement",
+        description="Is an Environmental Statement attached to the application",
+    )
+    environmental_statement_reference = StringField(
+        display="Environmental statement reference",
+        description="Reference of the environmental statement document supplied with application",
+        max_length=None,
+    )
+
+    _ref = "dev-type"
+    _display = "Development type"
+    _description = (
+        "Supporting information for developments used for oil and gas exploration or mining "
+    )
+
+
+class VolAgreement(SchemaNode):
+    draft_agreement_included = BooleanField(
+        display="Draft agreement included",
+        description="Has an outline or draft agreement been included? (True / False)",
+    )
+    agreement_summary = StringField(
+        display="Agreement summary", description="Summary of the agreement", max_length=None
+    )
+
+    _ref = "vol-agreement"
+    _display = "Voluntary agreement"
+    _description = (
+        "Details of any voluntary agreements made as part of an oil and gas extraction application."
+    )
+
+
+class ExtractionOilGas(SchemaNode):
+
+    _ref = "extraction-oil-gas"
+    _display = "Development relating to the onshore extraction of oil and gas"
+    _description = "Development relating to the onshore extraction of oil and gas (including exploratory, appraisal and production phases) and the associated plans, documents and validation information required to support an application. "
+    _descendants = [
+        AgentContact,
+        AgentDetails,
+        ApplicantContact,
+        ApplicantDetails,
+        FloodRiskAssessment,
+        ConflictOfInterest,
+        BioGeoArchCon,
+        Checklist,
+        Declaration,
+        DesignatedAreas,
+        Employment,
+        EquipMethod,
+        ExistingUse,
+        FoulSewage,
+        HazSubstances,
+        HrsOperation,
+        OwnershipCerts,
+        AccessRightsOfWay,
+        PlansDrawingsSupportingMaterials,
+        PreAppAdvice,
+        SiteDetails,
+        SiteOwnership,
+        SiteVisit,
+        StorageFacilities,
+        TradeEffluent,
+        TreesHedges,
+        OilgasPermissionType,
+        DevType,
+        VolAgreement,
+    ]
+
+
+class NotifiedPersons(SchemaNode):
+    notice_date = StringField(
+        display="Notice date",
+        description="Date when notice was served to an owner or tenant",
+        max_length=None,
+    )
+
+    _ref = "notified-persons"
+    _display = "Notified person"
+    _description = "Details of a person that has been notified (often owners and agricultural tenants of the land)"
+    _descendants = [Person]
+
+
+class Eligibility(SchemaNode):
+    applicant_land_interest = BooleanField(
+        display="Applicant land interest",
+        description="Does the applicant have an interest in the land",
+    )
+    ownership_notification = EnumField(
+        display="Ownership notification",
+        description="If not the sole owner, has notification been given under Article 10",
+        select_options=[
+            EnumOption(key="yes", label="Yes", description="Affirmative response"),
+            EnumOption(key="no", label="No", description="Negative response"),
+            EnumOption(
+                key="not-applicable",
+                label="Not Applicable",
+                description="Response not applicable or not provided",
+            ),
+        ],
+    )
+
+    _ref = "eligibility"
+    _display = "Eligibility"
+    _description = "Whether certain eligibility criteria has been met and the right people notified"
+    _descendants = [NotifiedPersons]
+
+
+class ReplacementDocuments(SchemaNode):
+    old_document = StringField(
+        display="Old document",
+        description="Reference of the old document being replaced in the amendment",
+        max_length=None,
+    )
+    new_document = StringField(
+        display="New document",
+        description="Reference for the new document replacing the old document in the amendment",
+        max_length=None,
+    )
+
+    _ref = "replacement-documents"
+    _display = "Replacement document"
+    _description = "Structure for documents being replaced in non-material amendments, mapping old document references to new document references held in application.documents "
+
+
+class NmAmendmentDetails(SchemaNode):
+    description = StringField(
+        display="Description",
+        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        max_length=None,
+    )
+    is_substituting_document = BooleanField(
+        display="Substituting document",
+        description="True or False indicating whether the amendment involves substituting documents",
+    )
+    reason = StringField(display="Reason", description="A textual reason", max_length=None)
+
+    _ref = "nm-amendment-details"
+    _display = "Non-material amendment details"
+    _description = (
+        "Details of changes being requested to plans after permission has already been granted."
+    )
+    _descendants = [ReplacementDocuments]
+
+
+class NonMaterialAmendment(SchemaNode):
+
+    _ref = "non-material-amendment"
+    _display = "Non-material amendment (S96a)"
+    _description = (
+        "An application for any minor changes to proposals that have already been approved"
+    )
+    _descendants = [
+        AgentContact,
+        AgentDetails,
+        ApplicantContact,
+        ApplicantDetails,
+        Checklist,
+        ConflictOfInterest,
+        Declaration,
+        DescYourProposal,
+        Eligibility,
+        NmAmendmentDetails,
+        PreAppAdvice,
+        SiteDetails,
+        SiteVisit,
+    ]
+
+
+class AdvertLocation(SchemaNode):
+    is_advert_in_place = BooleanField(
+        display="Is advert in place", description="Whether the advertisement is already in place"
+    )
+    advert_placed_date = StringField(
+        display="Advert placed date",
+        description="Date when the advertisement was placed (YYYY-MM-DD format)",
+        max_length=None,
+    )
+    is_replacement_advert = BooleanField(
+        display="Is replacement advert", description="Whether this is a replacement advertisement"
+    )
+    is_advert_overhanging = BooleanField(
+        display="Is advert overhanging",
+        description="Whether the advertisement will project over a footpath or other public highway",
+    )
+
+    _ref = "advert-location"
+    _display = "Advertisement location"
+    _description = "Where the advertisement being applied to be built will be located"
+    _descendants = [DocumentReference]
+
+
+class AdvertPeriod(SchemaNode):
+    advert_start_date = StringField(
+        display="Advert start date",
+        description="The start of the time period that consent to advertisement is sought",
+        max_length=None,
+    )
+    advert_end_date = StringField(
+        display="Advert end date",
+        description="The end of the time period that consent to advertisement is sought",
+        max_length=None,
+    )
+
+    _ref = "advert-period"
+    _display = "Advert period"
+    _description = "How long the proposed advertisement will be shown."
+
+
+class AdvertisementProposalType(SchemaNode):
+    advertisement_type = EnumField(
+        display="Advertisement type",
+        description="One of the advertisement-types or other",
+        select_options=[
+            EnumOption(key="fascia", label="Fascia", description=""),
+            EnumOption(
+                key="projecting-hanging", label="Projecting or hanging sign", description=""
+            ),
+            EnumOption(key="hoarding", label="Hoarding", description=""),
+            EnumOption(key="other", label="Other", description=""),
+        ],
+    )
+    advertisement_count = StringField(
+        display="Advertisement count",
+        description="Number of this type of advertisement",
+        max_length=None,
+    )
+    advertisement_other_description = StringField(
+        display="Advertisement other description",
+        description="Details required if other advertisement type is selected",
+        max_length=None,
+    )
+
+    _ref = "advertisement-proposal-type"
+    _display = "Advertisement proposal type"
+    _description = "Information about a specific type of advertisement including type, count, and additional description if 'other' type is selected "
+
+
+class AdvertisementTypes(SchemaNode):
+    description = StringField(
+        display="Description",
+        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        max_length=None,
+    )
+
+    _ref = "advertisement-types"
+    _display = "Advertisement types"
+    _description = "What type of advertisements are proposed and how many there will be."
+    _descendants = [AdvertisementProposalType]
+
+
+class InterestInLand(SchemaNode):
+    applicant_owns_land = BooleanField(
+        display="Applicant owns land",
+        description="True or False indicating whether the applicant owns the land where the advertisement will be displayed",
+    )
+    permission_obtained = BooleanField(
+        display="Permission obtained",
+        description="True or False indicating whether permission of the owner for the display of an advertisement has been obtained",
+    )
+    permission_not_obtained_details = StringField(
+        display="Permission not obtained details",
+        description="Details explaining why permission from the land owner has not been obtained for the advertisement display",
+        max_length=None,
+    )
+
+    _ref = "interest-in-land"
+    _display = "Interest in land"
+    _description = "Whether the applicant owns or has permission to use the land where the proposed advertisement will be placed"
+
+
+class Advertisements(SchemaNode):
+    height_from_ground = StringField(
+        display="Height from ground",
+        description="Height, in metres, from ground to the base of the advertisement",
+        max_length=None,
+    )
+    height = StringField(
+        display="Height",
+        description="Height, in metres, of dimensions of advertisement",
+        max_length=None,
+    )
+    width = StringField(
+        display="Width", description="Width of dimensions of advertisement", max_length=None
+    )
+    depth = StringField(
+        display="Depth",
+        description="Depth, in metres, of dimensions of advertisement",
+        max_length=None,
+    )
+    symbol_height_max = StringField(
+        display="Symbol height max",
+        description="Maximum height, in metres, of any individual letters or symbols",
+        max_length=None,
+    )
+    colour = StringField(display="Colour", description="Colour of proposed sign", max_length=None)
+    materials = StringField(
+        display="Materials", description="Materials of proposed sign", max_length=None
+    )
+    max_projection = StringField(
+        display="Max projection",
+        description="Maximum projection, in metres, of the advertisement from the face of the building",
+        max_length=None,
+    )
+    illuminated = BooleanField(
+        display="Illuminated", description="Will the sign(s) be illuminated?"
+    )
+    illumination_method = EnumField(
+        display="Illumination method",
+        description="Method of illumination for the advertisement",
+        select_options=[
+            EnumOption(
+                key="internally",
+                label="Internally",
+                description="Illumination provided from within the advertisement structure.",
+            ),
+            EnumOption(
+                key="externally",
+                label="Externally",
+                description="Illumination provided by external light sources.",
+            ),
+        ],
+    )
+    illuminance_level = StringField(
+        display="Illuminance level",
+        description="Level of illuminance for the advertisement",
+        max_length=None,
+    )
+    illumination_type = EnumField(
+        display="Illumination type",
+        description="Type of illumination (static or intermittent)",
+        select_options=[
+            EnumOption(
+                key="static",
+                label="Static",
+                description="Illumination is constant and does not change or flash.",
+            ),
+            EnumOption(
+                key="intermittent",
+                label="Intermittent",
+                description="Illumination switches on and off or flashes at intervals.",
+            ),
+        ],
+    )
+
+    _ref = "advertisements"
+    _display = "Advertisement"
+    _description = (
+        "Details of a proposed advertisement including dimensions, materials, and illumination"
+    )
+
+
+class ProposedAdvertDetails(SchemaNode):
+
+    _ref = "proposed-advert-details"
+    _display = "Proposed advert details"
+    _description = "Details of the proposed advertisements such as their size and how they are made"
+    _descendants = [Advertisements]
+
+
+class Advertising(SchemaNode):
+
+    _ref = "advertising"
+    _display = "Advertising"
+    _description = "An application for all types of advertisements and signs"
+    _descendants = [
+        AdvertLocation,
+        AdvertPeriod,
+        AdvertisementTypes,
+        AgentContact,
+        AgentDetails,
+        ApplicantContact,
+        ApplicantDetails,
+        Checklist,
+        CommunityConsultation,
+        ConflictOfInterest,
+        InterestInLand,
+        Declaration,
+        PreAppAdvice,
+        ProposedAdvertDetails,
+        SiteDetails,
+        SiteVisit,
+    ]
+
+
+class Ldc(SchemaNode):
+
+    _ref = "ldc"
+    _display = "Lawful development certificate"
+    _description = "A legal document stating the lawfulness of past, present or future building use, operation or other matters, signifying that enforcement action cannot be carried out against the development"
+    _descendants = [
+        AgentContact,
+        AgentDetails,
+        ApplicantContact,
+        ApplicantDetails,
+        ConflictOfInterest,
+        Checklist,
+        Declaration,
+        InterestDetails,
+        PreAppAdvice,
+        SiteDetails,
+        SiteVisit,
+    ]
+
+
+class Full(SchemaNode):
+
+    _ref = "full"
+    _display = "Full planning permission"
+    _description = "This application is needed when making detailed proposals for developments which are not covered by a householder application or permitted development rights"
+    _descendants = [
+        AccessRightsOfWay,
+        AgentContact,
+        AgentDetails,
+        ApplicantContact,
+        ApplicantDetails,
+        BioGeoArchCon,
+        Bng,
+        Checklist,
+        ConflictOfInterest,
+        Declaration,
+        Employment,
+        ExistingUse,
+        FloodRiskAssessment,
+        FoulSewage,
+        HazSubstances,
+        HrsOperation,
+        Materials,
+        NonResFloorspace,
+        OwnershipCerts,
+        PreAppAdvice,
+        ProcessesMachineryWaste,
+        ProposalDetails,
+        ResUnits,
+        SiteArea,
+        SiteDetails,
+        SiteVisit,
+        TradeEffluent,
+        TreesHedges,
+        VehicleParking,
+        WasteStorageCollection,
+    ]
+
+
+class Addresses(SchemaNode):
+    address_text = StringField(
+        display="Address Text",
+        description="Flexible field for capturing addresses",
+        max_length=None,
+    )
+    postcode = StringField(display="Postcode", description="The postal code", max_length=None)
+    uprn = StringField(
+        display="UPRN", description="Unique Property Reference Number", max_length=None
+    )
+
+    _ref = "addresses"
+    _display = "Address"
+    _description = "Address information including text representation, postcode, and UPRN "
+
+
+class AdjPremises(SchemaNode):
+
+    _ref = "adj-premises"
+    _display = "Adjacent premises"
+    _description = "Details of properties next to the development site"
+    _descendants = [Addresses]
+
+
+class DescProposedWorks(SchemaNode):
+    proposed_works_details = StringField(
+        display="Proposed works details",
+        description="Description of the proposed works including detailed explanation of the work",
+        max_length=None,
+    )
+    extension_depth = StringField(
+        display="Extension depth",
+        description="How far the extension extends beyond the rear wall, measured externally in metres",
+        max_length=None,
+    )
+    max_extension_height = StringField(
+        display="Maximum extension height",
+        description="Maximum height of the extension, measured externally from natural ground level in metres",
+        max_length=None,
+    )
+    eaves_height = StringField(
+        display="Eaves height",
+        description="Height at the eaves of the extension, measured externally from natural ground level in metres",
+        max_length=None,
+    )
+
+    _ref = "desc-proposed-works"
+    _display = "Description of proposed works"
+    _description = (
+        "Details of development plans such as extensions measurements or work specifications"
+    )
+
+
+class EligibilityExtension(SchemaNode):
+    is_single_storey_extension = BooleanField(
+        display="Single storey extension", description="Will the extension be a single storey"
+    )
+    is_extension_height_over_4m = BooleanField(
+        display="Extension height over 4m",
+        description="Will the extension exceed 4 metres in height",
+    )
+    is_dwelling_detached = BooleanField(
+        display="Dwelling detached", description="Is the dwelling detached"
+    )
+    is_extension_beyond_rear_wall = BooleanField(
+        display="Extension beyond rear wall",
+        description="Will the extension extend beyond the rear wall of the original dwelling",
+    )
+    extension_length = StringField(
+        display="Extension length",
+        description="Length of rear extension in metres",
+        max_length=None,
+    )
+    is_within_site_constraints = BooleanField(
+        display="Within site constraints",
+        description="Is the dwellinghouse within any restricted area",
+    )
+    site_constraints = EnumField(
+        display="Site constraints",
+        description="List of specific site constraints that restrict development",
+        select_options=[
+            EnumOption(key="world-heritage-site", label="World Heritage Site", description=None),
+            EnumOption(key="national-park", label="National Park", description=None),
+            EnumOption(
+                key="area-outstanding-natural-beauty",
+                label="Area of Outstanding Natural Beauty (AONB)",
+                description=None,
+            ),
+            EnumOption(
+                key="site-special-scientific-interest",
+                label="Site of Special Scientific Interest (SSSI)",
+                description=None,
+            ),
+            EnumOption(
+                key="national-nature-reserve", label="National Nature Reserve", description=None
+            ),
+            EnumOption(key="conservation-area", label="Conservation Area", description=None),
+            EnumOption(
+                key="special-area-conservation",
+                label="Special Area of Conservation",
+                description=None,
+            ),
+            EnumOption(
+                key="special-protection-area",
+                label="Special Protection Area/Ramsar site",
+                description=None,
+            ),
+            EnumOption(key="green-belt", label="Green Belt", description=None),
+            EnumOption(
+                key="secretary-specified-area",
+                label="Secretary of State Protected Area",
+                description=None,
+            ),
+            EnumOption(key="the-broads", label="The Broads", description=None),
+        ],
+    )
+
+    _ref = "eligibility-extension"
+    _display = "Eligibility extension"
+    _description = "How a proposal to build an extension meets relevant criteria."
+
+
+class PaExtension(SchemaNode):
+
+    _ref = "pa-extension"
+    _display = "Larger Home Extension"
+    _description = "Planning application for extension"
+    _descendants = [
+        AdjPremises,
+        AgentContact,
+        AgentDetails,
+        ApplicantContact,
+        ApplicantDetails,
+        Checklist,
+        ConflictOfInterest,
+        Declaration,
+        DescProposedWorks,
+        EligibilityExtension,
+        SiteDetails,
+    ]
+
+
+class DischargeCon(SchemaNode):
+    description_list = StringField(
+        display="Description list",
+        description="Description or list of materials/details that are being submitted for approval",
+        max_length=None,
+    )
+
+    _ref = "discharge-con"
+    _display = "Discharge condition"
+    _description = (
+        "How any conditions imposed as part of being given planning permission will be met"
+    )
+
+
+class PartDischarge(SchemaNode):
+    is_discharging_part = BooleanField(
+        display="Is discharging part",
+        description="Is applicant trying to discharge part of condition?",
+    )
+    discharging_part_details = StringField(
+        display="Discharging part details",
+        description="Indicate which part of the condition the application relates to",
+        max_length=None,
+    )
+
+    _ref = "part-discharge"
+    _display = "Part discharge"
+    _description = "Details of how the applicant is meeting a specific part of a set of conditions made by the planning authority."
+
+
+class ApprovalCondition(SchemaNode):
+
+    _ref = "approval-condition"
+    _display = "Approval of details reserved by condition"
+    _description = "An application to have conditions approved which have been applied at the time of granting a planning permission to limit and control the way in which the planning permission has been implemented"
+    _descendants = [
+        AgentContact,
+        AgentDetails,
+        ApplicantContact,
+        ApplicantDetails,
+        Checklist,
+        ConflictOfInterest,
+        Declaration,
+        DescYourProposal,
+        DischargeCon,
+        PartDischarge,
+        PreAppAdvice,
+        SiteDetails,
+        SiteVisit,
+    ]
+
+
+class TreesLocation(SchemaNode):
+    is_site_different = BooleanField(
+        display="Is site different",
+        description="Whether the site where trees are located is different from the applicant's address",
+    )
+
+    _ref = "trees-location"
+    _display = "Trees location"
+    _description = "Where trees affected by the proposed development are located."
+    _descendants = [SiteLocations]
+
+
+class NoticeTreesInConArea(SchemaNode):
+
+    _ref = "notice-trees-in-con-area"
+    _display = "Notification of proposed works to trees in a conservation area"
+    _description = "Notification, 6 weeks prior to works being carried out, of proposed works to a tree in a conservation area that is not subject to a Tree Preservation order"
+    _descendants = [
+        AgentContact,
+        AgentDetails,
+        ApplicantContact,
+        ApplicantDetails,
+        Checklist,
+        ConflictOfInterest,
+        Declaration,
+        TreesAdditional,
+        TreesLocation,
+        TreesOwnership,
+        TreeWorkDetails,
+    ]
+
+
+class DescExistingUse(SchemaNode):
+
+    _ref = "desc-existing-use"
+    _display = "Description of existing use"
+    _description = "How the development site is used, including use class information"
+    _descendants = [ExistingUseDetails]
+
+
+class SupportingApplications(SchemaNode):
+    reference_number = StringField(
+        display="Reference number",
+        description="Reference number of the planning permission",
+        max_length=None,
+    )
+    condition_number = StringField(
+        display="Condition number",
+        description="Number of any condition being breached",
+        max_length=None,
+    )
+    decision_date = StringField(
+        display="Decision date",
+        description="The date when the decision was made, in YYYY-MM-DD format",
+        max_length=None,
+    )
+
+    _ref = "supporting-applications"
+    _display = "Supporting applications"
+    _description = "Planning permissions, certificates, or notices affecting the application site "
+
+
+class GroundsLdc(SchemaNode):
+    grounds_pre_2024 = EnumField(
+        display="Grounds pre 2024",
+        description="List of grounds pre 2024-04-25 under which the certificate is sought",
+        select_options=[
+            EnumOption(
+                key="use-10y",
+                label="Use over 10 years ago",
+                description="The use began more than 10 years before the date of this application.",
+            ),
+            EnumOption(
+                key="breach-10y",
+                label="Breach of condition over 10 years ago",
+                description="The use, building works or activity in breach of condition began more than 10 years before the date of this application.",
+            ),
+            EnumOption(
+                key="lawful-change-no-pp",
+                label="Lawful change of use within 10 years",
+                description="The use began within the last 10 years, as a result of a change of use not requiring planning permission, and there has not been a change of use requiring planning permission in the last 10 years.",
+            ),
+            EnumOption(
+                key="works-complete-4y",
+                label="Building works completed over 4 years ago",
+                description="The building works (for instance, building or engineering works) were substantially completed more than four years before the date of this application.",
+            ),
+            EnumOption(
+                key="dwelling-change-4y",
+                label="Dwelling change of use over 4 years ago",
+                description="The change of use to use as a single dwelling house began more than four years before the date of this application.",
+            ),
+            EnumOption(
+                key="other",
+                label="Other",
+                description="Other – please specify (this might include claims that the change of use or building work was not development, or that it benefited from planning permission granted under the Act or by the General Permitted Development Order).",
+            ),
+        ],
+    )
+    grounds_post_2024 = EnumField(
+        display="Grounds post 2024",
+        description="List of grounds post 2024-04-25 under which the certificate is sought",
+        select_options=[
+            EnumOption(
+                key="use-10y",
+                label="Use over 10 years ago",
+                description="The use, building works or activity began more than 10 years before the date of this application.",
+            ),
+            EnumOption(
+                key="lawful-change-no-pp",
+                label="Lawful change of use within 10 years",
+                description="The use began within the last 10 years, as a result of a change of use not requiring planning permission, and there has not been a change of use requiring planning permission in the last 10 years.",
+            ),
+            EnumOption(
+                key="other",
+                label="Other",
+                description="Other – please specify (this might include claims that the change of use or building work was not development, or that it benefited from planning permission granted under the Act or by the General Permitted Development Order).",
+            ),
+        ],
+    )
+    other_details = StringField(
+        display="Other details",
+        description="Explanation if other ground is selected",
+        max_length=None,
+    )
+    reason = StringField(display="Reason", description="A textual reason", max_length=None)
+
+    _ref = "grounds-ldc"
+    _display = "Grounds for lawful development certificate"
+    _description = (
+        "Evidence and explanations relating to a Lawful Development Certificate (LDC) application"
+    )
+    _descendants = [SupportingApplications]
+
+
+class InfoSupportLdc(SchemaNode):
+    existing_use_start_date = StringField(
+        display="Existing use start date",
+        description="Date when the existing use of the land or building commenced, in YYYY-MM-DD format",
+        max_length=None,
+    )
+    has_existing_use_interrupted = BooleanField(
+        display="Existing use interrupted",
+        description="Indicating whether the existing use has been interrupted since it commenced",
+    )
+    interruption_details = StringField(
+        display="Interruption details",
+        description="Details of any interruption to the existing use including dates and circumstances",
+        max_length=None,
+    )
+    has_existing_use_changed = BooleanField(
+        display="Existing use change",
+        description="Indicate whether there has been any change in the existing use since it commenced",
+    )
+    existing_use_change_details = StringField(
+        display="Existing use change details",
+        description="Details of any changes to the existing use including nature of changes and dates",
+        max_length=None,
+    )
+
+    _ref = "info-support-ldc"
+    _display = "Information to support LDC"
+    _description = (
+        "Supporting information required to make a Lawful Development Certificate application"
+    )
+
+
+class UseWorksActivity(SchemaNode):
+    ldc_need = EnumField(
+        display="LDC need",
+        description="What is the lawful development certificate needed for?",
+        select_options=[
+            EnumOption(key="existing-use", label="Existing use", description=""),
+            EnumOption(
+                key="existing-building-work", label="Existing building work", description=""
+            ),
+            EnumOption(
+                key="breach-con-existing-use",
+                label="Existing use in breach of condition",
+                description="",
+            ),
+            EnumOption(
+                key="breach-con-building-work",
+                label="Building work in breach of condition",
+                description="",
+            ),
+            EnumOption(
+                key="breach-con-activity", label="Activity in breach of condition", description=""
+            ),
+        ],
+    )
+    use = EnumField(
+        display="Use",
+        description="A use class or type of use",
+        select_options=[
+            EnumOption(
+                key="b2",
+                label="B2 – General Industrial",
+                description="Industrial uses not falling within Class E.",
+            ),
+            EnumOption(
+                key="b8",
+                label="B8 – Storage and Distribution",
+                description="Warehousing and storage.",
+            ),
+            EnumOption(
+                key="c1",
+                label="C1 – Hotels",
+                description="Includes hotels, boarding houses, and guest houses.",
+            ),
+            EnumOption(
+                key="c2",
+                label="C2 – Residential Institutions",
+                description="Care homes, hospitals, and boarding schools.",
+            ),
+            EnumOption(
+                key="c2a",
+                label="C2A – Secure Residential Institutions",
+                description="Prisons, young offender institutions.",
+            ),
+            EnumOption(
+                key="c3",
+                label="C3 – Dwellinghouses",
+                description="Sole or main residence used by people forming a single household.",
+            ),
+            EnumOption(
+                key="c4",
+                label="C4 – Houses in multiple occupation",
+                description="Defined in the Housing Act 2004 (with the exclusion of converted block of flats).",
+            ),
+            EnumOption(
+                key="e-a",
+                label="E(a) – Retail (other than hot food)",
+                description="Shops and other retail services.",
+            ),
+            EnumOption(
+                key="e-b",
+                label="E(b) – Food and Drink",
+                description="Premises mostly for on-site consumption.",
+            ),
+            EnumOption(
+                key="e-c-i",
+                label="E(c)(i) – Financial Services",
+                description="Banks, building societies, and credit unions.",
+            ),
+            EnumOption(
+                key="e-c-ii",
+                label="E(c)(ii) – Professional Services",
+                description="Non-health/medical services (e.g., accountants, solicitors).",
+            ),
+            EnumOption(
+                key="e-c-iii",
+                label="E(c)(iii) – Any Other Service",
+                description="Non-retail services to the public.",
+            ),
+            EnumOption(
+                key="e-d",
+                label="E(d) – Indoor Sports and Recreation",
+                description="Excludes motorised or firearms activities.",
+            ),
+            EnumOption(
+                key="e-e",
+                label="E(e) – Medical or Health Services",
+                description="Clinics and health centres.",
+            ),
+            EnumOption(
+                key="e-f",
+                label="E(f) – Creche, Day Nursery",
+                description="Facilities for childcare.",
+            ),
+            EnumOption(
+                key="e-g-i",
+                label="E(g)(i) – Office",
+                description="For operational or administrative functions.",
+            ),
+            EnumOption(
+                key="e-g-ii",
+                label="E(g)(ii) – Research and Development",
+                description="Development of products or processes.",
+            ),
+            EnumOption(
+                key="e-g-iii",
+                label="E(g)(iii) – Industrial Process",
+                description="Processes that can operate within a residential area.",
+            ),
+            EnumOption(
+                key="f1-a",
+                label="F1(a) – Education",
+                description="Schools, colleges, and training centres.",
+            ),
+            EnumOption(
+                key="f1-b",
+                label="F1(b) – Display of Works of Art",
+                description="Galleries (excluding commercial galleries).",
+            ),
+            EnumOption(key="f1-c", label="F1(c) – Museum", description="Non-commercial museums."),
+            EnumOption(
+                key="f1-d",
+                label="F1(d) – Public Library",
+                description="Libraries open to the public.",
+            ),
+            EnumOption(
+                key="f1-e",
+                label="F1(e) – Public Hall/Exhibition Hall",
+                description="Community spaces for events.",
+            ),
+            EnumOption(
+                key="f1-f",
+                label="F1(f) – Public Worship/Religious Instruction",
+                description="Churches, mosques, synagogues.",
+            ),
+            EnumOption(key="f1-g", label="F1(g) – Law Court", description="Court facilities."),
+            EnumOption(
+                key="f2-a",
+                label="F2(a) – Local Community Shop",
+                description="Shop under 280 sqm with no similar facility nearby.",
+            ),
+            EnumOption(
+                key="f2-b",
+                label="F2(b) – Community Hall",
+                description="Halls for local community use.",
+            ),
+            EnumOption(
+                key="f2-c",
+                label="F2(c) – Outdoor Sport/Recreation",
+                description="Excludes motorised sports.",
+            ),
+            EnumOption(
+                key="f2-d",
+                label="F2(d) – Indoor/Outdoor Swimming Pool",
+                description="Includes skating rinks.",
+            ),
+            EnumOption(
+                key="sui",
+                label="Sui generis",
+                description="Uses that do not fall within any defined use class and are considered unique. For example, theatres, nightclubs, scrap yards and mineral extraction",
+            ),
+            EnumOption(
+                key="other",
+                label="Other (Please Specify)",
+                description="Free text required if selected.",
+            ),
+        ],
+    )
+    specified_use = StringField(
+        display="Specified use",
+        description="A specified use if no applicable use class is available",
+        max_length=None,
+    )
+
+    _ref = "use-works-activity"
+    _display = "Use works activity"
+    _description = "Why a Lawful Development Certificate is required regarding how the development site is being used, or specific works taking place on the site."
+
+
+class LdcExistingUse(SchemaNode):
+
+    _ref = "ldc-existing-use"
+    _display = "LDC Existing Use"
+    _description = "Existing use of the site"
+    _descendants = [
+        AgentContact,
+        AgentDetails,
+        ApplicantContact,
+        ApplicantDetails,
+        Checklist,
+        ConflictOfInterest,
+        Declaration,
+        DescExistingUse,
+        GroundsLdc,
+        InfoSupportLdc,
+        InterestDetails,
+        PreAppAdvice,
+        ResUnits,
+        SiteDetails,
+        SiteVisit,
+        UseWorksActivity,
+    ]
+
+
+class AgriForestDevElig(SchemaNode):
+    agri_unit_area = StringField(
+        display="Agricultural unit area",
+        description="Total area of the entire agricultural unit",
+        max_length=None,
+    )
+    land_parcel_area = EnumField(
+        display="Land parcel area",
+        description="The size category for a given land parcel",
+        select_options=[
+            EnumOption(key="1-hec-or-more", label="1 hectare or more", description=""),
+            EnumOption(
+                key="less-1-more-point4-hec",
+                label="Less than 1 hectare but at least 0.4 hectare",
+                description="",
+            ),
+            EnumOption(key="less-point4.hec", label="Less that 0.4 hectare", description=""),
+        ],
+    )
+    agri_start_date = StringField(
+        display="Agricultural use start date",
+        description="The month and year when the land started being used for agriculture",
+        max_length=None,
+    )
+    is_necessary_for_agri = BooleanField(
+        display="Is necessary for agriculture",
+        description="Is the proposed development reasonably necessary for the purposes of agriculture?",
+    )
+    details = StringField(
+        display="Details",
+        description="Additional details or information about an item",
+        max_length=None,
+    )
+    is_designed_agri = BooleanField(
+        display="Is designed for agricultural purposes",
+        description="Is the proposed development designed for the purposes of agriculture?",
+    )
+    design_details = StringField(
+        display="Design details",
+        description="Additional details or information about design",
+        max_length=None,
+    )
+    dwelling_alteration = BooleanField(
+        display="Dwelling alteration",
+        description="Whether the proposed development involves any alteration to a dwelling.",
+    )
+    away_from_road = BooleanField(
+        display="Is over 25 metres from road",
+        description="Whether the proposed development is more than 25 metres from a metalled part of a trunk or classified road",
+    )
+    close_to_aerodrome = BooleanField(
+        display="Within 3km of aerodrome",
+        description="Whether the proposed development is within 3 kilometres of an aerodrome",
+    )
+    proposed_height = StringField(
+        display="Proposed height",
+        description="Height once the additional storeys have been added in metres",
+        max_length=None,
+    )
+    affects_heritage = BooleanField(
+        display="Affects heritage or nature conservation",
+        description="Whether the proposed development would affect local hertiage or nature considerations",
+    )
+    heritage_nature_impact_details = StringField(
+        display="Heritage and nature impact details",
+        description="Details of how the proposed development would affect an ancient monument, archaeological site or listed building, or relate to a Site of Special Scientific Interest or local nature reserve.",
+        max_length=None,
+    )
+
+    _ref = "agri-forest-dev-elig"
+    _display = "Agricultural and forestry development eligibility"
+    _description = "Information needed to assess agricultural unit, land parcel, agricultural purpose and wider site constraints "
+
+
+class ProposedBuildingDetails(SchemaNode):
+    details = StringField(
+        display="Details",
+        description="Additional details or information about an item",
+        max_length=None,
+    )
+    building_length = StringField(
+        display="Building length",
+        description="Length of the building (in metres).",
+        max_length=None,
+    )
+    eaves_height = StringField(
+        display="Eaves height",
+        description="Height at the eaves of the extension, measured externally from natural ground level in metres",
+        max_length=None,
+    )
+    building_breadth = StringField(
+        display="Building breadth",
+        description="Breadth of the building (in metres).",
+        max_length=None,
+    )
+    building_ridge_height = StringField(
+        display="Building ridge height",
+        description="Height to the ridge of the building (in metres).",
+        max_length=None,
+    )
+
+    _ref = "proposed-building-details"
+    _display = "Building details"
+    _description = "Details of the building being proposed, extended or altered "
+
+
+class ProposedBuilding(SchemaNode):
+    development_operation_types = EnumField(
+        display="Development operation types",
+        description="The types of building operation included in the agricultural or forestry proposal.",
+        select_options=[
+            EnumOption(key="new-build", label="A new building", description=""),
+            EnumOption(key="extension", label="An extension", description=""),
+            EnumOption(key="alteration", label="An alteration", description=""),
+        ],
+    )
+    building_wall_materials = StringField(
+        display="Wall materials", description="Details of the wall materials", max_length=None
+    )
+    building_wall_colour = StringField(
+        display="Wall colour", description="Colour of the wall", max_length=None
+    )
+    building_roof_materials = StringField(
+        display="Roof materials", description="Details of the roof materials", max_length=None
+    )
+    building_roof_colour = StringField(
+        display="Roof colour", description="Colour of the roof", max_length=None
+    )
+    has_agri_building_2_yrs = BooleanField(
+        display="Agricultural building built within 2 years",
+        description="Whether an agricultural building has been constructed on the agricultural unit within the last two years",
+    )
+    agri_building_area = StringField(
+        display="Agricultural building ground area",
+        description="Overall ground area of the agricultural building constructed within the last two years, in square metres",
+        max_length=None,
+    )
+    agri_building_distance = StringField(
+        display="Agricultural building distance",
+        description="Distance from the recent agricultural building to the proposed new building (in metres)",
+        max_length=None,
+    )
+    house_livestock = BooleanField(
+        display="Houses livestock, slurry or sewage sludge",
+        description="Whether the proposed building would be used to house livestock, slurry or sewage sludge ",
+    )
+    livestock_building_400m = BooleanField(
+        display="Livestock building distance from homes",
+        description="Whether livestock building more than 400 metres from the nearest house, excluding the farmhouse",
+    )
+    exceeds_threshold = BooleanField(
+        display="Exceeds threhold",
+        description="Whether the ground area covered by the proposed building exceeds the relevant Part 6 threshold",
+    )
+    related_work_distance = BooleanField(
+        display="Related work distance",
+        description="Whether specified related works have been erected within 90 metres of the proposed development within the last two years",
+    )
+    engineering_operations_threshold = EnumField(
+        display="Engineering operations threshold",
+        description="Whether engineering operations exceed 1,000 square metres where the agricultural unit is 5 hectares or more",
+        select_options=[
+            EnumOption(key="yes", label="Yes", description="Affirmative response"),
+            EnumOption(key="no", label="No", description="Negative response"),
+            EnumOption(
+                key="not-applicable",
+                label="Not Applicable",
+                description="Response not applicable or not provided",
+            ),
+        ],
+    )
+    within_scheduled_monument = BooleanField(
+        display="Within Scheduled Momument",
+        description="Would the erection, extension, or alteration be carried out on land or a building that is, or is within the curtilage of, a scheduled monument",
+    )
+
+    _ref = "proposed-building"
+    _display = "Agricultural or forestry building details"
+    _description = "Details of the proposed agricultural or forestry building, including operation type, dimensions, materials "
+    _descendants = [ProposedBuildingDetails]
+
+
+class PaBuildAgriForest(SchemaNode):
+
+    _ref = "pa-build-agri-forest"
+    _display = "Prior approval: Agricultural or forestry building development"
+    _description = (
+        "Prior apporval for building development related to agricultural and forestry buildings"
+    )
+    _descendants = [
+        AgentContact,
+        AgentDetails,
+        AgriForestDevElig,
+        ApplicantContact,
+        ApplicantDetails,
+        Checklist,
+        ConflictOfInterest,
+        Declaration,
+        ProposedBuilding,
+        SiteDetails,
+    ]
+
+
+# list of roots are loaded here so all the processing is done on startup not for each request.
+# roots are expected to be planning application nodes
+schema_node_roots = schema_node_root_classes()
+
+# convenience ref -> schema map
+schema_node_root_mapping = {schema_node._ref: schema_node for schema_node in schema_node_roots}

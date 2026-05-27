@@ -1,0 +1,52 @@
+{% macro render_form_card(form, depth=0) %}
+<div class="card mb-4" style="margin-left: {{ depth * 1.5 }}rem">
+  <div class="card-header">
+    <h5 class="mb-0">{{ form._display or form.__class__.__name__ }}</h5>
+    {% if form._description %}
+    <small class="text-muted">{{ form._description }}</small>
+    {% endif %}
+  </div>
+  {% set visible_fields = form | selectattr("widget.input_type", "ne", "hidden") | list %}
+  {% if visible_fields %}
+  <div class="card-body">
+    {{ form.hidden_tag() }}
+    <div class="row g-3">
+      {% for field in visible_fields %}
+      <div class="col-md-6">
+        {% if field.type == 'BooleanField' %}
+        <div class="form-check mt-2">
+          {{ field(class="form-check-input" + (" is-invalid" if field.errors else "")) }}
+          {{ field.label(class="form-check-label") }}
+          {% for error in field.errors %}
+            <div class="invalid-feedback">{{ error }}</div>
+          {% endfor %}
+        </div>
+        {% elif field.type == 'RadioField' %}
+        {{ field.label(class="form-label fw-semibold") }}
+        <div>
+          {% for subfield in field %}
+          <div class="form-check">
+            {{ subfield(class="form-check-input" + (" is-invalid" if field.errors else "")) }}
+            {{ subfield.label(class="form-check-label") }}
+          </div>
+          {% endfor %}
+          {% for error in field.errors %}
+            <div class="invalid-feedback d-block">{{ error }}</div>
+          {% endfor %}
+        </div>
+        {% else %}
+        {{ field.label(class="form-label fw-semibold") }}
+        {{ field(class="form-control" + (" is-invalid" if field.errors else "")) }}
+        {% for error in field.errors %}
+          <div class="invalid-feedback">{{ error }}</div>
+        {% endfor %}
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% else %}
+  {{ form.hidden_tag() }}
+  {% endif %}
+</div>
+{% endmacro %}

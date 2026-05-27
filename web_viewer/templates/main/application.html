@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% from "main/macros.html" import render_form_card %}
+{% block title %}{{ application_ref }}{% endblock %}
+{% block content %}
+
+<div class="d-flex align-items-center gap-2 mb-4">
+  <a href="{{ url_for('main.index') }}" class="text-muted text-decoration-none">&larr; All applications</a>
+</div>
+
+<form method="POST" novalidate>
+
+  {% for form in forms %}
+  {% set depth = (form._prefix.split('.')|length) if form._prefix else 0 %}
+  {{ render_form_card(form, depth) }}
+  {% endfor %}
+
+  <div class="d-flex justify-content-end mb-4">
+    <button type="submit" class="btn btn-primary px-4">Submit</button>
+  </div>
+
+</form>
+{% endblock %}

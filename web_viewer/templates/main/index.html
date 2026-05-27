@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Forms Generator — Home{% endblock %}
+{% block content %}
+<h1 class="mb-4">Planning application types</h1>
+
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+  {% for app_ref, node_class in application_types.items() %}
+  <div class="col">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title d-flex justify-content-between align-items-start">
+          {{ node_class._display or app_ref }}
+          <a href="{{ url_for('main.application', application_ref=app_ref) }}" class="ms-2">
+            <img src="{{ url_for('static', filename='icons/arrow-right-circle.svg') }}" width="20" height="20" alt="Open">
+          </a>
+        </h5>
+        {% if node_class._description %}
+        <p class="card-text text-muted small">{{ node_class._description }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}
