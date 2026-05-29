@@ -2199,6 +2199,1451 @@ class OutlineAll(SchemaNode):
     ]
 
 
+class File(SchemaNode):
+    base64_content = StringField(
+        display="Base64",
+        description="Base64-encoded content of the file for inline file uploads",
+        max_length=None,
+    )
+    filename = StringField(
+        display="Filename",
+        description="Name of the file being uploaded useful for identifying and preserving the file",
+        max_length=None,
+    )
+    mime_type = StringField(
+        display="MIME type",
+        description="The file's MIME type such as application/pdf or image/jpeg",
+        max_length=None,
+    )
+    file_size = StringField(
+        display="File size",
+        description="Size of the file in bytes that can be used to enforce limits",
+        max_length=None,
+    )
+
+    _ref = "file"
+    _display = "File"
+    _description = "Structure for digital files to be included in the submission of an application "
+
+
+class Documents(SchemaNode):
+    reference = StringField(
+        display="Reference", description="A unique reference for the data item", max_length=None
+    )
+    name = StringField(display="Name", description="A name of a person", max_length=None)
+    description = StringField(
+        display="Description",
+        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        max_length=None,
+    )
+    document_types = StringField(
+        display="Document types",
+        description="List of codelist references that the document covers",
+        max_length=None,
+    )
+    uploaded_date = StringField(
+        display="Uploaded date",
+        description="The date the document was uploaded to the application",
+        max_length=None,
+    )
+
+    _ref = "documents"
+    _display = "Document"
+    _description = (
+        "Structure for submitted documents including reference, metadata, and file information "
+    )
+    _descendants = [File]
+
+
+class Fee(SchemaNode):
+    amount = StringField(
+        display="Amount",
+        description="The total amount due for the application fee",
+        max_length=None,
+    )
+    amount_paid = StringField(
+        display="Amount paid",
+        description="The amount paid towards the application fee",
+        max_length=None,
+    )
+    transactions = StringField(
+        display="Transactions",
+        description="References to payments or financial transactions related to this application",
+        max_length=None,
+    )
+
+    _ref = "fee"
+    _display = "Fee"
+    _description = "Structure for application fees including amounts due, amounts paid, and transaction references "
+
+
+class Application(SchemaNode):
+    reference = StringField(
+        display="Reference", description="A unique reference for the data item", max_length=None
+    )
+    application_types = StringField(
+        display="Application types",
+        description="A list of planning application types that define the nature of the planning application",
+        max_length=None,
+    )
+    planning_authority = EnumField(
+        display="Planning authority",
+        description="A reference of the planning authority the application has been submitted to, e.g. local-authority:CMD for London borough of Camden",
+        select_options=[
+            EnumOption(key="local-authority:ADU", label="Adur District Council", description=None),
+            EnumOption(
+                key="local-authority:ALL", label="Allerdale Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:AMB", label="Amber Valley Borough Council", description=None
+            ),
+            EnumOption(key="local-authority:ARU", label="Arun District Council", description=None),
+            EnumOption(
+                key="local-authority:ASF", label="Ashford Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:ASH", label="Ashfield District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:AYL", label="Aylesbury Vale District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:BAB", label="Babergh District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:BAE", label="Bassetlaw District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:BAI", label="Basildon Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:BAN",
+                label="Basingstoke and Deane Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:BAR",
+                label="Barrow-in-Furness Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:BAS",
+                label="Bath and North East Somerset Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:BBD",
+                label="Blackburn with Darwen Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:BDF", label="Bedford Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:BDG",
+                label="London Borough of Barking and Dagenham",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:BEN", label="London Borough of Brent", description=None
+            ),
+            EnumOption(
+                key="local-authority:BEX", label="London Borough of Bexley", description=None
+            ),
+            EnumOption(
+                key="local-authority:BIR", label="Birmingham City Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:BKM", label="Buckinghamshire County Council", description=None
+            ),
+            EnumOption(key="local-authority:BLA", label="Blaby District Council", description=None),
+            EnumOption(
+                key="local-authority:BMH", label="Bournemouth Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:BNE", label="London Borough of Barnet", description=None
+            ),
+            EnumOption(
+                key="local-authority:BNH", label="Brighton and Hove City Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:BNS",
+                label="Barnsley Metropolitan Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:BOL",
+                label="Bolton Metropolitan Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:BOS", label="Bolsover District Council", description=None
+            ),
+            EnumOption(key="local-authority:BOT", label="Boston Borough Council", description=None),
+            EnumOption(
+                key="local-authority:BPC",
+                label="Bournemouth, Christchurch and Poole Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:BPL", label="Blackpool Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:BRA", label="Braintree District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:BRC", label="Bracknell Forest Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:BRD",
+                label="City of Bradford Metropolitan District Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:BRE", label="Breckland District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:BRM", label="Bromsgrove District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:BRO", label="Broadland District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:BRT", label="Broxtowe Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:BRW", label="Brentwood Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:BRX", label="Broxbourne Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:BRY", label="London Borough of Bromley", description=None
+            ),
+            EnumOption(key="local-authority:BST", label="Bristol City Council", description=None),
+            EnumOption(
+                key="local-authority:BUC", label="Buckinghamshire Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:BUN", label="Burnley Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:BUR",
+                label="Bury Metropolitan Borough Council",
+                description=None,
+            ),
+            EnumOption(key="local-authority:CAB", label="Cambridge City Council", description=None),
+            EnumOption(
+                key="local-authority:CAM", label="Cambridgeshire County Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:CAN", label="Cannock Chase District Council", description=None
+            ),
+            EnumOption(key="local-authority:CAR", label="Carlisle City Council", description=None),
+            EnumOption(
+                key="local-authority:CAS", label="Castle Point Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:CAT", label="Canterbury City Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:CBF", label="Central Bedfordshire Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:CHA", label="Charnwood Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:CHC", label="Christchurch Borough Council", description=None
+            ),
+            EnumOption(key="local-authority:CHE", label="Cheshire East Council", description=None),
+            EnumOption(
+                key="local-authority:CHI", label="Chichester District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:CHL", label="Chelmsford City Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:CHN", label="Chiltern District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:CHO", label="Chorley Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:CHR", label="Cherwell District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:CHS", label="Chesterfield Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:CHT", label="Cheltenham Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:CHW",
+                label="Cheshire West and Chester Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:CLD",
+                label="Calderdale Metropolitan Borough Council",
+                description=None,
+            ),
+            EnumOption(key="local-authority:CMA", label="Cumbria County Council", description=None),
+            EnumOption(
+                key="local-authority:CMD", label="London Borough of Camden", description=None
+            ),
+            EnumOption(
+                key="local-authority:COL", label="Colchester City Council", description=None
+            ),
+            EnumOption(key="local-authority:CON", label="Cornwall Council", description=None),
+            EnumOption(
+                key="local-authority:COP", label="Copeland Borough Council", description=None
+            ),
+            EnumOption(key="local-authority:COR", label="Corby Borough Council", description=None),
+            EnumOption(
+                key="local-authority:COT", label="Cotswold District Council", description=None
+            ),
+            EnumOption(key="local-authority:COV", label="Coventry City Council", description=None),
+            EnumOption(
+                key="local-authority:CPCA",
+                label="Cambridgeshire and Peterborough Combined Authority",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:CRA", label="Craven District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:CRW", label="Crawley Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:CRY", label="London Borough of Croydon", description=None
+            ),
+            EnumOption(
+                key="local-authority:DAC", label="Dacorum Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:DAL", label="Darlington Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:DAR", label="Dartford Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:DAV", label="Daventry District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:DBY", label="Derbyshire County Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:DEB",
+                label="Derbyshire Dales District Council",
+                description=None,
+            ),
+            EnumOption(key="local-authority:DER", label="Derby City Council", description=None),
+            EnumOption(key="local-authority:DEV", label="Devon County Council", description=None),
+            EnumOption(
+                key="local-authority:DNC",
+                label="Doncaster Metropolitan Borough Council",
+                description=None,
+            ),
+            EnumOption(key="local-authority:DOR", label="Dorset County Council", description=None),
+            EnumOption(key="local-authority:DOV", label="Dover District Council", description=None),
+            EnumOption(key="local-authority:DST", label="Dorset Council", description=None),
+            EnumOption(
+                key="local-authority:DUD",
+                label="Dudley Metropolitan Borough Council",
+                description=None,
+            ),
+            EnumOption(key="local-authority:DUR", label="Durham County Council", description=None),
+            EnumOption(
+                key="local-authority:EAL", label="London Borough of Ealing", description=None
+            ),
+            EnumOption(
+                key="local-authority:EAS", label="Eastbourne Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:EAT", label="Eastleigh Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:ECA",
+                label="East Cambridgeshire District Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:EDE", label="East Devon District Council", description=None
+            ),
+            EnumOption(key="local-authority:EDN", label="Eden District Council", description=None),
+            EnumOption(
+                key="local-authority:EDO", label="East Dorset District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:EHA", label="East Hampshire District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:EHE",
+                label="East Hertfordshire District Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:ELI", label="East Lindsey District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:ELM", label="Elmbridge Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:ENF", label="London Borough of Enfield", description=None
+            ),
+            EnumOption(
+                key="local-authority:ENO", label="East Northamptonshire Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:EPP", label="Epping Forest District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:EPS", label="Epsom and Ewell Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:ERE", label="Erewash Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:ERY",
+                label="East Riding of Yorkshire Council",
+                description=None,
+            ),
+            EnumOption(key="local-authority:ESK", label="East Suffolk Council", description=None),
+            EnumOption(key="local-authority:ESS", label="Essex County Council", description=None),
+            EnumOption(
+                key="local-authority:EST",
+                label="East Staffordshire Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:ESX", label="East Sussex County Council", description=None
+            ),
+            EnumOption(key="local-authority:EXE", label="Exeter City Council", description=None),
+            EnumOption(
+                key="local-authority:FAR", label="Fareham Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:FEN", label="Fenland District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:FOE", label="Forest of Dean District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:FOR", label="Forest Heath District Council", description=None
+            ),
+            EnumOption(key="local-authority:FYL", label="Fylde Borough Council", description=None),
+            EnumOption(
+                key="local-authority:GAT",
+                label="Gateshead Metropolitan Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:GED", label="Gedling Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:GLA", label="Greater London Authority", description=None
+            ),
+            EnumOption(
+                key="local-authority:GLO", label="Gloucester City Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:GLS", label="Gloucestershire County Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:GMCA",
+                label="Greater Manchester Combined Authority",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:GOS", label="Gosport Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:GRA", label="Gravesham Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:GRE", label="Royal Borough of Greenwich", description=None
+            ),
+            EnumOption(
+                key="local-authority:GRT", label="Guildford Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:GRY", label="Great Yarmouth Borough Council", description=None
+            ),
+            EnumOption(key="local-authority:HAA", label="Havant Borough Council", description=None),
+            EnumOption(
+                key="local-authority:HAE", label="Hambleton District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:HAG", label="Harrogate Borough Council", description=None
+            ),
+            EnumOption(key="local-authority:HAL", label="Halton Borough Council", description=None),
+            EnumOption(
+                key="local-authority:HAM", label="Hampshire County Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:HAO", label="Harborough District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:HAR", label="Harlow District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:HAS", label="Hastings Borough Council", description=None
+            ),
+            EnumOption(key="local-authority:HAT", label="Hart District Council", description=None),
+            EnumOption(
+                key="local-authority:HAV", label="London Borough of Havering", description=None
+            ),
+            EnumOption(
+                key="local-authority:HCK", label="London Borough of Hackney", description=None
+            ),
+            EnumOption(key="local-authority:HEF", label="Herefordshire Council", description=None),
+            EnumOption(
+                key="local-authority:HER", label="Hertsmere Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:HIG", label="High Peak Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:HIL", label="London Borough of Hillingdon", description=None
+            ),
+            EnumOption(
+                key="local-authority:HIN",
+                label="Hinckley and Bosworth Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:HMF",
+                label="London Borough of Hammersmith & Fulham",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:HNS", label="London Borough of Hounslow", description=None
+            ),
+            EnumOption(
+                key="local-authority:HOR", label="Horsham District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:HPL", label="Hartlepool Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:HRT", label="Hertfordshire County Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:HRW", label="London Borough of Harrow", description=None
+            ),
+            EnumOption(
+                key="local-authority:HRY", label="London Borough of Haringey", description=None
+            ),
+            EnumOption(
+                key="local-authority:HUN",
+                label="Huntingdonshire District Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:HYN", label="Hyndburn Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:IOS", label="Council of the Isles of Scilly", description=None
+            ),
+            EnumOption(key="local-authority:IOW", label="Isle of Wight Council", description=None),
+            EnumOption(
+                key="local-authority:IPS", label="Ipswich Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:ISL", label="London Borough of Islington", description=None
+            ),
+            EnumOption(
+                key="local-authority:KEC",
+                label="Royal Borough of Kensington and Chelsea",
+                description=None,
+            ),
+            EnumOption(key="local-authority:KEN", label="Kent County Council", description=None),
+            EnumOption(
+                key="local-authority:KET", label="Kettering Borough Council", description=None
+            ),
+            EnumOption(key="local-authority:KHL", label="Hull City Council", description=None),
+            EnumOption(
+                key="local-authority:KIN",
+                label="Borough Council of King's Lynn and West Norfolk",
+                description=None,
+            ),
+            EnumOption(key="local-authority:KIR", label="Kirklees Council", description=None),
+            EnumOption(
+                key="local-authority:KTT",
+                label="Royal Borough of Kingston upon Thames",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:KWL",
+                label="Knowsley Metropolitan Borough Council",
+                description=None,
+            ),
+            EnumOption(key="local-authority:LAC", label="Lancaster City Council", description=None),
+            EnumOption(
+                key="local-authority:LAN", label="Lancashire County Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:LBH", label="London Borough of Lambeth", description=None
+            ),
+            EnumOption(key="local-authority:LCE", label="Leicester City Council", description=None),
+            EnumOption(key="local-authority:LCR", label="Liverpool City Region", description=None),
+            EnumOption(key="local-authority:LDS", label="Leeds City Council", description=None),
+            EnumOption(
+                key="local-authority:LEC", label="Leicestershire County Council", description=None
+            ),
+            EnumOption(key="local-authority:LEE", label="Lewes District Council", description=None),
+            EnumOption(
+                key="local-authority:LEW", label="London Borough of Lewisham", description=None
+            ),
+            EnumOption(
+                key="local-authority:LIC", label="City of Lincoln Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:LIF", label="Lichfield District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:LIN", label="Lincolnshire County Council", description=None
+            ),
+            EnumOption(key="local-authority:LIV", label="Liverpool City Council", description=None),
+            EnumOption(
+                key="local-authority:LND", label="City of London Corporation", description=None
+            ),
+            EnumOption(key="local-authority:LUT", label="Luton Borough Council", description=None),
+            EnumOption(
+                key="local-authority:MAI", label="Maidstone Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:MAL", label="Maldon District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:MAN", label="Manchester City Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:MAS", label="Mansfield District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:MAV", label="Malvern Hills District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:MDB", label="Middlesbrough Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:MDE", label="Mid Devon District Council", description=None
+            ),
+            EnumOption(key="local-authority:MDW", label="Medway Council", description=None),
+            EnumOption(key="local-authority:MEL", label="Melton Borough Council", description=None),
+            EnumOption(
+                key="local-authority:MEN", label="Mendip District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:MIK", label="Milton Keynes City Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:MOL", label="Mole Valley District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:MRT", label="London Borough of Merton", description=None
+            ),
+            EnumOption(
+                key="local-authority:MSS", label="Mid Sussex District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:MSU", label="Mid Suffolk District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:NBL", label="Northumberland County Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:NDE", label="North Devon District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:NDO", label="North Dorset District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:NEA",
+                label="Newark and Sherwood District Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:NEC",
+                label="Newcastle-under-Lyme Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:NECA", label="North East Combined Authority", description=None
+            ),
+            EnumOption(
+                key="local-authority:NED",
+                label="North East Derbyshire District Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:NEL", label="North East Lincolnshire Council", description=None
+            ),
+            EnumOption(key="local-authority:NET", label="Newcastle City Council", description=None),
+            EnumOption(
+                key="local-authority:NEW", label="New Forest District Council", description=None
+            ),
+            EnumOption(key="local-authority:NFK", label="Norfolk County Council", description=None),
+            EnumOption(
+                key="local-authority:NGM", label="Nottingham City Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:NHE",
+                label="North Hertfordshire District Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:NKE", label="North Kesteven District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:NLN", label="North Lincolnshire Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:NNO", label="North Norfolk District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:NOR", label="Northampton Borough Council", description=None
+            ),
+            EnumOption(key="local-authority:NOW", label="Norwich City Council", description=None),
+            EnumOption(key="local-authority:NSM", label="North Somerset Council", description=None),
+            EnumOption(
+                key="local-authority:NTCA",
+                label="North of Tyne Combined Authority",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:NTH", label="Northamptonshire County Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:NTT", label="Nottinghamshire County Council", description=None
+            ),
+            EnumOption(key="local-authority:NTY", label="North Tyneside Council", description=None),
+            EnumOption(
+                key="local-authority:NUN",
+                label="Nuneaton and Bedworth Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:NWA",
+                label="North Warwickshire Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:NWL",
+                label="North West Leicestershire District Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:NWM", label="London Borough of Newham", description=None
+            ),
+            EnumOption(
+                key="local-authority:NYK", label="North Yorkshire County Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:OAD",
+                label="Oadby and Wigston Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:OLD",
+                label="Oldham Metropolitan Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:OXF", label="Oxfordshire County Council", description=None
+            ),
+            EnumOption(key="local-authority:OXO", label="Oxford City Council", description=None),
+            EnumOption(key="local-authority:PEN", label="Pendle Borough Council", description=None),
+            EnumOption(key="local-authority:PLY", label="Plymouth City Council", description=None),
+            EnumOption(key="local-authority:POL", label="Borough of Poole", description=None),
+            EnumOption(
+                key="local-authority:POR", label="Portsmouth City Council", description=None
+            ),
+            EnumOption(key="local-authority:PRE", label="Preston City Council", description=None),
+            EnumOption(
+                key="local-authority:PTE", label="Peterborough City Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:PUR", label="Purbeck District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:RCC",
+                label="Redcar and Cleveland Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:RCH",
+                label="Rochdale Metropolitan Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:RDB", label="London Borough of Redbridge", description=None
+            ),
+            EnumOption(
+                key="local-authority:RDG", label="Reading Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:RED", label="Redditch Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:REI",
+                label="Reigate and Banstead Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:RIB", label="Ribble Valley Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:RIC",
+                label="London Borough of Richmond upon Thames",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:RIH", label="Richmondshire District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:ROC", label="Rochford District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:ROH", label="Rother District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:ROS", label="Rossendale Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:ROT",
+                label="Rotherham Metropolitan Borough Council",
+                description=None,
+            ),
+            EnumOption(key="local-authority:RUG", label="Rugby Borough Council", description=None),
+            EnumOption(
+                key="local-authority:RUH", label="Rushmoor Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:RUN", label="Runnymede Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:RUS", label="Rushcliffe Borough Council", description=None
+            ),
+            EnumOption(key="local-authority:RUT", label="Rutland County Council", description=None),
+            EnumOption(
+                key="local-authority:RYE", label="Ryedale District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:SAL",
+                label="St Albans City and District Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:SAW",
+                label="Sandwell Metropolitan Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:SBU", label="South Bucks District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:SCA",
+                label="South Cambridgeshire District Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:SCE", label="Scarborough Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:SYMCA",
+                label="South Yorkshire Mayoral Combined Authority",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:SDE",
+                label="South Derbyshire District Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:SED", label="St Edmundsbury Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:SEG", label="Sedgemoor District Council", description=None
+            ),
+            EnumOption(key="local-authority:SEL", label="Selby District Council", description=None),
+            EnumOption(
+                key="local-authority:SEV", label="Sevenoaks District Council", description=None
+            ),
+            EnumOption(key="local-authority:SFK", label="Suffolk County Council", description=None),
+            EnumOption(
+                key="local-authority:SFT",
+                label="Sefton Metropolitan Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:SGC", label="South Gloucestershire Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:SHA", label="South Hams District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:SHE", label="Folkestone and Hythe Council", description=None
+            ),
+            EnumOption(key="local-authority:SHF", label="Sheffield City Council", description=None),
+            EnumOption(key="local-authority:SHN", label="St Helens Council", description=None),
+            EnumOption(
+                key="local-authority:SHO", label="South Holland District Council", description=None
+            ),
+            EnumOption(key="local-authority:SHR", label="Shropshire Council", description=None),
+            EnumOption(
+                key="local-authority:SKE", label="South Kesteven District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:SKP",
+                label="Stockport Metropolitan Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:SLA", label="South Lakeland District Council", description=None
+            ),
+            EnumOption(key="local-authority:SLF", label="Salford City Council", description=None),
+            EnumOption(key="local-authority:SLG", label="Slough Borough Council", description=None),
+            EnumOption(
+                key="local-authority:SND", label="Sunderland City Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:SNO", label="South Norfolk District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:SNR", label="South Northamptonshire Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:SOL",
+                label="Solihull Metropolitan Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:SOM", label="Somerset County Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:SOS", label="Southend-on-Sea Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:SOX",
+                label="South Oxfordshire District Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:SPE", label="Spelthorne Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:SRI", label="South Ribble Borough Council", description=None
+            ),
+            EnumOption(key="local-authority:SRY", label="Surrey County Council", description=None),
+            EnumOption(
+                key="local-authority:SSO", label="South Somerset District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:SST", label="South Staffordshire Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:STA", label="Stafford Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:STE", label="Stoke-on-Trent City Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:STF",
+                label="Staffordshire Moorlands District Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:STH", label="Southampton City Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:STN", label="London Borough of Sutton", description=None
+            ),
+            EnumOption(
+                key="local-authority:STO", label="Stroud District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:STR",
+                label="Stratford-on-Avon District Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:STS", label="Staffordshire County Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:STT",
+                label="Stockton-on-Tees Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:STV", label="Stevenage Borough Council", description=None
+            ),
+            EnumOption(key="local-authority:STY", label="South Tyneside Council", description=None),
+            EnumOption(
+                key="local-authority:SUF",
+                label="Suffolk Coastal District Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:SUR", label="Surrey Heath Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:SWD", label="Swindon Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:SWK", label="London Borough of Southwark", description=None
+            ),
+            EnumOption(key="local-authority:SWL", label="Swale Borough Council", description=None),
+            EnumOption(
+                key="local-authority:SWT",
+                label="Somerset West and Taunton Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:TAM",
+                label="Tameside Metropolitan Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:TAN", label="Tandridge District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:TAU", label="Taunton Deane Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:TAW", label="Tamworth Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:TEI", label="Teignbridge District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:TEN", label="Tendring District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:TES", label="Test Valley Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:TEW", label="Tewkesbury Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:TFW", label="Telford & Wrekin Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:THA", label="Thanet District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:THE", label="Three Rivers District Council", description=None
+            ),
+            EnumOption(key="local-authority:THR", label="Thurrock Council", description=None),
+            EnumOption(key="local-authority:TOB", label="Torbay Council", description=None),
+            EnumOption(
+                key="local-authority:TON",
+                label="Tonbridge and Malling Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:TOR", label="Torridge District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:TRF",
+                label="Trafford Metropolitan Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:TUN", label="Tunbridge Wells Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:TVCA", label="Tees Valley Combined Authority", description=None
+            ),
+            EnumOption(
+                key="local-authority:TWH", label="London Borough of Tower Hamlets", description=None
+            ),
+            EnumOption(
+                key="local-authority:UTT", label="Uttlesford District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:VAL",
+                label="Vale of White Horse District Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:WAE", label="Waverley Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:WAR", label="Warwickshire County Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:WAT", label="Watford Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:WAV", label="Waveney District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:WAW", label="Warwick District Council", description=None
+            ),
+            EnumOption(key="local-authority:WBK", label="West Berkshire Council", description=None),
+            EnumOption(
+                key="local-authority:WDE", label="West Devon Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:WDO", label="West Dorset District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:WEA", label="Wealden District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:WECA",
+                label="West of England Combined Authority",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:WEL", label="Wellingborough Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:WEW", label="Welwyn Hatfield Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:WEY",
+                label="Weymouth and Portland Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:WFT",
+                label="London Borough of Waltham Forest",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:WGN",
+                label="Wigan Metropolitan Borough Council",
+                description=None,
+            ),
+            EnumOption(key="local-authority:WIL", label="Wiltshire Council", description=None),
+            EnumOption(
+                key="local-authority:WIN", label="Winchester City Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:WKF",
+                label="Wakefield Metropolitan District Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:WLA", label="West Lancashire Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:WLI", label="West Lindsey District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:WLL",
+                label="Walsall Metropolitan Borough Council",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:WLV", label="City of Wolverhampton Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:WMCA",
+                label="West Midlands Combined Authority",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:WND", label="London Borough of Wandsworth", description=None
+            ),
+            EnumOption(
+                key="local-authority:WNM",
+                label="Royal Borough of Windsor and Maidenhead",
+                description=None,
+            ),
+            EnumOption(key="local-authority:WOC", label="Worcester City Council", description=None),
+            EnumOption(key="local-authority:WOI", label="Woking Borough Council", description=None),
+            EnumOption(
+                key="local-authority:WOK", label="Wokingham Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:WOR", label="Worcestershire County Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:WOT", label="Worthing Borough Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:WOX",
+                label="West Oxfordshire District Council",
+                description=None,
+            ),
+            EnumOption(key="local-authority:WRL", label="Wirral Borough Council", description=None),
+            EnumOption(
+                key="local-authority:WRT", label="Warrington Borough Council", description=None
+            ),
+            EnumOption(key="local-authority:WSK", label="West Suffolk Council", description=None),
+            EnumOption(key="local-authority:WSM", label="City of Westminster", description=None),
+            EnumOption(
+                key="local-authority:WSO", label="West Somerset District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:WSX", label="West Sussex County Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:WYC", label="Wychavon District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:WYCA",
+                label="West Yorkshire Combined Authority",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:WYE", label="Wyre Forest District Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:WYO", label="Wycombe District Council", description=None
+            ),
+            EnumOption(key="local-authority:WYR", label="Wyre Borough Council", description=None),
+            EnumOption(key="local-authority:YOR", label="City of York Council", description=None),
+            EnumOption(key="local-authority:CUA", label="Cumberland Council", description=None),
+            EnumOption(
+                key="local-authority:WFUA",
+                label="Westmorland and Furness Council",
+                description=None,
+            ),
+            EnumOption(key="local-authority:SUA", label="Somerset Council", description=None),
+            EnumOption(
+                key="local-authority:NYUA", label="North Yorkshire Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:YNYCA",
+                label="York and North Yorkshire Combined Authority",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:NNECA", label="North East Combined Authority", description=None
+            ),
+            EnumOption(
+                key="local-authority:EMCCA",
+                label="East Midlands Combined County Authority",
+                description=None,
+            ),
+            EnumOption(
+                key="local-authority:NNUA", label="North Northamptonshire Council", description=None
+            ),
+            EnumOption(
+                key="local-authority:WNUA", label="West Northamptonshire Council", description=None
+            ),
+            EnumOption(
+                key="national-park-authority:Q20198711",
+                label="South Downs National Park Authority",
+                description=None,
+            ),
+            EnumOption(
+                key="national-park-authority:Q27159704",
+                label="Lake District National Park Authority",
+                description=None,
+            ),
+            EnumOption(
+                key="national-park-authority:Q27178932",
+                label="Yorkshire Dales National Park Authority",
+                description=None,
+            ),
+            EnumOption(
+                key="national-park-authority:Q4972284", label="Broads Authority", description=None
+            ),
+            EnumOption(
+                key="national-park-authority:Q5225646",
+                label="Dartmoor National Park Authority",
+                description=None,
+            ),
+            EnumOption(
+                key="national-park-authority:Q72617158",
+                label="New Forest National Park Authority",
+                description=None,
+            ),
+            EnumOption(
+                key="national-park-authority:Q72617669",
+                label="North York Moors National Park Authority",
+                description=None,
+            ),
+            EnumOption(
+                key="national-park-authority:Q72617784",
+                label="Exmoor National Park Authority",
+                description=None,
+            ),
+            EnumOption(
+                key="national-park-authority:Q72617890",
+                label="Northumberland National Park Authority",
+                description=None,
+            ),
+            EnumOption(
+                key="national-park-authority:Q72617988",
+                label="Peak District National Park Authority",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q20648596",
+                label="Old Oak and Park Royal Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q4916714",
+                label="Birmingham Heartlands Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q6670544",
+                label="London Legacy Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q6670837",
+                label="London Thames Gateway Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q72456968",
+                label="South Tees Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q72463795",
+                label="Ebbsfleet Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q7799380",
+                label="Thurrock Thames Gateway Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q7860503",
+                label="Tyne and Wear Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q7986087",
+                label="West Northamptonshire Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q105544651",
+                label="Aycliffe and Peterlee Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q105544654",
+                label="Basildon Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q5061392",
+                label="Central Manchester Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q3258953",
+                label="London Docklands Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q105544669",
+                label="Telford Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q7694573",
+                label="Teesside Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q117149370",
+                label="Middlesbrough Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q124604981",
+                label="Hartlepool Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q6515953",
+                label="Leeds Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q4968888",
+                label="Bristol Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q5182976",
+                label="Crawley Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q115585981",
+                label="Stockport Town Centre West Mayoral Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q3920908",
+                label="Merseyside Development Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q6861239",
+                label="Milton Keynes Development Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q7177999",
+                label="Peterborough Development Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q7205796",
+                label="Plymouth Development Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q7832579",
+                label="Trafford Park Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:stockport-town-centre-MDC",
+                label="Stockport Town Centre Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:northern-gateway-MDC",
+                label="Northern Gateway Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:old-trafford-MDC",
+                label="Old Trafford Development Corporation",
+                description=None,
+            ),
+            EnumOption(
+                key="development-corporation:Q137717415",
+                label="Oxford Street Development Corporation",
+                description=None,
+            ),
+        ],
+    )
+    submission_date = StringField(
+        display="Submission date",
+        description="Date the application is submitted in YYYY-MM-DD format",
+        max_length=None,
+    )
+    modules = StringField(
+        display="Modules",
+        description="List of required modules for this application that can be used to validate the application",
+        max_length=None,
+    )
+
+    _ref = "application"
+    _display = "Planning application"
+    _description = "Core planning application structure containing reference information, application types, submission details, modules, documents, and fees "
+    _descendants = [Documents, Fee]
+
+
 class AccessRightsOfWay(SchemaNode):
     new_altered_vehicle = EnumField(
         display="New or altered vehicle access",
@@ -2714,6 +4159,7 @@ class TechnicalDetailsConsent(SchemaNode):
     _display = "Technical details consent"
     _description = "Technical Details Consent (TDC) is the second stage of the 'Permission in Principle' (PiP) process in planning, primarily for housing-led development. It follows the initial 'Permission in Principle' stage, which establishes whether a site is suitable in principle for development. TDC assesses the detailed design, layout, and other technical aspects of the proposed development. "
     _descendants = [
+        Application,
         AccessRightsOfWay,
         AgentContact,
         AgentDetails,
@@ -2943,7 +4389,7 @@ class RelatedApplications(SchemaNode):
     _description = "Details about a related application including its reference, description and decision date "
 
 
-class RelatedApplicationsmodule(SchemaNode):
+class RelatedApplicationsmoduleresolved(SchemaNode):
     has_related_applications = BooleanField(
         display="Has related applications",
         description="Are there any related applications, previous proposals or demolitions for the site",
@@ -2961,6 +4407,7 @@ class Lbc(SchemaNode):
     _display = "Listed building consent"
     _description = "An application for works for the demolition of a listed building or for its alteration or extension in any manner which would affect its character as a building of special architectural or historic interest"
     _descendants = [
+        Application,
         AgentContact,
         AgentDetails,
         ApplicantContact,
@@ -2977,7 +4424,7 @@ class Lbc(SchemaNode):
         OwnershipCerts,
         PreAppAdvice,
         ProposalDetails,
-        RelatedApplicationsmodule,
+        RelatedApplicationsmoduleresolved,
         SiteDetails,
         SiteVisit,
     ]
@@ -3063,17 +4510,17 @@ class LdcProposedWorkLb(SchemaNode):
     _display = "LDC Proposed Work to a Listed Building"
     _description = "Proposed work to a listed building"
     _descendants = [
+        DescProposedWorksLbLdc,
+        GroundsForApplication,
+        LbGrade,
         AgentContact,
         AgentDetails,
         ApplicantContact,
         ApplicantDetails,
-        Checklist,
         ConflictOfInterest,
+        Checklist,
         Declaration,
-        DescProposedWorksLbLdc,
-        GroundsForApplication,
         InterestDetails,
-        LbGrade,
         PreAppAdvice,
         SiteDetails,
         SiteVisit,
@@ -3127,12 +4574,13 @@ class HedgerowRemoval(SchemaNode):
     _descendants = [SupportingDocuments]
 
 
-class HedgerowRemovalapplication(SchemaNode):
+class HedgerowRemovalapplicationresolved(SchemaNode):
 
     _ref = "hedgerow-removal"
     _display = "Hedgerow removal notice"
     _description = "An application for anyone proposing to remove a hedgerow, or part of a hedgerow"
     _descendants = [
+        Application,
         ApplicantContact,
         ApplicantDetails,
         AgentContact,
@@ -3152,6 +4600,7 @@ class PriorApproval(SchemaNode):
     _display = "Prior approval"
     _description = "This applies to developments with permitted development rights (where developments are granted planning permission by national legislation without the need to submit a planning application)"
     _descendants = [
+        Application,
         AgentContact,
         AgentDetails,
         ApplicantContact,
@@ -3161,6 +4610,44 @@ class PriorApproval(SchemaNode):
         Declaration,
         SiteDetails,
     ]
+
+
+class ProposalDetailsLdc(SchemaNode):
+    proposal_incl_building_operations = BooleanField(
+        display="Proposal incl building operations",
+        description="Does the proposal include building operations?",
+    )
+    proposal_building_operations_description = StringField(
+        display="Proposal building operations description",
+        description="Description of the building operations included in the proposal",
+        max_length=None,
+    )
+    proposal_incl_change_of_use = BooleanField(
+        display="Proposal incl change of use",
+        description="Does the proposal include a change of use?",
+    )
+    proposal_change_of_use_description = StringField(
+        display="Proposal change of use description",
+        description="Description of the change of use included in the proposal",
+        max_length=None,
+    )
+    proposal_existing_use_description = StringField(
+        display="Proposal existing use description",
+        description="Description of the existing use before the proposed change of use",
+        max_length=None,
+    )
+    proposal_existing_use_stop_date = StringField(
+        display="Proposal existing use stop date",
+        description="Date when the existing use stopped or will stop",
+        max_length=None,
+    )
+    proposal_started = BooleanField(
+        display="Proposal started", description="Has any work on the proposal already been started"
+    )
+
+    _ref = "proposal-details-ldc"
+    _display = "Proposal details LDC"
+    _description = "Details of why a Lawful Development Certificate is required."
 
 
 class GroundsExistingUse(SchemaNode):
@@ -3509,62 +4996,24 @@ class GroundsProposedUse(SchemaNode):
     _description = "What the new site will be used for"
 
 
-class ProposalDetailsLdc(SchemaNode):
-    proposal_incl_building_operations = BooleanField(
-        display="Proposal incl building operations",
-        description="Does the proposal include building operations?",
-    )
-    proposal_building_operations_description = StringField(
-        display="Proposal building operations description",
-        description="Description of the building operations included in the proposal",
-        max_length=None,
-    )
-    proposal_incl_change_of_use = BooleanField(
-        display="Proposal incl change of use",
-        description="Does the proposal include a change of use?",
-    )
-    proposal_change_of_use_description = StringField(
-        display="Proposal change of use description",
-        description="Description of the change of use included in the proposal",
-        max_length=None,
-    )
-    proposal_existing_use_description = StringField(
-        display="Proposal existing use description",
-        description="Description of the existing use before the proposed change of use",
-        max_length=None,
-    )
-    proposal_existing_use_stop_date = StringField(
-        display="Proposal existing use stop date",
-        description="Date when the existing use stopped or will stop",
-        max_length=None,
-    )
-    proposal_started = BooleanField(
-        display="Proposal started", description="Has any work on the proposal already been started"
-    )
-
-    _ref = "proposal-details-ldc"
-    _display = "Proposal details LDC"
-    _description = "Details of why a Lawful Development Certificate is required."
-
-
 class LdcProspectiveUse(SchemaNode):
 
     _ref = "ldc-prospective-use"
     _display = "LDC Proposed Use"
     _description = "Prospective use of the site"
     _descendants = [
+        ProposalDetailsLdc,
+        GroundsExistingUse,
+        GroundsProposedUse,
         AgentContact,
         AgentDetails,
         ApplicantContact,
         ApplicantDetails,
-        Checklist,
         ConflictOfInterest,
+        Checklist,
         Declaration,
-        GroundsExistingUse,
-        GroundsProposedUse,
         InterestDetails,
         PreAppAdvice,
-        ProposalDetailsLdc,
         SiteDetails,
         SiteVisit,
     ]
@@ -3602,6 +5051,7 @@ class ReservedMatters(SchemaNode):
     _display = "Reserved matters"
     _description = "This application is only required when the applicant has already been granted outline planning permission. Reserved matters can include appearance, means of access, landscaping, layout and scale"
     _descendants = [
+        Application,
         AgentContact,
         AgentDetails,
         ApplicantContact,
@@ -3631,6 +5081,7 @@ class DemolitionConArea(SchemaNode):
     _display = "Planning permission for relevant demolition in a conservation area"
     _description = "An application for planning permission involving the demolition of any unlisted building or structure in a conservation area if permission is required"
     _descendants = [
+        Application,
         ApplicantContact,
         ApplicantDetails,
         AgentContact,
@@ -3644,7 +5095,7 @@ class DemolitionConArea(SchemaNode):
         OwnershipCerts,
         PreAppAdvice,
         ProposalDetails,
-        RelatedApplicationsmodule,
+        RelatedApplicationsmoduleresolved,
         SiteDetails,
         SiteVisit,
     ]
@@ -3768,6 +5219,7 @@ class ConsentUnderTpo(SchemaNode):
     _display = "Consent under TPO"
     _description = "An application that will affect a protected tree including those covered by a Tree Preservation Order (TPO) or those which grow in a conservation area"
     _descendants = [
+        Application,
         AgentContact,
         AgentDetails,
         ApplicantContact,
@@ -3789,11 +5241,18 @@ class OutlineSome(SchemaNode):
     _description = "Outline planning permission with some matters reserved"
     _descendants = [
         AccessRightsOfWay,
+        BioGeoArchCon,
+        FoulSewage,
+        HazSubstances,
+        Materials,
+        TradeEffluent,
+        TreesHedges,
+        VehicleParking,
+        WasteStorageCollection,
         AgentContact,
         AgentDetails,
         ApplicantContact,
         ApplicantDetails,
-        BioGeoArchCon,
         Bng,
         Checklist,
         ConflictOfInterest,
@@ -3801,10 +5260,7 @@ class OutlineSome(SchemaNode):
         Employment,
         ExistingUse,
         FloodRiskAssessment,
-        FoulSewage,
-        HazSubstances,
         HrsOperation,
-        Materials,
         NonResFloorspace,
         OwnershipCerts,
         PreAppAdvice,
@@ -3814,10 +5270,6 @@ class OutlineSome(SchemaNode):
         SiteArea,
         SiteDetails,
         SiteVisit,
-        TradeEffluent,
-        TreesHedges,
-        VehicleParking,
-        WasteStorageCollection,
     ]
 
 
@@ -3856,6 +5308,17 @@ class DescWorkImpactsRisks(SchemaNode):
     _ref = "desc-work-impacts-risks"
     _display = "Description of work impacts and risks"
     _description = "How the proposed development may affect nearby amenities, air traffic, defence assets or protected views."
+
+
+class EligibilityRelatedWorks(SchemaNode):
+    external_support_required = BooleanField(
+        display="External support required",
+        description="Will the proposed engineering works include external support structures or extend beyond the curtilage for wall or foundation strengthening",
+    )
+
+    _ref = "eligibility-related-works"
+    _display = "Eligibility related works"
+    _description = "Whether any related works such as scaffolding required will affect the eligibility of the planning proposal"
 
 
 class EligibilityCurrentBuilding(SchemaNode):
@@ -3939,34 +5402,23 @@ class EligibilityProposal(SchemaNode):
     _description = "How the proposed development meets eligibility criteria"
 
 
-class EligibilityRelatedWorks(SchemaNode):
-    external_support_required = BooleanField(
-        display="External support required",
-        description="Will the proposed engineering works include external support structures or extend beyond the curtilage for wall or foundation strengthening",
-    )
-
-    _ref = "eligibility-related-works"
-    _display = "Eligibility related works"
-    _description = "Whether any related works such as scaffolding required will affect the eligibility of the planning proposal"
-
-
 class PaStorey(SchemaNode):
 
     _ref = "pa-storey"
     _display = "Additional storeys"
     _description = "Enlargement of a dwellinghouse by construction of additional storeys"
     _descendants = [
+        DescWorkImpactsRisks,
+        EligibilityRelatedWorks,
+        EligibilityCurrentBuilding,
+        EligibilityProposal,
         AgentContact,
         AgentDetails,
         ApplicantContact,
         ApplicantDetails,
-        Checklist,
         ConflictOfInterest,
+        Checklist,
         Declaration,
-        DescWorkImpactsRisks,
-        EligibilityCurrentBuilding,
-        EligibilityProposal,
-        EligibilityRelatedWorks,
         SiteDetails,
     ]
 
@@ -4032,7 +5484,7 @@ class ProposalDetailsIncNonResidential(SchemaNode):
     _descendants = [NonResidentialUse]
 
 
-class SiteAreacomponent(SchemaNode):
+class SiteAreacomponentresolved(SchemaNode):
     value = StringField(
         display="Value",
         description="Numeric value representing a measurement or quantity",
@@ -4228,7 +5680,7 @@ class Uses(SchemaNode):
     _description = "A specific use class or type of use for a site or building "
 
 
-class ExistingUsecomponent(SchemaNode):
+class ExistingUsecomponentresolved(SchemaNode):
     floorspace = StringField(
         display="Floorspace",
         description="Total floorspace for a use in square metres",
@@ -4269,7 +5721,7 @@ class SiteInfo(SchemaNode):
     _ref = "site-info"
     _display = "Site information"
     _description = "Any additional relevant information about the development site."
-    _descendants = [SiteAreacomponent, ExistingUsecomponent, SupportingDocuments]
+    _descendants = [SiteAreacomponentresolved, ExistingUsecomponentresolved, SupportingDocuments]
 
 
 class Pip(SchemaNode):
@@ -4278,6 +5730,7 @@ class Pip(SchemaNode):
     _display = "Permission in principle"
     _description = "An alternative way of getting planning permission for housing-led development which separates the consideration of matters of principle from the technical detail of the development"
     _descendants = [
+        Application,
         AgentDetails,
         AgentContact,
         ApplicantDetails,
@@ -4351,6 +5804,7 @@ class S73(SchemaNode):
     _display = "Removal or variation of a condition following grant of planning permission"
     _description = "Applications for a removal or variation of a condition after planning permission has been granted"
     _descendants = [
+        Application,
         AgentContact,
         AgentDetails,
         ApplicantContact,
@@ -4391,6 +5845,7 @@ class Hh(SchemaNode):
     _display = "Householder planning application"
     _description = "A simplified process for applications to alter or enlarge a single house (but not a flat), including works within the boundary/garden"
     _descendants = [
+        Application,
         AccessRightsOfWay,
         AgentContact,
         AgentDetails,
@@ -4417,6 +5872,7 @@ class Outline(SchemaNode):
     _display = "Outline planning"
     _description = "Applications that are used to understand whether the basic nature of a development is viable"
     _descendants = [
+        Application,
         AgentContact,
         AgentDetails,
         ApplicantContact,
@@ -4805,6 +6261,7 @@ class ExtractionOilGas(SchemaNode):
     _display = "Development relating to the onshore extraction of oil and gas"
     _description = "Development relating to the onshore extraction of oil and gas (including exploratory, appraisal and production phases) and the associated plans, documents and validation information required to support an application. "
     _descendants = [
+        Application,
         AgentContact,
         AgentDetails,
         ApplicantContact,
@@ -4920,6 +6377,7 @@ class NonMaterialAmendment(SchemaNode):
         "An application for any minor changes to proposals that have already been approved"
     )
     _descendants = [
+        Application,
         AgentContact,
         AgentDetails,
         ApplicantContact,
@@ -5133,6 +6591,7 @@ class Advertising(SchemaNode):
     _display = "Advertising"
     _description = "An application for all types of advertisements and signs"
     _descendants = [
+        Application,
         AdvertLocation,
         AdvertPeriod,
         AdvertisementTypes,
@@ -5158,6 +6617,7 @@ class Ldc(SchemaNode):
     _display = "Lawful development certificate"
     _description = "A legal document stating the lawfulness of past, present or future building use, operation or other matters, signifying that enforcement action cannot be carried out against the development"
     _descendants = [
+        Application,
         AgentContact,
         AgentDetails,
         ApplicantContact,
@@ -5178,6 +6638,7 @@ class Full(SchemaNode):
     _display = "Full planning permission"
     _description = "This application is needed when making detailed proposals for developments which are not covered by a householder application or permitted development rights"
     _descendants = [
+        Application,
         AccessRightsOfWay,
         AgentContact,
         AgentDetails,
@@ -5340,15 +6801,15 @@ class PaExtension(SchemaNode):
     _description = "Planning application for extension"
     _descendants = [
         AdjPremises,
+        DescProposedWorks,
+        EligibilityExtension,
         AgentContact,
         AgentDetails,
         ApplicantContact,
         ApplicantDetails,
-        Checklist,
         ConflictOfInterest,
+        Checklist,
         Declaration,
-        DescProposedWorks,
-        EligibilityExtension,
         SiteDetails,
     ]
 
@@ -5389,6 +6850,7 @@ class ApprovalCondition(SchemaNode):
     _display = "Approval of details reserved by condition"
     _description = "An application to have conditions approved which have been applied at the time of granting a planning permission to limit and control the way in which the planning permission has been implemented"
     _descendants = [
+        Application,
         AgentContact,
         AgentDetails,
         ApplicantContact,
@@ -5423,6 +6885,7 @@ class NoticeTreesInConArea(SchemaNode):
     _display = "Notification of proposed works to trees in a conservation area"
     _description = "Notification, 6 weeks prior to works being carried out, of proposed works to a tree in a conservation area that is not subject to a Tree Preservation order"
     _descendants = [
+        Application,
         AgentContact,
         AgentDetails,
         ApplicantContact,
@@ -5443,133 +6906,6 @@ class DescExistingUse(SchemaNode):
     _display = "Description of existing use"
     _description = "How the development site is used, including use class information"
     _descendants = [ExistingUseDetails]
-
-
-class SupportingApplications(SchemaNode):
-    reference_number = StringField(
-        display="Reference number",
-        description="Reference number of the planning permission",
-        max_length=None,
-    )
-    condition_number = StringField(
-        display="Condition number",
-        description="Number of any condition being breached",
-        max_length=None,
-    )
-    decision_date = StringField(
-        display="Decision date",
-        description="The date when the decision was made, in YYYY-MM-DD format",
-        max_length=None,
-    )
-
-    _ref = "supporting-applications"
-    _display = "Supporting applications"
-    _description = "Planning permissions, certificates, or notices affecting the application site "
-
-
-class GroundsLdc(SchemaNode):
-    grounds_pre_2024 = EnumField(
-        display="Grounds pre 2024",
-        description="List of grounds pre 2024-04-25 under which the certificate is sought",
-        select_options=[
-            EnumOption(
-                key="use-10y",
-                label="Use over 10 years ago",
-                description="The use began more than 10 years before the date of this application.",
-            ),
-            EnumOption(
-                key="breach-10y",
-                label="Breach of condition over 10 years ago",
-                description="The use, building works or activity in breach of condition began more than 10 years before the date of this application.",
-            ),
-            EnumOption(
-                key="lawful-change-no-pp",
-                label="Lawful change of use within 10 years",
-                description="The use began within the last 10 years, as a result of a change of use not requiring planning permission, and there has not been a change of use requiring planning permission in the last 10 years.",
-            ),
-            EnumOption(
-                key="works-complete-4y",
-                label="Building works completed over 4 years ago",
-                description="The building works (for instance, building or engineering works) were substantially completed more than four years before the date of this application.",
-            ),
-            EnumOption(
-                key="dwelling-change-4y",
-                label="Dwelling change of use over 4 years ago",
-                description="The change of use to use as a single dwelling house began more than four years before the date of this application.",
-            ),
-            EnumOption(
-                key="other",
-                label="Other",
-                description="Other – please specify (this might include claims that the change of use or building work was not development, or that it benefited from planning permission granted under the Act or by the General Permitted Development Order).",
-            ),
-        ],
-    )
-    grounds_post_2024 = EnumField(
-        display="Grounds post 2024",
-        description="List of grounds post 2024-04-25 under which the certificate is sought",
-        select_options=[
-            EnumOption(
-                key="use-10y",
-                label="Use over 10 years ago",
-                description="The use, building works or activity began more than 10 years before the date of this application.",
-            ),
-            EnumOption(
-                key="lawful-change-no-pp",
-                label="Lawful change of use within 10 years",
-                description="The use began within the last 10 years, as a result of a change of use not requiring planning permission, and there has not been a change of use requiring planning permission in the last 10 years.",
-            ),
-            EnumOption(
-                key="other",
-                label="Other",
-                description="Other – please specify (this might include claims that the change of use or building work was not development, or that it benefited from planning permission granted under the Act or by the General Permitted Development Order).",
-            ),
-        ],
-    )
-    other_details = StringField(
-        display="Other details",
-        description="Explanation if other ground is selected",
-        max_length=None,
-    )
-    reason = StringField(display="Reason", description="A textual reason", max_length=None)
-
-    _ref = "grounds-ldc"
-    _display = "Grounds for lawful development certificate"
-    _description = (
-        "Evidence and explanations relating to a Lawful Development Certificate (LDC) application"
-    )
-    _descendants = [SupportingApplications]
-
-
-class InfoSupportLdc(SchemaNode):
-    existing_use_start_date = StringField(
-        display="Existing use start date",
-        description="Date when the existing use of the land or building commenced, in YYYY-MM-DD format",
-        max_length=None,
-    )
-    has_existing_use_interrupted = BooleanField(
-        display="Existing use interrupted",
-        description="Indicating whether the existing use has been interrupted since it commenced",
-    )
-    interruption_details = StringField(
-        display="Interruption details",
-        description="Details of any interruption to the existing use including dates and circumstances",
-        max_length=None,
-    )
-    has_existing_use_changed = BooleanField(
-        display="Existing use change",
-        description="Indicate whether there has been any change in the existing use since it commenced",
-    )
-    existing_use_change_details = StringField(
-        display="Existing use change details",
-        description="Details of any changes to the existing use including nature of changes and dates",
-        max_length=None,
-    )
-
-    _ref = "info-support-ldc"
-    _display = "Information to support LDC"
-    _description = (
-        "Supporting information required to make a Lawful Development Certificate application"
-    )
 
 
 class UseWorksActivity(SchemaNode):
@@ -5760,28 +7096,155 @@ class UseWorksActivity(SchemaNode):
     _description = "Why a Lawful Development Certificate is required regarding how the development site is being used, or specific works taking place on the site."
 
 
+class SupportingApplications(SchemaNode):
+    reference_number = StringField(
+        display="Reference number",
+        description="Reference number of the planning permission",
+        max_length=None,
+    )
+    condition_number = StringField(
+        display="Condition number",
+        description="Number of any condition being breached",
+        max_length=None,
+    )
+    decision_date = StringField(
+        display="Decision date",
+        description="The date when the decision was made, in YYYY-MM-DD format",
+        max_length=None,
+    )
+
+    _ref = "supporting-applications"
+    _display = "Supporting applications"
+    _description = "Planning permissions, certificates, or notices affecting the application site "
+
+
+class GroundsLdc(SchemaNode):
+    grounds_pre_2024 = EnumField(
+        display="Grounds pre 2024",
+        description="List of grounds pre 2024-04-25 under which the certificate is sought",
+        select_options=[
+            EnumOption(
+                key="use-10y",
+                label="Use over 10 years ago",
+                description="The use began more than 10 years before the date of this application.",
+            ),
+            EnumOption(
+                key="breach-10y",
+                label="Breach of condition over 10 years ago",
+                description="The use, building works or activity in breach of condition began more than 10 years before the date of this application.",
+            ),
+            EnumOption(
+                key="lawful-change-no-pp",
+                label="Lawful change of use within 10 years",
+                description="The use began within the last 10 years, as a result of a change of use not requiring planning permission, and there has not been a change of use requiring planning permission in the last 10 years.",
+            ),
+            EnumOption(
+                key="works-complete-4y",
+                label="Building works completed over 4 years ago",
+                description="The building works (for instance, building or engineering works) were substantially completed more than four years before the date of this application.",
+            ),
+            EnumOption(
+                key="dwelling-change-4y",
+                label="Dwelling change of use over 4 years ago",
+                description="The change of use to use as a single dwelling house began more than four years before the date of this application.",
+            ),
+            EnumOption(
+                key="other",
+                label="Other",
+                description="Other – please specify (this might include claims that the change of use or building work was not development, or that it benefited from planning permission granted under the Act or by the General Permitted Development Order).",
+            ),
+        ],
+    )
+    grounds_post_2024 = EnumField(
+        display="Grounds post 2024",
+        description="List of grounds post 2024-04-25 under which the certificate is sought",
+        select_options=[
+            EnumOption(
+                key="use-10y",
+                label="Use over 10 years ago",
+                description="The use, building works or activity began more than 10 years before the date of this application.",
+            ),
+            EnumOption(
+                key="lawful-change-no-pp",
+                label="Lawful change of use within 10 years",
+                description="The use began within the last 10 years, as a result of a change of use not requiring planning permission, and there has not been a change of use requiring planning permission in the last 10 years.",
+            ),
+            EnumOption(
+                key="other",
+                label="Other",
+                description="Other – please specify (this might include claims that the change of use or building work was not development, or that it benefited from planning permission granted under the Act or by the General Permitted Development Order).",
+            ),
+        ],
+    )
+    other_details = StringField(
+        display="Other details",
+        description="Explanation if other ground is selected",
+        max_length=None,
+    )
+    reason = StringField(display="Reason", description="A textual reason", max_length=None)
+
+    _ref = "grounds-ldc"
+    _display = "Grounds for lawful development certificate"
+    _description = (
+        "Evidence and explanations relating to a Lawful Development Certificate (LDC) application"
+    )
+    _descendants = [SupportingApplications]
+
+
+class InfoSupportLdc(SchemaNode):
+    existing_use_start_date = StringField(
+        display="Existing use start date",
+        description="Date when the existing use of the land or building commenced, in YYYY-MM-DD format",
+        max_length=None,
+    )
+    has_existing_use_interrupted = BooleanField(
+        display="Existing use interrupted",
+        description="Indicating whether the existing use has been interrupted since it commenced",
+    )
+    interruption_details = StringField(
+        display="Interruption details",
+        description="Details of any interruption to the existing use including dates and circumstances",
+        max_length=None,
+    )
+    has_existing_use_changed = BooleanField(
+        display="Existing use change",
+        description="Indicate whether there has been any change in the existing use since it commenced",
+    )
+    existing_use_change_details = StringField(
+        display="Existing use change details",
+        description="Details of any changes to the existing use including nature of changes and dates",
+        max_length=None,
+    )
+
+    _ref = "info-support-ldc"
+    _display = "Information to support LDC"
+    _description = (
+        "Supporting information required to make a Lawful Development Certificate application"
+    )
+
+
 class LdcExistingUse(SchemaNode):
 
     _ref = "ldc-existing-use"
     _display = "LDC Existing Use"
     _description = "Existing use of the site"
     _descendants = [
+        DescExistingUse,
+        UseWorksActivity,
+        GroundsLdc,
+        InfoSupportLdc,
+        ResUnits,
         AgentContact,
         AgentDetails,
         ApplicantContact,
         ApplicantDetails,
-        Checklist,
         ConflictOfInterest,
+        Checklist,
         Declaration,
-        DescExistingUse,
-        GroundsLdc,
-        InfoSupportLdc,
         InterestDetails,
         PreAppAdvice,
-        ResUnits,
         SiteDetails,
         SiteVisit,
-        UseWorksActivity,
     ]
 
 
@@ -5975,15 +7438,15 @@ class PaBuildAgriForest(SchemaNode):
         "Prior apporval for building development related to agricultural and forestry buildings"
     )
     _descendants = [
+        AgriForestDevElig,
+        ProposedBuilding,
         AgentContact,
         AgentDetails,
-        AgriForestDevElig,
         ApplicantContact,
         ApplicantDetails,
-        Checklist,
         ConflictOfInterest,
+        Checklist,
         Declaration,
-        ProposedBuilding,
         SiteDetails,
     ]
 
