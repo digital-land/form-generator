@@ -4,7 +4,7 @@ Example implementation of the [planning application data schema](https://github.
 
 This repo demonstrates how to go from [schema specification files](https://github.com/digital-land/planning-application-data-specification/tree/main/specification) writen in yaml+mark down to Python classes.
 
-These Python classes aer used to builf a [Flask](https://flask.palletsprojects.com/en/stable/) app (using [WTForms](https://wtforms.readthedocs.io/en/3.2.x/), a schema validator and a PDF generator.
+These Python classes aer used to builf a [Flask](https://flask.palletsprojects.com/en/stable/) app (using [WTForms](https://wtforms.readthedocs.io/en/3.2.x/)), a schema validator and a PDF generator.
 
 
 ## Local setup
@@ -14,7 +14,7 @@ Python packages and a python virtual environment. Stay in the pipenv shell for t
 ```shell
 cp env_example .env
 pipenv shell
-pipenv install
+pipenv install --dev
 ```
 
 
@@ -43,7 +43,16 @@ python web_viewer/app.py
 Point a web browser at [http://127.0.0.1:2121](http://127.0.0.1:2121) and you should see a list of 'Planning application types'.
 
 
-# Licence
+## Overview
+
+The [builder](builder/README.md) package creates a simplified pythonic representation of the [planning application data schema](https://github.com/digital-land/planning-application-data-specification). The pythonic representation is a Python module of base schema classes which are intended to be intuative and simple. These classes are ready to be extended or used just like any other Python code in other parts of this project.
+
+The [web app](web_client) is a Flask app that can be used to navigate the planning applications. HTML forms are auto-built on demand from the *base schema classes* created by *builder*.
+
+[PDFs](pdf_builder) are also built with the *base schema classes*.
+
+
+## Licence
 
 The software in this project is open source and covered by the [LICENSE](LICENSE) file.
 

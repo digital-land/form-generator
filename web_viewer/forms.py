@@ -25,10 +25,15 @@ def schema_auto_form(schema_node_class):
         elif isinstance(attr_value, SchemaStringField):
             form_fields[attr_name] = WTFStringField(label)
         elif isinstance(attr_value, SchemaEnumField):
-            choices = [
-                (opt.key, f"{opt.label} - {opt.description}")
-                for opt in (attr_value.select_options or [])
-            ]
+
+            # Optional description field
+            choices = []
+            for opt in attr_value.select_options:
+                opt_label = opt.label
+                if opt.description:
+                    opt_label += f" - {opt.description}"
+                choices.append((opt.key, opt_label))
+
             form_fields[attr_name] = WTFRadioField(label, choices=choices)
         else:
             raise ValueError("Unknown schema field can't be mapped to a WTForms field")

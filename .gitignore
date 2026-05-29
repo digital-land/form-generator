@@ -9,3 +9,5 @@ settings/local_config*.py
 dist/
 build/
 .venv/
+.DS_Store
+Pipfile.lock

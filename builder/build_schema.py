@@ -1,17 +1,15 @@
 import csv
 from functools import cached_property
-from types import SimpleNamespace
 import os
 import warnings
 
 from jinja2 import Environment, FileSystemLoader
 
-
-from builder.planning_app_data_spec_bin.loader import load_specification_model
-from builder.planning_app_data_spec_bin.models import (
-    ComponentInstance,
-    FieldInstance,
-    ModuleDef,
+from builder.planning_app_data_spec import (
+    ComponentResolved,
+    Field,
+    ModuleResolved,
+    PlanningAppDataResolved,
 )
 from schema import valid_class_name, valid_field_name, tidy_string
 from schema.schema_tree import BooleanField, EnumField, EnumOption, SchemaSegment, StringField
@@ -47,64 +45,40 @@ class FormBuilder:
         return output
 
 
-def segment_tree(namespace, obj_descriptor, obj_with_items):
+def segment_tree(schema_descriptor):
     """
     Build tree of SchemaSegment objects by collapsing upstream Module, Component and Field
     classes into a simpler tree.
 
-    @param namespace: (str) 'ref' must be unique in the space. e.g. 'Field', 'Component' etc.
-    @param obj_descriptor: (obj) with attributes .ref, .name, .description
+    @param namespace: (str)
+    @param schema_descriptor: (subclass of :class:`SchemaBase`)
     """
+
+    # 'ref' must be unique in the space. e.g. 'Field', 'Component' etc.
+    namespace = schema_descriptor.__class__.__name__
+
+    # ApplicationResolved, ComponentResolved, Field, ModuleResolved
+
     s = SchemaSegment(
-        ref=obj_descriptor.ref,
+        ref=schema_descriptor.ref,
         namespace=namespace,
-        name=obj_descriptor.name,
-        description=obj_descriptor.description,
+        name=schema_descriptor.name,
+        description=schema_descriptor.description,
     )
 
-    # The upstream dataclasses aren't completely symmetrical so bit of fiddle to line up
-    # a way to find their child objects
-    if hasattr(obj_with_items, "items"):
-        obj_iterator = iter(obj_with_items.items)
-    elif isinstance(obj_with_items, list):
-        obj_iterator = obj_with_items
+    children = getattr(schema_descriptor, "field_entries", [])
+    children.extend(getattr(schema_descriptor, "fields", []))
+    children.extend(getattr(schema_descriptor, "modules", []))
 
-    # for item in obj_with_items.items:
-    for item in obj_iterator:
-        if isinstance(item, FieldInstance):
-
-            # TODO
-            # overrides = {
-            #     "applies-if": {"application-type": {"in": ["approval-condition"]}},
-            #     "field": "description-list",
-            #     "required": True,
-            # }
-            if item.overrides["field"] != item.original.ref:
-                raise NotImplementedError("TODO - handle when this happens")
-
-            # if len(item.overrides) > 1:
-            #     raise NotImplementedError("TODO - handle when this happens")
-
-            s.fields.append(item.original)
-
-        elif isinstance(item, ComponentInstance):
-
-            descendant_name = item.referenced_by_field.overrides.get("field", item.component.ref)
-            descriptor = SimpleNamespace(
-                ref=descendant_name,
-                name=item.component.name,
-                description=item.component.description,
-            )
-            next_layer_fieldset = segment_tree("Component", descriptor, item.component)
-            s.descendants.append(next_layer_fieldset)
-
-        elif isinstance(item, ModuleDef):
-
-            next_layer_fieldset = segment_tree("Module", item, item.items)
+    for child in children:
+        if isinstance(child, Field):
+            s.fields.append(child)
+        elif isinstance(child, (ComponentResolved, ModuleResolved)):
+            next_layer_fieldset = segment_tree(child)
             s.descendants.append(next_layer_fieldset)
 
         else:
-            raise NotImplementedError(f"Unknown processable item: {item}")
+            raise NotImplementedError(f"Unknown field_entries item: {child}")
 
     return s
 
@@ -125,11 +99,11 @@ def restructured_spec(spec_path):
     @return (list) one item per planning application
     """
 
-    specification = load_specification_model(spec_path)
+    specification = PlanningAppDataResolved(planning_app_repo_path=spec_path)
 
     apps = []
-    for app_def in specification["applications"].values():
-        application_spec_segment = segment_tree("Application", app_def, app_def.modules)
+    for app_def in specification.applications.values():
+        application_spec_segment = segment_tree(app_def)
         apps.append(application_spec_segment)
 
         # print(f"----{app_name}----")
@@ -156,11 +130,9 @@ def render_python(project_root, planning_application_spec_path):
     """
 
     form_builder = FormBuilder(project_root=project_root)
-
     py_output = form_builder.build(dict(document_header=True), "schema_tree_class.py.j2")
 
-    spec_path = os.path.join(planning_application_spec_path, "specification")
-    spec_simplified = restructured_spec(spec_path)
+    spec_simplified = restructured_spec(planning_application_spec_path)
 
     # assumption - refs are primary keys
     segment_register = {}

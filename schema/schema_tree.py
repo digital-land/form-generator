@@ -2,7 +2,8 @@ from collections import namedtuple
 from dataclasses import dataclass, field
 from typing import Any, List
 
-from builder.planning_app_data_spec_bin.models import FieldDef
+
+from builder.planning_app_data_spec import Field
 from schema import tidy_string
 
 
@@ -17,7 +18,7 @@ class SchemaSegment:
     name: str
     description: str
     descendants: List[Any] = field(default_factory=list)  # really it's SchemaSegment
-    fields: List[FieldDef] = field(default_factory=list)
+    fields: List[Field] = field(default_factory=list)
 
 
 class SchemaNode:
