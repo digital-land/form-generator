@@ -308,9 +308,9 @@ class ConflictOfInterest(SchemaNode):
         display="Conflict to declare",
         description="Indicates whether any named applicant or agent has a relationship to the planning authority that must be declared",
     )
-    conflict_person_name = StringField(
-        display="Conflict person name",
-        description="Name of the individual with the conflict of interest that matches one of the names provided in applicants/agent section",
+    person_reference = StringField(
+        display="Person reference",
+        description="A reference to an applicant, agent or named individual",
         max_length=None,
     )
     conflict_details = StringField(
@@ -325,7 +325,11 @@ class ConflictOfInterest(SchemaNode):
 
 
 class Declaration(SchemaNode):
-    name = StringField(display="Name", description="A name of a person", max_length=None)
+    person_reference = StringField(
+        display="Person reference",
+        description="A reference to an applicant, agent or named individual",
+        max_length=None,
+    )
     declaration_confirmed = BooleanField(
         display="Declaration confirmed",
         description="Confirms the applicant or agent has reviewed and validated the information provided in the application",
@@ -1212,9 +1216,6 @@ class FloorspaceDetailsOutline(SchemaNode):
         description="A specified use if no applicable use class is available",
         max_length=None,
     )
-    not_applicable = BooleanField(
-        display="Not applicable", description="Whether the facility is not applicable"
-    )
     existing_gross_floorspace = StringField(
         display="Existing gross floorspace",
         description="Existing gross internal floorspace, in sqm",
@@ -1329,9 +1330,6 @@ class RoomDetailsOutline(SchemaNode):
     )
     use_other = StringField(
         display="Use other", description='Specify use if use is "other"', max_length=None
-    )
-    not_applicable = BooleanField(
-        display="Not applicable", description="Whether the facility is not applicable"
     )
     is_existing_rooms_lost_known = BooleanField(
         display="Is existing rooms lost known",
@@ -1469,15 +1467,14 @@ class OwnershipCerts(SchemaNode):
             ),
         ],
     )
-    applicant_signature = StringField(
-        display="Applicant signature",
-        description="Digital signature of the applicant",
+    person_reference = StringField(
+        display="Person reference",
+        description="A reference to an applicant, agent or named individual",
         max_length=None,
     )
-    agent_signature = StringField(
-        display="Agent signature",
-        description="Digital signature of the agent (if applicable)",
-        max_length=None,
+    declaration_confirmed = BooleanField(
+        display="Declaration confirmed",
+        description="Confirms the applicant or agent has reviewed and validated the information provided in the application",
     )
     declaration_date = StringField(
         display="Declaration date", description="The date the declaration was made", max_length=None
@@ -1724,7 +1721,7 @@ class RelatedApplication(SchemaNode):
     )
     description = StringField(
         display="Description",
-        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        description="A text description providing details about the subject.",
         max_length=None,
     )
     decision_date = StringField(
@@ -1741,7 +1738,7 @@ class RelatedApplication(SchemaNode):
 class ProposalDetails(SchemaNode):
     description = StringField(
         display="Description",
-        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        description="A text description providing details about the subject.",
         max_length=None,
     )
     reserved_matters = EnumField(
@@ -2102,7 +2099,7 @@ class SiteLocations(SchemaNode):
     )
     description = StringField(
         display="Description",
-        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        description="A text description providing details about the subject.",
         max_length=None,
     )
     uprns = StringField(
@@ -2233,7 +2230,7 @@ class Documents(SchemaNode):
     name = StringField(display="Name", description="A name of a person", max_length=None)
     description = StringField(
         display="Description",
-        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        description="A text description providing details about the subject.",
         max_length=None,
     )
     document_types = StringField(
@@ -2277,14 +2274,32 @@ class Fee(SchemaNode):
     _description = "Structure for application fees including amounts due, amounts paid, and transaction references "
 
 
-class Application(SchemaNode):
-    reference = StringField(
-        display="Reference", description="A unique reference for the data item", max_length=None
+class SubmissionDetails(SchemaNode):
+    submission_reference = StringField(
+        display="Submission reference",
+        description="A unique reference for the submission",
+        max_length=None,
     )
     application_types = StringField(
         display="Application types",
         description="A list of planning application types that define the nature of the planning application",
         max_length=None,
+    )
+    specification_profile = EnumField(
+        display="Specification profile",
+        description="The specification profile used to determine context-specific allowed codelist values for the application",
+        select_options=[
+            EnumOption(
+                key="mhclg-core",
+                label="MHCLG core",
+                description="The core national specification profile used by MHCLG.",
+            ),
+            EnumOption(
+                key="gla",
+                label="GLA",
+                description="The Greater London Authority profile used where GLA-specific requirements apply.",
+            ),
+        ],
     )
     planning_authority = EnumField(
         display="Planning authority",
@@ -3627,20 +3642,20 @@ class Application(SchemaNode):
             ),
         ],
     )
-    submission_date = StringField(
-        display="Submission date",
-        description="Date the application is submitted in YYYY-MM-DD format",
+    submitted_at = StringField(
+        display="Submitted at",
+        description="The date and time the application was submitted",
         max_length=None,
     )
-    modules = StringField(
-        display="Modules",
-        description="List of required modules for this application that can be used to validate the application",
+    created_at = StringField(
+        display="Created at",
+        description="The date and time the submission payload was created",
         max_length=None,
     )
 
-    _ref = "application"
-    _display = "Planning application"
-    _description = "Core planning application structure containing reference information, application types, submission details, modules, documents, and fees "
+    _ref = "submission-details"
+    _display = "Submission details"
+    _description = "Details about the submitted payload, including reference information, application types, specification profile, destination, documents, and fees "
     _descendants = [Documents, Fee]
 
 
@@ -3944,7 +3959,7 @@ class TradeEffluent(SchemaNode):
     )
     description = StringField(
         display="Description",
-        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        description="A text description providing details about the subject.",
         max_length=None,
     )
 
@@ -4076,10 +4091,8 @@ class ParkingSpaces(SchemaNode):
         description="Total number of proposed parking spaces",
         max_length=None,
     )
-    unknown_proposed = StringField(
-        display="Unknown proposed",
-        description="If proposed parking spaces is unknown",
-        max_length=None,
+    unknown_proposed = BooleanField(
+        display="Unknown proposed", description="If proposed parking spaces is unknown"
     )
     difference_in_spaces = StringField(
         display="Difference in spaces",
@@ -4159,7 +4172,7 @@ class TechnicalDetailsConsent(SchemaNode):
     _display = "Technical details consent"
     _description = "Technical Details Consent (TDC) is the second stage of the 'Permission in Principle' (PiP) process in planning, primarily for housing-led development. It follows the initial 'Permission in Principle' stage, which establishes whether a site is suitable in principle for development. TDC assesses the detailed design, layout, and other technical aspects of the proposed development. "
     _descendants = [
-        Application,
+        SubmissionDetails,
         AccessRightsOfWay,
         AgentContact,
         AgentDetails,
@@ -4199,7 +4212,7 @@ class CommunityConsultation(SchemaNode):
     )
     description = StringField(
         display="Description",
-        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        description="A text description providing details about the subject.",
         max_length=None,
     )
 
@@ -4244,7 +4257,7 @@ class Demolition(SchemaNode):
     )
     description = StringField(
         display="Description",
-        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        description="A text description providing details about the subject.",
         max_length=None,
     )
     reason = StringField(display="Reason", description="A textual reason", max_length=None)
@@ -4375,7 +4388,7 @@ class RelatedApplications(SchemaNode):
     )
     description = StringField(
         display="Description",
-        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        description="A text description providing details about the subject.",
         max_length=None,
     )
     decision_date = StringField(
@@ -4407,7 +4420,7 @@ class Lbc(SchemaNode):
     _display = "Listed building consent"
     _description = "An application for works for the demolition of a listed building or for its alteration or extension in any manner which would affect its character as a building of special architectural or historic interest"
     _descendants = [
-        Application,
+        SubmissionDetails,
         AgentContact,
         AgentDetails,
         ApplicantContact,
@@ -4433,7 +4446,7 @@ class Lbc(SchemaNode):
 class DescProposedWorksLbLdc(SchemaNode):
     description = StringField(
         display="Description",
-        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        description="A text description providing details about the subject.",
         max_length=None,
     )
 
@@ -4508,11 +4521,9 @@ class LdcProposedWorkLb(SchemaNode):
 
     _ref = "ldc-proposed-work-lb"
     _display = "LDC Proposed Work to a Listed Building"
-    _description = "Proposed work to a listed building"
+    _description = "An application for a certificate confirming whether proposed works to a listed building would be lawful because they do not require listed building consent"
     _descendants = [
-        DescProposedWorksLbLdc,
-        GroundsForApplication,
-        LbGrade,
+        SubmissionDetails,
         AgentContact,
         AgentDetails,
         ApplicantContact,
@@ -4520,7 +4531,10 @@ class LdcProposedWorkLb(SchemaNode):
         ConflictOfInterest,
         Checklist,
         Declaration,
+        DescProposedWorksLbLdc,
+        GroundsForApplication,
         InterestDetails,
+        LbGrade,
         PreAppAdvice,
         SiteDetails,
         SiteVisit,
@@ -4580,7 +4594,7 @@ class HedgerowRemovalapplicationresolved(SchemaNode):
     _display = "Hedgerow removal notice"
     _description = "An application for anyone proposing to remove a hedgerow, or part of a hedgerow"
     _descendants = [
-        Application,
+        SubmissionDetails,
         ApplicantContact,
         ApplicantDetails,
         AgentContact,
@@ -4600,7 +4614,7 @@ class PriorApproval(SchemaNode):
     _display = "Prior approval"
     _description = "This applies to developments with permitted development rights (where developments are granted planning permission by national legislation without the need to submit a planning application)"
     _descendants = [
-        Application,
+        SubmissionDetails,
         AgentContact,
         AgentDetails,
         ApplicantContact,
@@ -5051,7 +5065,7 @@ class ReservedMatters(SchemaNode):
     _display = "Reserved matters"
     _description = "This application is only required when the applicant has already been granted outline planning permission. Reserved matters can include appearance, means of access, landscaping, layout and scale"
     _descendants = [
-        Application,
+        SubmissionDetails,
         AgentContact,
         AgentDetails,
         ApplicantContact,
@@ -5081,7 +5095,7 @@ class DemolitionConArea(SchemaNode):
     _display = "Planning permission for relevant demolition in a conservation area"
     _description = "An application for planning permission involving the demolition of any unlisted building or structure in a conservation area if permission is required"
     _descendants = [
-        Application,
+        SubmissionDetails,
         ApplicantContact,
         ApplicantDetails,
         AgentContact,
@@ -5154,7 +5168,7 @@ class TreeDetails(SchemaNode):
 class TreeWorkDetails(SchemaNode):
     description = StringField(
         display="Description",
-        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        description="A text description providing details about the subject.",
         max_length=None,
     )
 
@@ -5219,7 +5233,7 @@ class ConsentUnderTpo(SchemaNode):
     _display = "Consent under TPO"
     _description = "An application that will affect a protected tree including those covered by a Tree Preservation Order (TPO) or those which grow in a conservation area"
     _descendants = [
-        Application,
+        SubmissionDetails,
         AgentContact,
         AgentDetails,
         ApplicantContact,
@@ -5276,7 +5290,7 @@ class OutlineSome(SchemaNode):
 class DescWorkImpactsRisks(SchemaNode):
     description = StringField(
         display="Description",
-        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        description="A text description providing details about the subject.",
         max_length=None,
     )
     dwellinghouse_height = StringField(
@@ -5462,7 +5476,7 @@ class NonResidentialUse(SchemaNode):
 class ProposalDetailsIncNonResidential(SchemaNode):
     description = StringField(
         display="Description",
-        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        description="A text description providing details about the subject.",
         max_length=None,
     )
     net_dwellings_min = StringField(
@@ -5730,7 +5744,7 @@ class Pip(SchemaNode):
     _display = "Permission in principle"
     _description = "An alternative way of getting planning permission for housing-led development which separates the consideration of matters of principle from the technical detail of the development"
     _descendants = [
-        Application,
+        SubmissionDetails,
         AgentDetails,
         AgentContact,
         ApplicantDetails,
@@ -5804,7 +5818,7 @@ class S73(SchemaNode):
     _display = "Removal or variation of a condition following grant of planning permission"
     _description = "Applications for a removal or variation of a condition after planning permission has been granted"
     _descendants = [
-        Application,
+        SubmissionDetails,
         AgentContact,
         AgentDetails,
         ApplicantContact,
@@ -5828,7 +5842,7 @@ class Parking(SchemaNode):
     )
     description = StringField(
         display="Description",
-        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        description="A text description providing details about the subject.",
         max_length=None,
     )
 
@@ -5845,7 +5859,7 @@ class Hh(SchemaNode):
     _display = "Householder planning application"
     _description = "A simplified process for applications to alter or enlarge a single house (but not a flat), including works within the boundary/garden"
     _descendants = [
-        Application,
+        SubmissionDetails,
         AccessRightsOfWay,
         AgentContact,
         AgentDetails,
@@ -5872,7 +5886,7 @@ class Outline(SchemaNode):
     _display = "Outline planning"
     _description = "Applications that are used to understand whether the basic nature of a development is viable"
     _descendants = [
-        Application,
+        SubmissionDetails,
         AgentContact,
         AgentDetails,
         ApplicantContact,
@@ -5902,39 +5916,57 @@ class DesignatedAreas(SchemaNode):
         display="Designations",
         description="List of designated areas that apply to the site",
         select_options=[
-            EnumOption(key="world-heritage-site", label="World Heritage Site", description=None),
-            EnumOption(key="national-park", label="National Park", description=None),
+            EnumOption(
+                key="world-heritage-site",
+                label="World Heritage Site",
+                description="Site of global cultural or natural importance",
+            ),
+            EnumOption(
+                key="national-park",
+                label="National Park",
+                description="Protected area for natural beauty and recreation",
+            ),
             EnumOption(
                 key="area-outstanding-natural-beauty",
                 label="Area of Outstanding Natural Beauty (AONB)",
-                description=None,
+                description="Designated for distinctive landscape value",
             ),
             EnumOption(
                 key="site-special-scientific-interest",
                 label="Site of Special Scientific Interest (SSSI)",
-                description=None,
+                description="Protected for wildlife, geology, or landform",
             ),
             EnumOption(
-                key="national-nature-reserve", label="National Nature Reserve", description=None
+                key="national-nature-reserve",
+                label="National Nature Reserve",
+                description="Important area for wildlife and conservation",
             ),
-            EnumOption(key="conservation-area", label="Conservation Area", description=None),
+            EnumOption(
+                key="conservation-area",
+                label="Conservation Area",
+                description="Area designated for historical or architectural significance",
+            ),
             EnumOption(
                 key="special-area-conservation",
                 label="Special Area of Conservation",
-                description=None,
+                description="Designated under the EU Habitats Directive",
             ),
             EnumOption(
                 key="special-protection-area",
                 label="Special Protection Area/Ramsar site",
-                description=None,
+                description="Protected for bird species under the EU Birds Directive",
             ),
-            EnumOption(key="green-belt", label="Green Belt", description=None),
+            EnumOption(
+                key="green-belt",
+                label="Green Belt",
+                description="Area designated to prevent urban sprawl",
+            ),
             EnumOption(
                 key="secretary-specified-area",
                 label="Secretary of State Protected Area",
-                description=None,
+                description="",
             ),
-            EnumOption(key="the-broads", label="The Broads", description=None),
+            EnumOption(key="the-broads", label="The Broads", description=""),
         ],
     )
 
@@ -6183,7 +6215,7 @@ class DevType(SchemaNode):
     )
     description = StringField(
         display="Description",
-        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        description="A text description providing details about the subject.",
         max_length=None,
     )
     quantity_cubic_metres = StringField(
@@ -6261,7 +6293,7 @@ class ExtractionOilGas(SchemaNode):
     _display = "Development relating to the onshore extraction of oil and gas"
     _description = "Development relating to the onshore extraction of oil and gas (including exploratory, appraisal and production phases) and the associated plans, documents and validation information required to support an application. "
     _descendants = [
-        Application,
+        SubmissionDetails,
         AgentContact,
         AgentDetails,
         ApplicantContact,
@@ -6352,7 +6384,7 @@ class ReplacementDocuments(SchemaNode):
 class NmAmendmentDetails(SchemaNode):
     description = StringField(
         display="Description",
-        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        description="A text description providing details about the subject.",
         max_length=None,
     )
     is_substituting_document = BooleanField(
@@ -6377,7 +6409,7 @@ class NonMaterialAmendment(SchemaNode):
         "An application for any minor changes to proposals that have already been approved"
     )
     _descendants = [
-        Application,
+        SubmissionDetails,
         AgentContact,
         AgentDetails,
         ApplicantContact,
@@ -6466,7 +6498,7 @@ class AdvertisementProposalType(SchemaNode):
 class AdvertisementTypes(SchemaNode):
     description = StringField(
         display="Description",
-        description="A text description providing details about the subject. For parking changes, this describes how the proposed works affect existing car parking arrangements.",
+        description="A text description providing details about the subject.",
         max_length=None,
     )
 
@@ -6591,7 +6623,7 @@ class Advertising(SchemaNode):
     _display = "Advertising"
     _description = "An application for all types of advertisements and signs"
     _descendants = [
-        Application,
+        SubmissionDetails,
         AdvertLocation,
         AdvertPeriod,
         AdvertisementTypes,
@@ -6617,7 +6649,7 @@ class Ldc(SchemaNode):
     _display = "Lawful development certificate"
     _description = "A legal document stating the lawfulness of past, present or future building use, operation or other matters, signifying that enforcement action cannot be carried out against the development"
     _descendants = [
-        Application,
+        SubmissionDetails,
         AgentContact,
         AgentDetails,
         ApplicantContact,
@@ -6638,7 +6670,7 @@ class Full(SchemaNode):
     _display = "Full planning permission"
     _description = "This application is needed when making detailed proposals for developments which are not covered by a householder application or permitted development rights"
     _descendants = [
-        Application,
+        SubmissionDetails,
         AccessRightsOfWay,
         AgentContact,
         AgentDetails,
@@ -6753,39 +6785,57 @@ class EligibilityExtension(SchemaNode):
         display="Site constraints",
         description="List of specific site constraints that restrict development",
         select_options=[
-            EnumOption(key="world-heritage-site", label="World Heritage Site", description=None),
-            EnumOption(key="national-park", label="National Park", description=None),
+            EnumOption(
+                key="world-heritage-site",
+                label="World Heritage Site",
+                description="Site of global cultural or natural importance",
+            ),
+            EnumOption(
+                key="national-park",
+                label="National Park",
+                description="Protected area for natural beauty and recreation",
+            ),
             EnumOption(
                 key="area-outstanding-natural-beauty",
                 label="Area of Outstanding Natural Beauty (AONB)",
-                description=None,
+                description="Designated for distinctive landscape value",
             ),
             EnumOption(
                 key="site-special-scientific-interest",
                 label="Site of Special Scientific Interest (SSSI)",
-                description=None,
+                description="Protected for wildlife, geology, or landform",
             ),
             EnumOption(
-                key="national-nature-reserve", label="National Nature Reserve", description=None
+                key="national-nature-reserve",
+                label="National Nature Reserve",
+                description="Important area for wildlife and conservation",
             ),
-            EnumOption(key="conservation-area", label="Conservation Area", description=None),
+            EnumOption(
+                key="conservation-area",
+                label="Conservation Area",
+                description="Area designated for historical or architectural significance",
+            ),
             EnumOption(
                 key="special-area-conservation",
                 label="Special Area of Conservation",
-                description=None,
+                description="Designated under the EU Habitats Directive",
             ),
             EnumOption(
                 key="special-protection-area",
                 label="Special Protection Area/Ramsar site",
-                description=None,
+                description="Protected for bird species under the EU Birds Directive",
             ),
-            EnumOption(key="green-belt", label="Green Belt", description=None),
+            EnumOption(
+                key="green-belt",
+                label="Green Belt",
+                description="Area designated to prevent urban sprawl",
+            ),
             EnumOption(
                 key="secretary-specified-area",
                 label="Secretary of State Protected Area",
-                description=None,
+                description="",
             ),
-            EnumOption(key="the-broads", label="The Broads", description=None),
+            EnumOption(key="the-broads", label="The Broads", description=""),
         ],
     )
 
@@ -6850,7 +6900,7 @@ class ApprovalCondition(SchemaNode):
     _display = "Approval of details reserved by condition"
     _description = "An application to have conditions approved which have been applied at the time of granting a planning permission to limit and control the way in which the planning permission has been implemented"
     _descendants = [
-        Application,
+        SubmissionDetails,
         AgentContact,
         AgentDetails,
         ApplicantContact,
@@ -6885,7 +6935,7 @@ class NoticeTreesInConArea(SchemaNode):
     _display = "Notification of proposed works to trees in a conservation area"
     _description = "Notification, 6 weeks prior to works being carried out, of proposed works to a tree in a conservation area that is not subject to a Tree Preservation order"
     _descendants = [
-        Application,
+        SubmissionDetails,
         AgentContact,
         AgentDetails,
         ApplicantContact,
