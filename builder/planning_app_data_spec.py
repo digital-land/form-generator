@@ -40,6 +40,7 @@ class Field(SchemaBase):
     typology: str | None = None
     start_date: str | None = None
     replacement_field: str | None = None
+    rules: list[Rule] = field(default_factory=list)
 
 
 @dataclass
@@ -183,7 +184,9 @@ class PlanningAppDataSpec:
 
             extra_keys = set(post_native.keys()) - expected_field_names
             if len(extra_keys) > 0:
+
                 msg = f"Unexpected attributes in {path}: " + ", ".join(list(extra_keys))
+                msg += f". Should field(s) be added to the '{data_cls.__name__}' dataclass?"
                 if self.hard_fail:
                     raise ValueError(msg)
                 else:
