@@ -163,6 +163,7 @@ def render_python(project_root, planning_application_spec_path):
                         raise ValueError("Reserved word for schema classes found as field name.")
 
                     field_info = {
+                        "ref": f.ref,
                         "display": f.name,
                         "description": f.description,
                     }

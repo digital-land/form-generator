@@ -21,6 +21,16 @@ class SchemaSegment:
     fields: List[Field] = field(default_factory=list)
 
 
+class SchemaValidationException(Exception):
+    """
+    Raised when data that doesn't conform with the schema is parsed.
+    """
+
+    def __init__(self, reasons):
+        self.reasons = reasons
+        super().__init__("; ".join(reasons))
+
+
 class SchemaNode:
     """
     Abstract class to represent a grouping of fields and their validation logic in the schema tree.
@@ -41,6 +51,46 @@ class SchemaNode:
             if isinstance(cls_attr, SchemaNodeField):
                 descendants.append(cls_attr.schema_node_cls)
         return descendants
+
+    def load_payload(self, payload):
+        """
+        Recursive resolve
+        @return None
+        @raise :class:`SchemaValidationException` is payload doesn't conform to schema
+        """
+        schema_node_cls = self.__class__
+        failure_reasons = []
+        for k, v in payload.items():
+
+            try:
+                schema_field = getattr(schema_node_cls, k)
+            except AttributeError:
+                failure_reasons.append(f"Unknown field '{k}'")
+                continue
+
+            if not isinstance(schema_field, AbstractSchemaField):
+                # possible security fail if this was allowed
+                failure_reasons.append(f"Attempt to set non-field value: {k}")
+                continue
+
+            setattr(self, k, v)
+
+        if len(failure_reasons) > 0:
+            raise SchemaValidationException(failure_reasons)
+
+    def __getitem__(self, key):
+        """
+        node.phone and node['phone-number'] should be the same thing. The former is the class
+        attribute, the latter is the field's 'ref'.
+        """
+        for k, v in vars(self.__class__).items():
+            if isinstance(v, AbstractSchemaField) and v.ref == key:
+                return getattr(self, k)
+
+        raise KeyError(f"Field {key} not found in {self.__class__.__name__}")
+
+    def __setitem__(self, key, value):
+        raise NotImplementedError("TODO when needed")
 
 
 def schema_node_root_classes():
@@ -71,11 +121,13 @@ def schema_node_classes():
 
 
 class AbstractSchemaField:
-    def __init__(self, display=None, description=None):
+    def __init__(self, ref=None, display=None, description=None):
         """
+        @param ref: (str) - name from specification/schema
         @param display: (str) - name of field suitable for user interface and display to user
         @param description: (str) - also safe to show user, details on how field is used
         """
+        self.ref = ref
         self.display = display
         self.description = description
 
@@ -101,7 +153,7 @@ class AbstractSchemaField:
 
         @return: (dict) - constructor values used by all subclasses
         """
-        return {"display": self.display, "description": self.description}
+        return {"ref": self.ref, "display": self.display, "description": self.description}
 
     def __repr__(self) -> str:
 
