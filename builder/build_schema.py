@@ -159,7 +159,7 @@ def render_python(project_root, planning_application_spec_path):
                 for f in schema_segment.fields:
 
                     field_name = valid_field_name(f)
-                    if field_name == "_descendants":
+                    if field_name in ["_ref", "_display", "_description"]:
                         raise ValueError("Reserved word for schema classes found as field name.")
 
                     field_info = {
@@ -236,17 +236,27 @@ def render_python(project_root, planning_application_spec_path):
 
                 # Look up class name of the segments that are children of schema_segment
                 # the name is needed by the template
-                descendants = []
+
+                descendants_simplified = []
                 for d_segment in schema_segment.descendants:
 
                     for k, v in segment_class_map.items():
                         if v == d_segment:
-                            d_class_name = k
+
+                            # TODO - SchemaNodeField should render itself with repr but class
+                            # is out of scope here. For now, template emulates repr
+
+                            node_info = {
+                                "field_name": valid_field_name(v),
+                                "display": tidy_string(v.name),
+                                "description": tidy_string(v.description),
+                                "schema_node_cls_name": k,
+                            }
+
+                            descendants_simplified.append(node_info)
                             break
                     else:
                         raise ValueError("Can't find schema in class map")
-
-                    descendants.append(d_class_name)
 
                 template_context = {
                     "class_name": class_name,
@@ -254,7 +264,7 @@ def render_python(project_root, planning_application_spec_path):
                     "display": tidy_string(schema_segment.name),
                     "description": tidy_string(schema_segment.description),
                     "schema_fields": fields_simplified,
-                    "descendants": descendants,
+                    "descendants": descendants_simplified,
                 }
                 py_output += form_builder.build(template_context, "schema_tree_class.py.j2")
 

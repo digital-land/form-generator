@@ -21,7 +21,7 @@ def application(application_ref):
 
         form = schema_auto_form(node)(prefix=prefix)
         results = [form]
-        for descendant in node._descendants:
+        for descendant in node.descendant_schema_nodes():
             child_prefix = f"{prefix}.{descendant._ref}" if prefix else descendant._ref
             results.extend(collect_forms(descendant, prefix=child_prefix))
         return results

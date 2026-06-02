@@ -4,7 +4,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.rl_config import defaultPageSize
 from reportlab.lib.units import inch
 
-from schema.schema_tree import AbstractSchemaField
+from schema.schema_tree import AbstractSchemaField, SchemaNodeField
 from schema.planning_applications import schema_node_root_mapping
 
 cm = 2.54
@@ -48,11 +48,12 @@ class GenerateApplication:
         for attr_name, attr_value in vars(schema_node_class).items():
             if attr_name.startswith("_") or not isinstance(attr_value, AbstractSchemaField):
                 continue
-            label = attr_value.display or attr_name
-            schema_fields.append(label)
 
-        for descendant in schema_node_class._descendants:
-            schema_fields.extend(self._dump_all_fields(descendant))
+            if isinstance(attr_value, SchemaNodeField):
+                schema_fields.extend(self._dump_all_fields(attr_value.schema_node_cls))
+            else:
+                label = attr_value.display or attr_name
+                schema_fields.append(label)
 
         return schema_fields
 

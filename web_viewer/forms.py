@@ -7,6 +7,7 @@ from schema.schema_tree import AbstractSchemaField
 from schema.schema_tree import BooleanField as SchemaBooleanField
 from schema.schema_tree import EnumField as SchemaEnumField
 from schema.schema_tree import StringField as SchemaStringField
+from schema.schema_tree import SchemaNodeField as SchemaSchemaNodeField
 
 
 def schema_auto_form(schema_node_class):
@@ -20,7 +21,10 @@ def schema_auto_form(schema_node_class):
         if attr_name.startswith("_") or not isinstance(attr_value, AbstractSchemaField):
             continue
         label = attr_value.display or attr_name
-        if isinstance(attr_value, SchemaBooleanField):
+        if isinstance(attr_value, SchemaSchemaNodeField):
+            # this field describe descendants - ignore it
+            pass
+        elif isinstance(attr_value, SchemaBooleanField):
             form_fields[attr_name] = WTFBooleanField(label)
         elif isinstance(attr_value, SchemaStringField):
             form_fields[attr_name] = WTFStringField(label)

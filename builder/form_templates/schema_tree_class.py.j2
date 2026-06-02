@@ -1,5 +1,5 @@
 {% if document_header %}
-from schema.schema_tree import BooleanField, EnumField, EnumOption, schema_node_root_classes, SchemaNode, StringField
+from schema.schema_tree import BooleanField, EnumField, EnumOption, schema_node_root_classes, SchemaNode, SchemaNodeField, StringField
 {% elif document_footer %}
 # list of roots are loaded here so all the processing is done on startup not for each request.
 # roots are expected to be planning application nodes
@@ -10,11 +10,13 @@ schema_node_root_mapping = {schema_node._ref: schema_node for schema_node in sch
 
 {% else %}
 class {{ class_name }}(SchemaNode):
-    {% for field_name, field_instance in schema_fields %}{{ field_name }} = {{ field_instance.__repr__() }}
-    {% endfor %}
     {% if ref %}_ref = "{{ ref }}"{% endif %}
     {% if display %}_display = "{{ display }}"{% endif %}
     {% if description %}_description = "{{ description }}"{% endif %}
-    {% if descendants %}_descendants = [{{ descendants | join(', ') }}]
-    {% endif %}
+
+    {% for field_name, field_instance in schema_fields %}{{ field_name }} = {{ field_instance.__repr__() }}
+    {% endfor %}
+    {% for node_info in descendants %}{{ node_info.field_name }} = SchemaNodeField(display="{{node_info.display}}", description="{{node_info.description}}", schema_node_cls={{node_info.schema_node_cls_name}})
+    {% endfor %}
+
 {% endif %}

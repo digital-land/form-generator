@@ -30,7 +30,17 @@ class SchemaNode:
     _ref = None
     _display = None
     _description = None
-    _descendants = []
+
+    @classmethod
+    def descendant_schema_nodes(cls):
+        """
+        @return: list of `SchemaNode` for nodes that are descendants of current node.
+        """
+        descendants = []
+        for cls_attr in vars(cls).values():
+            if isinstance(cls_attr, SchemaNodeField):
+                descendants.append(cls_attr.schema_node_cls)
+        return descendants
 
 
 def schema_node_root_classes():
@@ -40,8 +50,10 @@ def schema_node_root_classes():
     all_classes = schema_node_classes()
     referenced = set()
     for cls in all_classes:
-        for descendant in getattr(cls, "_descendants", []):
-            referenced.add(descendant)
+
+        for schema_node_cls in cls.descendant_schema_nodes():
+            referenced.add(schema_node_cls)
+
     return [cls for cls in all_classes if cls not in referenced]
 
 
@@ -66,6 +78,22 @@ class AbstractSchemaField:
         """
         self.display = display
         self.description = description
+
+    def __set_name__(self, owner, name):
+        self._descriptor_name = name
+
+    def __get__(self, instance, instance_class=None) -> object:
+        if instance is None:
+            # class method called.
+            # This means `self` is currently an attribute of the class (so NOT an instance
+            # variable).
+            #
+            # see https://docs.python.org/3/howto/descriptor.html
+            return self
+        return instance.__dict__.get(self._descriptor_name)
+
+    def __set__(self, instance, value) -> None:
+        instance.__dict__[self._descriptor_name] = value
 
     def _common_construction_params(self) -> dict:
         """
@@ -156,3 +184,35 @@ class EnumField(AbstractSchemaField):
 
     def _subclass_construction_params(self):
         return {"select_options": self.select_options}
+
+
+class SchemaNodeField(AbstractSchemaField):
+    """
+    Descendant node is represented as a field.
+
+    Needs to be a field as these are used as class variables which need to be handled slightly
+    differently to instance variables.
+    """
+
+    def __init__(self, **kwargs):
+        """
+        Additional args-
+            schema_node_cls (subclass of :class:`AbstractSchemaField`) - class not instance
+        """
+
+        self.schema_node_cls = kwargs.pop("schema_node_cls", None)
+        super().__init__(**kwargs)
+
+    def _subclass_construction_params(self):
+        return {"schema_node_cls": self.schema_node_cls.__name__}
+
+    def __set__(self, instance, value) -> None:
+        """
+        Load dictionary of values into child node.
+        """
+        assert isinstance(value, dict), "Keys become attributes of self.schema_node_cls"
+
+        node = self.schema_node_cls()
+        node.load_payload(value)
+
+        instance.__dict__[self._descriptor_name] = node
