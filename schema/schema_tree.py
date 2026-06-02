@@ -80,6 +80,8 @@ class SchemaNode:
 
     def __getitem__(self, key):
         """
+        Dictionary like access to fields.
+
         node.phone and node['phone-number'] should be the same thing. The former is the class
         attribute, the latter is the field's 'ref'.
         """
@@ -88,9 +90,6 @@ class SchemaNode:
                 return getattr(self, k)
 
         raise KeyError(f"Field {key} not found in {self.__class__.__name__}")
-
-    def __setitem__(self, key, value):
-        raise NotImplementedError("TODO when needed")
 
 
 def schema_node_root_classes():
