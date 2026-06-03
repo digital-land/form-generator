@@ -152,53 +152,35 @@ class AbstractSchemaField:
 
         @return: (dict) - constructor values used by all subclasses
         """
-        return {"ref": self.ref, "display": self.display, "description": self.description}
+        # required field
+        r = []
+
+        if self.ref is not None:
+            r.append(f'ref="{tidy_string(self.ref)}"')
+
+        if self.display is not None:
+            r.append(f'display="{tidy_string(self.display)}"')
+
+        if self.description is not None:
+            r.append(f'description="{tidy_string(self.description)}"')
+
+        return r
 
     def __repr__(self) -> str:
 
-        construction_kwargs = {
-            **self._common_construction_params(),
-            **self._subclass_construction_params(),
-        }
-
-        kw_pairs = []
-        for k, v in construction_kwargs.items():
-
-            if v is None:
-                kw_pairs.append(f"{k}={v}")
-
-            elif isinstance(v, str):
-
-                # clean schema strings into nicer python
-                vt = tidy_string(v)
-                kw_pairs.append(f'{k}="{vt}"')
-
-            elif isinstance(v, list):
-
-                # MAYBE TODO - recursive as well?
-
-                vt = []
-                for vx in v:
-                    # TODO - breaking Law of Demeter
-                    assert isinstance(vx, EnumOption)
-                    vt.append(repr(vx))
-
-                vtt = ", ".join(vt)
-                kw_pairs.append(f"{k}=[{vtt}]")
-
-            else:
-                raise NotImplementedError(f"TODO: can't repr field: '{k}'")
-
-        construction_s = ", ".join(kw_pairs)
+        construction_kwargs_composite = (
+            self._common_construction_params() + self._subclass_construction_params()
+        )
+        construction_s = ", ".join(construction_kwargs_composite)
         r = f"{self.__class__.__name__}({construction_s})"
         return r
 
     def _subclass_construction_params(self):
         """
-        This method can be implemented by subclasses if they have custom construction args.
-        @return: dict.
+        Hook method can be implemented by subclasses if they have custom construction args.
+        @return: (list of str) as construction key word arguments.
         """
-        return {}
+        return []
 
 
 class StringField(AbstractSchemaField):
@@ -212,7 +194,10 @@ class StringField(AbstractSchemaField):
         super().__init__(**kwargs)
 
     def _subclass_construction_params(self):
-        return {"max_length": self.max_length}
+        if self.max_length is None:
+            # default not needed
+            return []
+        return [f"max_length={self.max_length}"]
 
 
 class BooleanField(AbstractSchemaField):
@@ -234,7 +219,17 @@ class EnumField(AbstractSchemaField):
         super().__init__(**kwargs)
 
     def _subclass_construction_params(self):
-        return {"select_options": self.select_options}
+
+        kw_pairs = []
+        vt = []
+        for vx in self.select_options:
+            assert isinstance(vx, EnumOption)
+            vt.append(repr(vx))
+
+        vtt = ", ".join(vt)
+        kw_pairs.append(f"select_options=[{vtt}]")
+
+        return kw_pairs
 
 
 class SchemaNodeField(AbstractSchemaField):
@@ -248,14 +243,25 @@ class SchemaNodeField(AbstractSchemaField):
     def __init__(self, **kwargs):
         """
         Additional args-
-            schema_node_cls (subclass of :class:`AbstractSchemaField`) - class not instance
+            schema_node_cls (subclass of :class:`AbstractSchemaField` or str naming a subclass)
+                - class not instance
+                - str is used when the class itself isn't available for example, it's out of
+                  scope. An exception will be raised if this hasn't been resolved when an attempt
+                  to use the class is made.
+                  It's a useful feature as it allows repr() to be used on a SchemaNodeField. See
+                  :func:`builder.build_schema.render_python`.
         """
 
         self.schema_node_cls = kwargs.pop("schema_node_cls", None)
+        if self.schema_node_cls is None:
+            raise ValueError("schema_node_cls is a required value")
+
         super().__init__(**kwargs)
 
     def _subclass_construction_params(self):
-        return {"schema_node_cls": self.schema_node_cls.__name__}
+        if isinstance(self.schema_node_cls, str):
+            return [f"schema_node_cls={self.schema_node_cls}"]
+        return [f"schema_node_cls={self.schema_node_cls.__name__}"]
 
     def __set__(self, instance, value) -> None:
         """

@@ -16,7 +16,7 @@ class {{ class_name }}(SchemaNode):
 
     {% for field_name, field_instance in schema_fields %}{{ field_name }} = {{ field_instance.__repr__() }}
     {% endfor %}
-    {% for node_info in descendants %}{{ node_info.field_name }} = SchemaNodeField(display="{{node_info.display}}", description="{{node_info.description}}", schema_node_cls={{node_info.schema_node_cls_name}})
+    {% for field_name, field_instance in descendants %}{{ field_name }} = {{ field_instance.__repr__() }}
     {% endfor %}
 
 {% endif %}

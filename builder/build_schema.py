@@ -12,7 +12,14 @@ from builder.planning_app_data_spec import (
     PlanningAppDataResolved,
 )
 from schema import valid_class_name, valid_field_name, tidy_string
-from schema.schema_tree import BooleanField, EnumField, EnumOption, SchemaSegment, StringField
+from schema.schema_tree import (
+    BooleanField,
+    EnumField,
+    EnumOption,
+    SchemaNodeField,
+    SchemaSegment,
+    StringField,
+)
 
 SHOW_WARNINGS = False
 
@@ -122,22 +129,23 @@ def walk_schema_tree(spec_segment):
         yield s
 
 
-def render_python(project_root, planning_application_spec_path):
+def render_python(project_root, planning_application_spec_path, schema_items):
     """
     @param project_root: (str)
     @param planning_application_spec_path: (str) filesystem location of git repo
             https://github.com/digital-land/planning-application-data-specification/
+    @param schema_items: (iterable of subclasses of :class:`SchemaBase`) to convert into Python
+            code.
+    @return: (str) Python code - see package level README.md for details on how to use this.
     """
 
     form_builder = FormBuilder(project_root=project_root)
     py_output = form_builder.build(dict(document_header=True), "schema_tree_class.py.j2")
 
-    spec_simplified = restructured_spec(planning_application_spec_path)
-
     # assumption - refs are primary keys
     segment_register = {}
     segment_class_map = {}  # class_name -> schema_segment
-    for application_spec_segment in spec_simplified:
+    for application_spec_segment in schema_items:
 
         for schema_segment in walk_schema_tree(application_spec_segment):
             # print(schema_segment.ref)
@@ -153,6 +161,7 @@ def render_python(project_root, planning_application_spec_path):
                     raise ValueError(msg)
 
             else:
+                # just to ensure ref is a primary key within the namespace (type of spec file)
                 segment_register[schema_segment.namespace][schema_segment.ref] = schema_segment
 
                 fields_simplified = []
@@ -173,49 +182,15 @@ def render_python(project_root, planning_application_spec_path):
                     elif f.datatype == "boolean":
                         schema_field = BooleanField(**field_info)
                     elif f.datatype == "enum":
-
-                        # there is a codelist .md file with field names, for now, I'm
-                        # not using this.
-                        csv_file = os.path.join(
-                            planning_application_spec_path,
-                            "data",
-                            "codelist",
-                            f"{f.codelist}.csv",
+                        schema_field = build_enum_field(
+                            planning_application_spec_path, field_info, f.codelist
                         )
 
-                        if not os.path.exists(csv_file):
-
-                            # temp holding pattern
+                        if schema_field is None:
+                            # couldn't be built, for now use a string field
                             schema_field = StringField(**field_info)
-
                             if SHOW_WARNINGS:
-                                warnings.warn(
-                                    f"TODO missing file {csv_file} is probably an http source"
-                                )
-
-                        else:
-
-                            select_options = []
-                            with open(csv_file) as f:
-
-                                csv_r = csv.DictReader(f)
-
-                                if (
-                                    "reference" not in csv_r.fieldnames
-                                    or "name" not in csv_r.fieldnames
-                                ):
-                                    msg = "TODO: Field names should be mapped from field schema"
-                                    raise NotImplementedError(msg)
-
-                                for r in csv_r:
-                                    e = EnumOption(
-                                        key=r["reference"],
-                                        label=r["name"],
-                                        description=r.get("description", None),
-                                    )
-                                    select_options.append(e)
-
-                            schema_field = EnumField(select_options=select_options, **field_info)
+                                warnings.warn(f"TODO missing enum field for {f.ref}")
 
                     else:
                         # default used for now
@@ -241,20 +216,21 @@ def render_python(project_root, planning_application_spec_path):
                 descendants_simplified = []
                 for d_segment in schema_segment.descendants:
 
+                    # find name of class in vanity map
                     for k, v in segment_class_map.items():
                         if v == d_segment:
-
-                            # TODO - SchemaNodeField should render itself with repr but class
-                            # is out of scope here. For now, template emulates repr
-
-                            node_info = {
-                                "field_name": valid_field_name(v),
+                            # SchemaNodeField renders itself by using a str as the schema_node_cls_name
+                            # instead of real class which is out of scope here.
+                            field_info = {
+                                "ref": v.ref,
                                 "display": tidy_string(v.name),
                                 "description": tidy_string(v.description),
-                                "schema_node_cls_name": k,
+                                "schema_node_cls": k,
                             }
+                            field_name = valid_field_name(v)
+                            schema_field = SchemaNodeField(**field_info)
+                            descendants_simplified.append((field_name, schema_field))
 
-                            descendants_simplified.append(node_info)
                             break
                     else:
                         raise ValueError("Can't find schema in class map")
@@ -274,10 +250,61 @@ def render_python(project_root, planning_application_spec_path):
     return py_output
 
 
+def build_enum_field(planning_application_spec_path, field_info, codelist):
+    """
+    Utility function to build :class:`EnumField`
+
+    @param planning_application_spec_path: (str(
+    @param field_info: (dict) - kwargs for EnumField
+
+    @return: EnumField or None if not possible
+        - not possible if data isn't available
+    """
+    # there is a codelist .md file with field names, for now, I'm
+    # not using this.
+    csv_file = os.path.join(
+        planning_application_spec_path,
+        "data",
+        "codelist",
+        f"{codelist}.csv",
+    )
+
+    if not os.path.exists(csv_file):
+
+        # csv_file is probably an http source"
+        return None
+
+    select_options = []
+    with open(csv_file) as f:
+
+        csv_r = csv.DictReader(f)
+
+        if "reference" not in csv_r.fieldnames or "name" not in csv_r.fieldnames:
+            msg = "TODO: Field names should be mapped from field schema"
+            raise NotImplementedError(msg)
+
+        for r in csv_r:
+            e = EnumOption(
+                key=r["reference"],
+                label=r["name"],
+                description=r.get("description", None),
+            )
+            select_options.append(e)
+
+    schema_field = EnumField(select_options=select_options, **field_info)
+    return schema_field
+
+
 if __name__ == "__main__":
     from builder import PROJECT_ROOT
 
+    # TODO get this from local config
     p = "/Users/si/Documents/TPXimpact/Projects/planning-application-data-specification"
 
-    r = render_python(project_root=PROJECT_ROOT, planning_application_spec_path=p)
+    spec_simplified = restructured_spec(p)
+    r = render_python(
+        project_root=PROJECT_ROOT,
+        planning_application_spec_path=p,
+        schema_items=spec_simplified,
+    )
     print(r)
