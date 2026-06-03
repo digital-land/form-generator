@@ -14,8 +14,9 @@ class PhoneNumbers(SchemaNode):
     _display = "Phone number"
     _description = "A substructure for recording a phone number "
 
-    number = StringField(display="Phone number", description="A phone number", max_length=None)
+    number = StringField(ref="number", display="Phone number", description="A phone number")
     contact_priority = EnumField(
+        ref="contact-priority",
         display="Contact priority",
         description="The priority of a number",
         select_options=[
@@ -35,12 +36,13 @@ class ContactDetails(SchemaNode):
     _description = "A substructure for recording contact details "
 
     email = StringField(
+        ref="email",
         display="Email",
         description="The email address that can be used for electronic correspondence with the individual",
-        max_length=None,
     )
 
     phone_numbers = SchemaNodeField(
+        ref="phone-numbers",
         display="Phone number",
         description="A substructure for recording a phone number ",
         schema_node_cls=PhoneNumbers,
@@ -53,10 +55,13 @@ class AgentContact(SchemaNode):
     _description = "Name and contact information if an agent is being used."
 
     agent_reference = StringField(
-        display="Agent reference", description="A reference to an agent object", max_length=None
+        ref="agent-reference",
+        display="Agent reference",
+        description="A reference to an agent object",
     )
 
     contact_details = SchemaNodeField(
+        ref="contact-details",
         display="Contact details",
         description="A substructure for recording contact details ",
         schema_node_cls=ContactDetails,
@@ -68,19 +73,19 @@ class Person(SchemaNode):
     _display = "Person obj"
     _description = "Details of an individual "
 
-    title = StringField(display="Title", description="The title of the individual", max_length=None)
+    title = StringField(ref="title", display="Title", description="The title of the individual")
     first_name = StringField(
-        display="First Name", description="The first name of the individual", max_length=None
+        ref="first-name", display="First Name", description="The first name of the individual"
     )
     last_name = StringField(
-        display="Last Name", description="The last name of the individual", max_length=None
+        ref="last-name", display="Last Name", description="The last name of the individual"
     )
     address_text = StringField(
+        ref="address-text",
         display="Address Text",
         description="Flexible field for capturing addresses",
-        max_length=None,
     )
-    postcode = StringField(display="Postcode", description="The postal code", max_length=None)
+    postcode = StringField(ref="postcode", display="Postcode", description="The postal code")
 
 
 class Agent(SchemaNode):
@@ -89,14 +94,15 @@ class Agent(SchemaNode):
     _description = "Details of the agent acting on behalf of the applicant, including name and organisation if applicable "
 
     reference = StringField(
-        display="Reference", description="A unique reference for the data item", max_length=None
+        ref="reference", display="Reference", description="A unique reference for the data item"
     )
     company = StringField(
+        ref="company",
         display="Company",
         description="The name of a company (that the agent works for)",
-        max_length=None,
     )
     user_role = EnumField(
+        ref="user-role",
         display="User role",
         description="The role of the named individual. Agent or proxy",
         select_options=[
@@ -114,7 +120,10 @@ class Agent(SchemaNode):
     )
 
     person = SchemaNodeField(
-        display="Person obj", description="Details of an individual ", schema_node_cls=Person
+        ref="person",
+        display="Person obj",
+        description="Details of an individual ",
+        schema_node_cls=Person,
     )
 
 
@@ -124,6 +133,7 @@ class AgentDetails(SchemaNode):
     _description = "Name and contact information if an agent is being used."
 
     agent = SchemaNodeField(
+        ref="agent",
         display="Agent obj",
         description="Details of the agent acting on behalf of the applicant, including name and organisation if applicable ",
         schema_node_cls=Agent,
@@ -136,12 +146,13 @@ class ApplicantContact(SchemaNode):
     _description = "Telephone number and email address of the applicant."
 
     applicant_reference = StringField(
+        ref="applicant-reference",
         display="Applicant reference",
         description="Reference to match contact details to a named individual from the applicant details component",
-        max_length=None,
     )
 
     contact_details = SchemaNodeField(
+        ref="contact-details",
         display="Contact details",
         description="A substructure for recording contact details ",
         schema_node_cls=ContactDetails,
@@ -154,11 +165,14 @@ class Applicants(SchemaNode):
     _description = "Details of an individual applicant for the planning application, including their personal information and contact details "
 
     reference = StringField(
-        display="Reference", description="A unique reference for the data item", max_length=None
+        ref="reference", display="Reference", description="A unique reference for the data item"
     )
 
     person = SchemaNodeField(
-        display="Person obj", description="Details of an individual ", schema_node_cls=Person
+        ref="person",
+        display="Person obj",
+        description="Details of an individual ",
+        schema_node_cls=Person,
     )
 
 
@@ -168,6 +182,7 @@ class ApplicantDetails(SchemaNode):
     _description = "Name and contact information for the parties making the application."
 
     applicants = SchemaNodeField(
+        ref="applicants",
         display="Applicant",
         description="Details of an individual applicant for the planning application, including their personal information and contact details ",
         schema_node_cls=Applicants,
@@ -180,6 +195,7 @@ class BngConditionExemptionReasons(SchemaNode):
     _description = "Reason why Biodiversity Net Gain does not apply, referencing specific exemptions or transitional arrangements "
 
     exemption_type = EnumField(
+        ref="exemption-type",
         display="Exemption type",
         description="The type of biodiversity gain exemption from the bng-exemption-type enum",
         select_options=[
@@ -220,7 +236,7 @@ class BngConditionExemptionReasons(SchemaNode):
             ),
         ],
     )
-    reason = StringField(display="Reason", description="A textual reason", max_length=None)
+    reason = StringField(ref="reason", display="Reason", description="A textual reason")
 
 
 class HabitatLossDetails(SchemaNode):
@@ -231,19 +247,19 @@ class HabitatLossDetails(SchemaNode):
     )
 
     loss_date = StringField(
+        ref="loss-date",
         display="Loss date",
         description="Date the activity causing habitat loss or degradation occurred",
-        max_length=None,
     )
     pre_loss_biodiversity_value = StringField(
+        ref="pre-loss-biodiversity-value",
         display="Pre loss biodiversity value",
         description="Biodiversity value immediately before habitat loss or degradation occurred, measured in Habitat Biodiversity Units",
-        max_length=None,
     )
     supporting_evidence = StringField(
+        ref="supporting-evidence",
         display="Supporting evidence",
         description="Description or reference to supporting documents for habitat loss or degradation evidence",
-        max_length=None,
     )
 
 
@@ -253,12 +269,12 @@ class SupportingDocuments(SchemaNode):
     _description = "Reference to a supporting document already listed in application.documents "
 
     reference = StringField(
-        display="Reference", description="A unique reference for the data item", max_length=None
+        ref="reference", display="Reference", description="A unique reference for the data item"
     )
     details = StringField(
+        ref="details",
         display="Details",
         description="Additional details or information about an item",
-        max_length=None,
     )
 
 
@@ -268,45 +284,49 @@ class BngDetails(SchemaNode):
     _description = "Details about the biodiversity net gain assessment including pre-development value, habitat loss information, and required supporting documents "
 
     pre_development_date = StringField(
+        ref="pre-development-date",
         display="Pre development date",
         description="Date of pre-development biodiversity value calculation, must align with application or justified earlier date",
-        max_length=None,
     )
     pre_development_biodiversity_value = StringField(
+        ref="pre-development-biodiversity-value",
         display="Pre development biodiversity value",
         description="Calculated biodiversity value in Habitat Biodiversity Units",
-        max_length=None,
     )
     earlier_date_reason = StringField(
+        ref="earlier-date-reason",
         display="Earlier date reason",
         description="Reason for using a pre-development date that is earlier than the application submission",
-        max_length=None,
     )
     habitat_loss_after_2020 = BooleanField(
+        ref="habitat-loss-after-2020",
         display="Habitat loss after 2020",
         description="Indicates whether there has been degradation of onsite habitat(s) after 30 Jan 2020",
     )
     metric_publication_date = StringField(
+        ref="metric-publication-date",
         display="Metric publication date",
         description="Publication date of the biodiversity metric tool used for calculations",
-        max_length=None,
     )
     irreplaceable_habitats = BooleanField(
+        ref="irreplaceable-habitats",
         display="Irreplaceable habitats",
         description="Indicates whether the site contains any irreplaceable habitats",
     )
     irreplaceable_habitats_details = StringField(
+        ref="irreplaceable-habitats-details",
         display="Irreplaceable habitats details",
         description="Description and references for any irreplaceable habitats identified on the site",
-        max_length=None,
     )
 
     habitat_loss_details = SchemaNodeField(
+        ref="habitat-loss-details",
         display="Habitat loss details",
         description="Details about habitat loss or degradation events that occurred after January 30, 2020 ",
         schema_node_cls=HabitatLossDetails,
     )
     supporting_documents = SchemaNodeField(
+        ref="supporting-documents",
         display="Supporting document",
         description="Reference to a supporting document already listed in application.documents ",
         schema_node_cls=SupportingDocuments,
@@ -321,20 +341,24 @@ class Bng(SchemaNode):
     )
 
     bng_exempt = BooleanField(
+        ref="bng-exempt",
         display="Biodiversity gain exemption",
         description="Statement whether the biodiversity gain condition will apply if permission is granted. Householder applicants need to confirm the biodiversity gain condition does not apply.",
     )
     bng_condition_applies = BooleanField(
+        ref="bng-condition-applies",
         display="Biodiversity gain condition applies",
         description="Does the applicant believe the Biodiversity Gain Condition applies to this application",
     )
 
     bng_condition_exemption_reasons = SchemaNodeField(
+        ref="bng-condition-exemption-reasons",
         display="BNG exemption reason",
         description="Reason why Biodiversity Net Gain does not apply, referencing specific exemptions or transitional arrangements ",
         schema_node_cls=BngConditionExemptionReasons,
     )
     bng_details = SchemaNodeField(
+        ref="bng-details",
         display="Biodiversity net gain details",
         description="Details about the biodiversity net gain assessment including pre-development value, habitat loss information, and required supporting documents ",
         schema_node_cls=BngDetails,
@@ -347,9 +371,9 @@ class Checklist(SchemaNode):
     _description = "Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation."
 
     national_req_types = StringField(
+        ref="national-req-types",
         display="National requirement types",
         description="List of the document types required for the given application type",
-        max_length=None,
     )
 
 
@@ -359,18 +383,19 @@ class ConflictOfInterest(SchemaNode):
     _description = "Details of any conflict of interest that may exist between the applicant and planning authority."
 
     conflict_to_declare = BooleanField(
+        ref="conflict-to-declare",
         display="Conflict to declare",
         description="Indicates whether any named applicant or agent has a relationship to the planning authority that must be declared",
     )
     person_reference = StringField(
+        ref="person-reference",
         display="Person reference",
         description="A reference to an applicant, agent or named individual",
-        max_length=None,
     )
     conflict_details = StringField(
+        ref="conflict-details",
         display="Conflict details",
         description="Details of the conflict of interest including name, role and how the individual is related to the planning authority",
-        max_length=None,
     )
 
 
@@ -380,16 +405,19 @@ class Declaration(SchemaNode):
     _description = "Signed and dated verification of the application's accuracy."
 
     person_reference = StringField(
+        ref="person-reference",
         display="Person reference",
         description="A reference to an applicant, agent or named individual",
-        max_length=None,
     )
     declaration_confirmed = BooleanField(
+        ref="declaration-confirmed",
         display="Declaration confirmed",
         description="Confirms the applicant or agent has reviewed and validated the information provided in the application",
     )
     declaration_date = StringField(
-        display="Declaration date", description="The date the declaration was made", max_length=None
+        ref="declaration-date",
+        display="Declaration date",
+        description="The date the declaration was made",
     )
 
 
@@ -399,13 +427,13 @@ class ExistingEmployees(SchemaNode):
     _description = "Employee count information including full-time, part-time, and total full-time equivalent (FTE) calculations "
 
     full_time = StringField(
-        display="Full-time", description="Number of full-time employees", max_length=None
+        ref="full-time", display="Full-time", description="Number of full-time employees"
     )
     part_time = StringField(
-        display="Part-time", description="Number of part-time employees", max_length=None
+        ref="part-time", display="Part-time", description="Number of part-time employees"
     )
     total_fte = StringField(
-        display="Total FTE", description="Total full-time equivalent (FTE)", max_length=None
+        ref="total-fte", display="Total FTE", description="Total full-time equivalent (FTE)"
     )
 
 
@@ -415,13 +443,13 @@ class ProposedEmployees(SchemaNode):
     _description = "Employee count information including full-time, part-time, and total full-time equivalent (FTE) calculations "
 
     full_time = StringField(
-        display="Full-time", description="Number of full-time employees", max_length=None
+        ref="full-time", display="Full-time", description="Number of full-time employees"
     )
     part_time = StringField(
-        display="Part-time", description="Number of part-time employees", max_length=None
+        ref="part-time", display="Part-time", description="Number of part-time employees"
     )
     total_fte = StringField(
-        display="Total FTE", description="Total full-time equivalent (FTE)", max_length=None
+        ref="total-fte", display="Total FTE", description="Total full-time equivalent (FTE)"
     )
 
 
@@ -431,11 +459,13 @@ class Employment(SchemaNode):
     _description = "How the proposed development will impact existing and proposed employee numbers"
 
     existing_employees = SchemaNodeField(
+        ref="existing-employees",
         display="Employees",
         description="Employee count information including full-time, part-time, and total full-time equivalent (FTE) calculations ",
         schema_node_cls=ExistingEmployees,
     )
     proposed_employees = SchemaNodeField(
+        ref="proposed-employees",
         display="Employees",
         description="Employee count information including full-time, part-time, and total full-time equivalent (FTE) calculations ",
         schema_node_cls=ProposedEmployees,
@@ -448,6 +478,7 @@ class ExistingUseDetails(SchemaNode):
     _description = "Information about a specific existing use on the site, including use class, additional details, and which part of the land it relates to "
 
     use = EnumField(
+        ref="use",
         display="Use",
         description="A use class or type of use",
         select_options=[
@@ -601,12 +632,12 @@ class ExistingUseDetails(SchemaNode):
         ],
     )
     use_details = StringField(
-        display="Use details", description="Further detail of the use", max_length=None
+        ref="use-details", display="Use details", description="Further detail of the use"
     )
     land_part = StringField(
+        ref="land-part",
         display="Land part",
         description="Which part of the land the use relates to",
-        max_length=None,
     )
 
 
@@ -615,35 +646,42 @@ class ExistingUse(SchemaNode):
     _display = "Existing use"
     _description = "How the site is currently being used."
 
-    site_vacant = BooleanField(display="Site vacant", description="Is the site currently vacant")
+    site_vacant = BooleanField(
+        ref="site-vacant", display="Site vacant", description="Is the site currently vacant"
+    )
     last_use_details = StringField(
+        ref="last-use-details",
         display="Last use details",
         description="Description of the last use of the site",
-        max_length=None,
     )
     last_use_end_date = StringField(
+        ref="last-use-end-date",
         display="Last use end date",
         description="Date the last use ended (YYYY-MM-DD format)",
-        max_length=None,
     )
     is_contaminated_land = BooleanField(
-        display="Is contaminated land", description="Is the site known to be contaminated?"
+        ref="is-contaminated-land",
+        display="Is contaminated land",
+        description="Is the site known to be contaminated?",
     )
     is_suspected_contaminated_land = BooleanField(
+        ref="is-suspected-contaminated-land",
         display="Is suspected contaminated land",
         description="Is the site suspected of contamination?",
     )
     proposed_use_contamination_risk = BooleanField(
+        ref="proposed-use-contamination-risk",
         display="Proposed use contamination risk",
         description="Is the proposed use vulnerable to the presence of contamination?",
     )
     contamination_assessment = StringField(
+        ref="contamination-assessment",
         display="Contamination assessment",
         description="Reference to contamination assessment document",
-        max_length=None,
     )
 
     existing_use_details = SchemaNodeField(
+        ref="existing-use-details",
         display="Existing use detail",
         description="Information about a specific existing use on the site, including use class, additional details, and which part of the land it relates to ",
         schema_node_cls=ExistingUseDetails,
@@ -656,9 +694,12 @@ class FloodRiskAssessment(SchemaNode):
     _description = "Results of any flood risk assessments made for the development site"
 
     flood_risk_area = BooleanField(
-        display="Flood risk area", description="Is the site within an area at risk of flooding?"
+        ref="flood-risk-area",
+        display="Flood risk area",
+        description="Is the site within an area at risk of flooding?",
     )
     data_provided_by = EnumField(
+        ref="data-provided-by",
         display="Data provided by",
         description="Who provided the data: Applicant or System/Service?",
         select_options=[
@@ -675,18 +716,22 @@ class FloodRiskAssessment(SchemaNode):
         ],
     )
     flood_risk_assessment = StringField(
+        ref="flood-risk-assessment",
         display="Flood risk assessment",
         description="Reference of the flood risk assessment document",
-        max_length=None,
     )
     within_20m_watercourse = BooleanField(
+        ref="within-20m-watercourse",
         display="Within 20m watercourse",
         description="Whether the development is within 20 metres of a watercourse",
     )
     increases_flood_risk = BooleanField(
-        display="Increases flood risk", description="Whether the development increases flood risk"
+        ref="increases-flood-risk",
+        display="Increases flood risk",
+        description="Whether the development increases flood risk",
     )
     surface_water_disposal = EnumField(
+        ref="surface-water-disposal",
         display="Surface water disposal",
         description="Method for disposing of surface water",
         select_options=[
@@ -724,8 +769,8 @@ class TimeRanges(SchemaNode):
     _display = "Time range"
     _description = "Time range structure for opening and closing times"
 
-    open_time = StringField(display="Open time", description="Opening time", max_length=None)
-    close_time = StringField(display="Close time", description="Closing time", max_length=None)
+    open_time = StringField(ref="open-time", display="Open time", description="Opening time")
+    close_time = StringField(ref="close-time", display="Close time", description="Closing time")
 
 
 class OperationalTimes(SchemaNode):
@@ -734,6 +779,7 @@ class OperationalTimes(SchemaNode):
     _description = "Opening times structure for operational hours by day"
 
     schedule_days = EnumField(
+        ref="schedule-days",
         display="Schedule days",
         description="List of days or day categories that a schedule entry applies to",
         select_options=[
@@ -748,10 +794,11 @@ class OperationalTimes(SchemaNode):
         ],
     )
     closed = BooleanField(
-        display="Closed", description="True or False - explicitly state when closed"
+        ref="closed", display="Closed", description="True or False - explicitly state when closed"
     )
 
     time_ranges = SchemaNodeField(
+        ref="time-ranges",
         display="Time range",
         description="Time range structure for opening and closing times",
         schema_node_cls=TimeRanges,
@@ -764,6 +811,7 @@ class HoursOfOperation(SchemaNode):
     _description = "Hours of operation structure for non-residential use"
 
     use = EnumField(
+        ref="use",
         display="Use",
         description="A use class or type of use",
         select_options=[
@@ -917,14 +965,16 @@ class HoursOfOperation(SchemaNode):
         ],
     )
     use_other = StringField(
-        display="Use other", description='Specify use if use is "other"', max_length=None
+        ref="use-other", display="Use other", description='Specify use if use is "other"'
     )
     hours_not_known = BooleanField(
+        ref="hours-not-known",
         display="Hours not known",
         description="Applicant states they do not know the hours of operation",
     )
 
     operational_times = SchemaNodeField(
+        ref="operational-times",
         display="Operational times",
         description="Opening times structure for operational hours by day",
         schema_node_cls=OperationalTimes,
@@ -939,12 +989,13 @@ class HrsOperation(SchemaNode):
     )
 
     additional_information = StringField(
+        ref="additional-information",
         display="Additional information",
         description="Any additional information (such as hours of use of other machinery within the site-generators, pumps, etc)",
-        max_length=None,
     )
 
     hours_of_operation = SchemaNodeField(
+        ref="hours-of-operation",
         display="Hours of operation",
         description="Hours of operation structure for non-residential use",
         schema_node_cls=HoursOfOperation,
@@ -957,6 +1008,7 @@ class FloorspaceDetails(SchemaNode):
     _description = "Details of non-residential floorspace changes by use class including existing, lost, and proposed amounts"
 
     use = EnumField(
+        ref="use",
         display="Use",
         description="A use class or type of use",
         select_options=[
@@ -1110,29 +1162,29 @@ class FloorspaceDetails(SchemaNode):
         ],
     )
     specified_use = StringField(
+        ref="specified-use",
         display="Specified use",
         description="A specified use if no applicable use class is available",
-        max_length=None,
     )
     existing_gross_floorspace = StringField(
+        ref="existing-gross-floorspace",
         display="Existing gross floorspace",
         description="Existing gross internal floorspace, in sqm",
-        max_length=None,
     )
     floorspace_lost = StringField(
+        ref="floorspace-lost",
         display="Floorspace lost",
         description="Gross floorspace to be lost by change of use, in sqm",
-        max_length=None,
     )
     total_gross_proposed = StringField(
+        ref="total-gross-proposed",
         display="Total gross proposed",
         description="Total gross internal floorspace proposed, in sqm",
-        max_length=None,
     )
     net_additional_floorspace = StringField(
+        ref="net-additional-floorspace",
         display="Net additional floorspace",
         description="Net additional gross internal floorspace, in sqm",
-        max_length=None,
     )
 
 
@@ -1142,6 +1194,7 @@ class FloorspaceDetailsOutline(SchemaNode):
     _description = "Details of non-residential floorspace changes by use class including existing, lost, and proposed amounts. Specifically for outline applications"
 
     use = EnumField(
+        ref="use",
         display="Use",
         description="A use class or type of use",
         select_options=[
@@ -1295,37 +1348,39 @@ class FloorspaceDetailsOutline(SchemaNode):
         ],
     )
     specified_use = StringField(
+        ref="specified-use",
         display="Specified use",
         description="A specified use if no applicable use class is available",
-        max_length=None,
     )
     existing_gross_floorspace = StringField(
+        ref="existing-gross-floorspace",
         display="Existing gross floorspace",
         description="Existing gross internal floorspace, in sqm",
-        max_length=None,
     )
     is_floorspace_lost_known = BooleanField(
+        ref="is-floorspace-lost-known",
         display="Is floorspace lost known",
         description="Whether the amount of floorspace to be lost is known",
     )
     floorspace_lost = StringField(
+        ref="floorspace-lost",
         display="Floorspace lost",
         description="Gross floorspace to be lost by change of use, in sqm",
-        max_length=None,
     )
     is_total_gross_proposed_known = BooleanField(
+        ref="is-total-gross-proposed-known",
         display="Is total gross proposed known",
         description="Whether the total gross proposed floorspace is known",
     )
     total_gross_proposed = StringField(
+        ref="total-gross-proposed",
         display="Total gross proposed",
         description="Total gross internal floorspace proposed, in sqm",
-        max_length=None,
     )
     net_additional_floorspace = StringField(
+        ref="net-additional-floorspace",
         display="Net additional floorspace",
         description="Net additional gross internal floorspace, in sqm",
-        max_length=None,
     )
 
 
@@ -1335,6 +1390,7 @@ class RoomDetails(SchemaNode):
     _description = "Details of room changes for hotels, residential institutions and hostels (C1, C2, C2A use classes)"
 
     use_class_accommodation = EnumField(
+        ref="use-class-accommodation",
         display="Use class for accommodation",
         description="Type of non-residential use class referring to accommodation uses",
         select_options=[
@@ -1361,22 +1417,22 @@ class RoomDetails(SchemaNode):
         ],
     )
     use_other = StringField(
-        display="Use other", description='Specify use if use is "other"', max_length=None
+        ref="use-other", display="Use other", description='Specify use if use is "other"'
     )
     existing_rooms_lost = StringField(
+        ref="existing-rooms-lost",
         display="Existing rooms lost",
         description="Existing rooms to be lost by change of use",
-        max_length=None,
     )
     total_rooms_proposed = StringField(
+        ref="total-rooms-proposed",
         display="Total rooms proposed",
         description="Total rooms proposed (including change of use)",
-        max_length=None,
     )
     net_additional_rooms = StringField(
+        ref="net-additional-rooms",
         display="Net additional rooms",
         description="Net additional rooms following development",
-        max_length=None,
     )
 
 
@@ -1386,6 +1442,7 @@ class RoomDetailsOutline(SchemaNode):
     _description = "Details of room changes for hotels, residential institutions and hostels (C1, C2, C2A use classes)"
 
     use_class_accommodation = EnumField(
+        ref="use-class-accommodation",
         display="Use class for accommodation",
         description="Type of non-residential use class referring to accommodation uses",
         select_options=[
@@ -1412,30 +1469,32 @@ class RoomDetailsOutline(SchemaNode):
         ],
     )
     use_other = StringField(
-        display="Use other", description='Specify use if use is "other"', max_length=None
+        ref="use-other", display="Use other", description='Specify use if use is "other"'
     )
     is_existing_rooms_lost_known = BooleanField(
+        ref="is-existing-rooms-lost-known",
         display="Is existing rooms lost known",
         description="Whether the total existing rooms that will be lost is known",
     )
     existing_rooms_lost = StringField(
+        ref="existing-rooms-lost",
         display="Existing rooms lost",
         description="Existing rooms to be lost by change of use",
-        max_length=None,
     )
     is_total_rooms_proposed_known = BooleanField(
+        ref="is-total-rooms-proposed-known",
         display="Is total rooms proposed known",
         description="Whether the total rooms proposed is known",
     )
     total_rooms_proposed = StringField(
+        ref="total-rooms-proposed",
         display="Total rooms proposed",
         description="Total rooms proposed (including change of use)",
-        max_length=None,
     )
     net_additional_rooms = StringField(
+        ref="net-additional-rooms",
         display="Net additional rooms",
         description="Net additional rooms following development",
-        max_length=None,
     )
 
 
@@ -1445,10 +1504,12 @@ class NonResFloorspace(SchemaNode):
     _description = "Details of changes to non-residential floorspace in the proposed development."
 
     non_residential_change = BooleanField(
+        ref="non-residential-change",
         display="Non residential change",
         description="Does the proposal involve the loss, gain, or change of non-residential floorspace?",
     )
     non_residential_change_outline = EnumField(
+        ref="non-residential-change-outline",
         display="Non residential change",
         description="Does the proposal involve the loss, gain, or change of non-residential floorspace?",
         select_options=[
@@ -1463,21 +1524,25 @@ class NonResFloorspace(SchemaNode):
     )
 
     floorspace_details = SchemaNodeField(
+        ref="floorspace-details",
         display="Floorspace details",
         description="Details of non-residential floorspace changes by use class including existing, lost, and proposed amounts",
         schema_node_cls=FloorspaceDetails,
     )
     floorspace_details_outline = SchemaNodeField(
+        ref="floorspace-details-outline",
         display="Floorspace details",
         description="Details of non-residential floorspace changes by use class including existing, lost, and proposed amounts. Specifically for outline applications",
         schema_node_cls=FloorspaceDetailsOutline,
     )
     room_details = SchemaNodeField(
+        ref="room-details",
         display="Room details",
         description="Details of room changes for hotels, residential institutions and hostels (C1, C2, C2A use classes)",
         schema_node_cls=RoomDetails,
     )
     room_details_outline = SchemaNodeField(
+        ref="room-details-outline",
         display="Room details",
         description="Details of room changes for hotels, residential institutions and hostels (C1, C2, C2A use classes)",
         schema_node_cls=RoomDetailsOutline,
@@ -1490,13 +1555,16 @@ class OwnersAndTenants(SchemaNode):
     _description = "Details of a person that has been notified (often owners and agricultural tenants of the land)"
 
     notice_date = StringField(
+        ref="notice-date",
         display="Notice date",
         description="Date when notice was served to an owner or tenant",
-        max_length=None,
     )
 
     person = SchemaNodeField(
-        display="Person obj", description="Details of an individual ", schema_node_cls=Person
+        ref="person",
+        display="Person obj",
+        description="Details of an individual ",
+        schema_node_cls=Person,
     )
 
 
@@ -1506,13 +1574,16 @@ class LbcOwners(SchemaNode):
     _description = "Details of a person that has been notified (often owners and agricultural tenants of the land)"
 
     notice_date = StringField(
+        ref="notice-date",
         display="Notice date",
         description="Date when notice was served to an owner or tenant",
-        max_length=None,
     )
 
     person = SchemaNodeField(
-        display="Person obj", description="Details of an individual ", schema_node_cls=Person
+        ref="person",
+        display="Person obj",
+        description="Details of an individual ",
+        schema_node_cls=Person,
     )
 
 
@@ -1522,14 +1593,14 @@ class NewspaperNotices(SchemaNode):
     _description = "Details of the newspaper notice published for unknown owners/tenants"
 
     newspaper_name = StringField(
+        ref="newspaper-name",
         display="Newspaper name",
         description="Name of the newspaper where the ownership notice was published",
-        max_length=None,
     )
     publication_date = StringField(
+        ref="publication-date",
         display="Publication date",
         description="Date when the ownership notice was published in the newspaper",
-        max_length=None,
     )
 
 
@@ -1539,18 +1610,22 @@ class OwnershipCerts(SchemaNode):
     _description = "Who will be affected by the proposal and whether they have been notified, such as agricultural tenants"
 
     sole_owner = BooleanField(
-        display="Sole owner", description="Is the applicant the sole owner of the land?"
+        ref="sole-owner",
+        display="Sole owner",
+        description="Is the applicant the sole owner of the land?",
     )
     agricultural_tenants = BooleanField(
+        ref="agricultural-tenants",
         display="Agricultural tenants",
         description="Are there any agricultural tenants on the land?",
     )
     steps_taken = StringField(
+        ref="steps-taken",
         display="Steps taken",
         description="Description of steps taken to identify unknown owners or tenants",
-        max_length=None,
     )
     ownership_cert_option = EnumField(
+        ref="ownership-cert-option",
         display="Ownership certificate type",
         description="The type of ownership certificate based on ownership and tenancy status",
         select_options=[
@@ -1577,29 +1652,35 @@ class OwnershipCerts(SchemaNode):
         ],
     )
     person_reference = StringField(
+        ref="person-reference",
         display="Person reference",
         description="A reference to an applicant, agent or named individual",
-        max_length=None,
     )
     declaration_confirmed = BooleanField(
+        ref="declaration-confirmed",
         display="Declaration confirmed",
         description="Confirms the applicant or agent has reviewed and validated the information provided in the application",
     )
     declaration_date = StringField(
-        display="Declaration date", description="The date the declaration was made", max_length=None
+        ref="declaration-date",
+        display="Declaration date",
+        description="The date the declaration was made",
     )
 
     owners_and_tenants = SchemaNodeField(
+        ref="owners-and-tenants",
         display="Notified person",
         description="Details of a person that has been notified (often owners and agricultural tenants of the land)",
         schema_node_cls=OwnersAndTenants,
     )
     lbc_owners = SchemaNodeField(
+        ref="lbc-owners",
         display="Notified person",
         description="Details of a person that has been notified (often owners and agricultural tenants of the land)",
         schema_node_cls=LbcOwners,
     )
     newspaper_notices = SchemaNodeField(
+        ref="newspaper-notices",
         display="Newspaper notice",
         description="Details of the newspaper notice published for unknown owners/tenants",
         schema_node_cls=NewspaperNotices,
@@ -1614,26 +1695,27 @@ class PreAppAdvice(SchemaNode):
     )
 
     advice_sought = BooleanField(
+        ref="advice-sought",
         display="Pre-application advice sought",
         description="Whether pre-application advice has been sought from the planning authority",
     )
     officer_name = StringField(
+        ref="officer-name",
         display="Officer name",
         description="Name of the planning officer who provided the pre-application advice",
-        max_length=None,
     )
     reference = StringField(
-        display="Reference", description="A unique reference for the data item", max_length=None
+        ref="reference", display="Reference", description="A unique reference for the data item"
     )
     advice_date = StringField(
+        ref="advice-date",
         display="Advice date",
         description="Date when pre-application advice was received, in YYYY-MM-DD format",
-        max_length=None,
     )
     advice_summary = StringField(
+        ref="advice-summary",
         display="Advice summary",
         description="Summary of the pre-application advice received from the planning authority",
-        max_length=None,
     )
 
 
@@ -1643,6 +1725,7 @@ class WasteManagement(SchemaNode):
     _description = "Details of applicable waste management facilities including type, capacity, and throughput information. "
 
     waste_management_facility_type = EnumField(
+        ref="waste-management-facility-type",
         display="Waste management facility type",
         description="Type of waste management facility being described in this entry",
         select_options=[
@@ -1754,11 +1837,12 @@ class WasteManagement(SchemaNode):
         ],
     )
     total_capacity = StringField(
+        ref="total-capacity",
         display="Total capacity",
         description="Total capacity of void in cubic metres (or tonnes/litres)",
-        max_length=None,
     )
     unit_type = EnumField(
+        ref="unit-type",
         display="Unit type",
         description="Unit for capacity/throughput (e.g. cubic metres, tonnes, litres)",
         select_options=[
@@ -1772,11 +1856,12 @@ class WasteManagement(SchemaNode):
         ],
     )
     annual_throughput = StringField(
+        ref="annual-throughput",
         display="Annual throughput",
         description="Maximum annual operational throughput in tonnes/litres",
-        max_length=None,
     )
     unit_type = EnumField(
+        ref="unit-type",
         display="Unit type",
         description="Unit for capacity/throughput (e.g. cubic metres, tonnes, litres)",
         select_options=[
@@ -1797,24 +1882,24 @@ class WasteStreams(SchemaNode):
     _description = "Annual throughput for different types of waste streams "
 
     municipal = StringField(
+        ref="municipal",
         display="Municipal",
         description="Maximum throughput for municipal waste (annual throughput in tonnes/litres)",
-        max_length=None,
     )
     construction_demolition = StringField(
+        ref="construction-demolition",
         display="Construction demolition",
         description="Maximum throughput for construction and demolition waste (annual throughput in tonnes/litres)",
-        max_length=None,
     )
     commercial_industrial = StringField(
+        ref="commercial-industrial",
         display="Commercial industrial",
         description="Maximum throughput for commercial and industrial waste (annual throughput in tonnes/litres)",
-        max_length=None,
     )
     hazardous = StringField(
+        ref="hazardous",
         display="Hazardous",
         description="Maximum throughput for hazardous waste (annual throughput in tonnes/litres)",
-        max_length=None,
     )
 
 
@@ -1824,21 +1909,24 @@ class ProcessesMachineryWaste(SchemaNode):
     _description = "How waste will be managed on the site "
 
     site_activity_details = StringField(
+        ref="site-activity-details",
         display="Site activity details",
         description="Description of activities, processes, and end products including site operations, plant, ventilation, and machinery",
-        max_length=None,
     )
     proposal_waste_management = BooleanField(
+        ref="proposal-waste-management",
         display="Proposal waste management",
         description="Whether the proposal involves any waste management facility that is relevant to the proposal",
     )
 
     waste_management = SchemaNodeField(
+        ref="waste-management",
         display="Waste management",
         description="Details of applicable waste management facilities including type, capacity, and throughput information. ",
         schema_node_cls=WasteManagement,
     )
     waste_streams = SchemaNodeField(
+        ref="waste-streams",
         display="Waste streams",
         description="Annual throughput for different types of waste streams ",
         schema_node_cls=WasteStreams,
@@ -1851,17 +1939,17 @@ class RelatedApplication(SchemaNode):
     _description = "Details about a related application including its reference, description and decision date "
 
     reference = StringField(
-        display="Reference", description="A unique reference for the data item", max_length=None
+        ref="reference", display="Reference", description="A unique reference for the data item"
     )
     description = StringField(
+        ref="description",
         display="Description",
         description="A text description providing details about the subject.",
-        max_length=None,
     )
     decision_date = StringField(
+        ref="decision-date",
         display="Decision date",
         description="The date when the decision was made, in YYYY-MM-DD format",
-        max_length=None,
     )
 
 
@@ -1871,11 +1959,12 @@ class ProposalDetails(SchemaNode):
     _description = "What development, works or change of use is proposed"
 
     description = StringField(
+        ref="description",
         display="Description",
         description="A text description providing details about the subject.",
-        max_length=None,
     )
     reserved_matters = EnumField(
+        ref="reserved-matters",
         display="Reserved matters",
         description="Identifies which reserved matters are being submitted for approval as part of this application",
         select_options=[
@@ -1887,33 +1976,38 @@ class ProposalDetails(SchemaNode):
         ],
     )
     proposal_started = BooleanField(
-        display="Proposal started", description="Has any work on the proposal already been started"
+        ref="proposal-started",
+        display="Proposal started",
+        description="Has any work on the proposal already been started",
     )
     proposal_started_date = StringField(
+        ref="proposal-started-date",
         display="Proposal start date",
         description="The date when work on the proposal started, in YYYY-MM-DD format",
-        max_length=None,
     )
     proposal_completed = BooleanField(
+        ref="proposal-completed",
         display="Proposal completed",
         description="Has any work on the proposal already been completed",
     )
     proposal_completed_date = StringField(
+        ref="proposal-completed-date",
         display="Proposal completion date",
         description="The date when work on the proposal was completed, in YYYY-MM-DD format",
-        max_length=None,
     )
     pip_reference = StringField(
+        ref="pip-reference",
         display="PIP reference",
         description="Reference number for the Planning in Principle (PIP) application this relates to",
-        max_length=None,
     )
     is_psi = BooleanField(
+        ref="is-psi",
         display="Is public service infrastructure",
         description="For applications made on or after 1 August 2021, is the proposal for public service infrastructure development",
     )
 
     related_application = SchemaNodeField(
+        ref="related-application",
         display="Related application details",
         description="Details about a related application including its reference, description and decision date ",
         schema_node_cls=RelatedApplication,
@@ -1928,14 +2022,17 @@ class UnitsPerBedroomNo(SchemaNode):
     )
 
     no_bedrooms_unknown = BooleanField(
+        ref="no-bedrooms-unknown",
         display="No bedrooms unknown",
         description="Set to true when counting units where bedroom number is unknown",
     )
     no_of_bedrooms = StringField(
-        display="Number of bedrooms", description="The number of bedrooms in unit", max_length=None
+        ref="no-of-bedrooms",
+        display="Number of bedrooms",
+        description="The number of bedrooms in unit",
     )
     units = StringField(
-        display="Units", description="The number of units of that bedroom count", max_length=None
+        ref="units", display="Units", description="The number of units of that bedroom count"
     )
 
 
@@ -1945,13 +2042,16 @@ class ExistingUnitBreakdown(SchemaNode):
     _description = "Structure for defining quantities of units, either as unknown or broken down by bedroom count "
 
     units_unknown = BooleanField(
-        display="Units unknown", description="Whether the number of units is unknown"
+        ref="units-unknown",
+        display="Units unknown",
+        description="Whether the number of units is unknown",
     )
     total_units = StringField(
-        display="Total units", description="Total number of units", max_length=None
+        ref="total-units", display="Total units", description="Total number of units"
     )
 
     units_per_bedroom_no = SchemaNodeField(
+        ref="units-per-bedroom-no",
         display="Bedroom count",
         description="Structure for counting units by bedroom number, allowing for unknown bedroom counts ",
         schema_node_cls=UnitsPerBedroomNo,
@@ -1964,13 +2064,16 @@ class ProposedUnitBreakdown(SchemaNode):
     _description = "Structure for defining quantities of units, either as unknown or broken down by bedroom count "
 
     units_unknown = BooleanField(
-        display="Units unknown", description="Whether the number of units is unknown"
+        ref="units-unknown",
+        display="Units unknown",
+        description="Whether the number of units is unknown",
     )
     total_units = StringField(
-        display="Total units", description="Total number of units", max_length=None
+        ref="total-units", display="Total units", description="Total number of units"
     )
 
     units_per_bedroom_no = SchemaNodeField(
+        ref="units-per-bedroom-no",
         display="Bedroom count",
         description="Structure for counting units by bedroom number, allowing for unknown bedroom counts ",
         schema_node_cls=UnitsPerBedroomNo,
@@ -1983,6 +2086,7 @@ class ResidentialUnitSummary(SchemaNode):
     _description = "Breakdown of residential unit counts by tenure and housing type, with optional unit breakdowns "
 
     tenure_type = EnumField(
+        ref="tenure-type",
         display="Tenure type",
         description="Category of housing tenure",
         select_options=[
@@ -2085,6 +2189,7 @@ class ResidentialUnitSummary(SchemaNode):
         ],
     )
     housing_type = EnumField(
+        ref="housing-type",
         display="Housing type",
         description="Type of housing",
         select_options=[
@@ -2156,11 +2261,13 @@ class ResidentialUnitSummary(SchemaNode):
     )
 
     existing_unit_breakdown = SchemaNodeField(
+        ref="existing-unit-breakdown",
         display="Unit quantities",
         description="Structure for defining quantities of units, either as unknown or broken down by bedroom count ",
         schema_node_cls=ExistingUnitBreakdown,
     )
     proposed_unit_breakdown = SchemaNodeField(
+        ref="proposed-unit-breakdown",
         display="Unit quantities",
         description="Structure for defining quantities of units, either as unknown or broken down by bedroom count ",
         schema_node_cls=ProposedUnitBreakdown,
@@ -2175,24 +2282,26 @@ class ResUnits(SchemaNode):
     )
 
     will_residential_units_change = BooleanField(
+        ref="will-residential-units-change",
         display="Residential unit change",
         description="Proposal includes the gain, loss or change of use of residential units",
     )
     total_existing_units = StringField(
+        ref="total-existing-units",
         display="Total existing units",
         description="The total number of existing units",
-        max_length=None,
     )
     total_proposed_units = StringField(
+        ref="total-proposed-units",
         display="Total proposed units",
         description="The total number of proposed units",
-        max_length=None,
     )
     net_change = StringField(
-        display="Net change", description="Calculated net change in units", max_length=None
+        ref="net-change", display="Net change", description="Calculated net change in units"
     )
 
     residential_unit_summary = SchemaNodeField(
+        ref="residential-unit-summary",
         display="Residential unit summary",
         description="Breakdown of residential unit counts by tenure and housing type, with optional unit breakdowns ",
         schema_node_cls=ResidentialUnitSummary,
@@ -2205,11 +2314,12 @@ class SiteArea(SchemaNode):
     _description = "How big the site is including relevant measurements"
 
     site_area_in_hectares = StringField(
+        ref="site-area-in-hectares",
         display="Site area in hectares",
         description="The size of the site in hectares",
-        max_length=None,
     )
     site_area_provided_by = EnumField(
+        ref="site-area-provided-by",
         display="Site area provided by",
         description="Who provided the site area value",
         select_options=[
@@ -2233,43 +2343,43 @@ class SiteLocations(SchemaNode):
     _description = "Details about the location of a development site, including its boundary, address, and/or coordinates "
 
     site_boundary = StringField(
+        ref="site-boundary",
         display="Site boundary",
         description="Geometry of the site of the development, typically in GeoJSON format",
-        max_length=None,
     )
     address_text = StringField(
+        ref="address-text",
         display="Address Text",
         description="Flexible field for capturing addresses",
-        max_length=None,
     )
-    postcode = StringField(display="Postcode", description="The postal code", max_length=None)
+    postcode = StringField(ref="postcode", display="Postcode", description="The postal code")
     easting = StringField(
+        ref="easting",
         display="Easting",
         description="Easting coordinate in British National Grid (EPSG:27700)",
-        max_length=None,
     )
     northing = StringField(
+        ref="northing",
         display="Northing",
         description="Northing coordinate in British National Grid (EPSG:27700)",
-        max_length=None,
     )
     latitude = StringField(
-        display="Latitude", description="Latitude coordinate in WGS84 (EPSG:4326)", max_length=None
+        ref="latitude", display="Latitude", description="Latitude coordinate in WGS84 (EPSG:4326)"
     )
     longitude = StringField(
+        ref="longitude",
         display="Longitude",
         description="Longitude coordinate in WGS84 (EPSG:4326)",
-        max_length=None,
     )
     description = StringField(
+        ref="description",
         display="Description",
         description="A text description providing details about the subject.",
-        max_length=None,
     )
     uprns = StringField(
+        ref="uprns",
         display="UPRNs",
         description="Unique Property Reference Numbers (UPRNs) for properties within the site boundary",
-        max_length=None,
     )
 
 
@@ -2279,6 +2389,7 @@ class SiteDetails(SchemaNode):
     _description = "Where the proposed development will be built."
 
     site_locations = SchemaNodeField(
+        ref="site-locations",
         display="Site location",
         description="Details about the location of a development site, including its boundary, address, and/or coordinates ",
         schema_node_cls=SiteLocations,
@@ -2293,13 +2404,13 @@ class OtherContact(SchemaNode):
     )
 
     fullname = StringField(
-        display="Full name", description="The complete name of a person", max_length=None
+        ref="fullname", display="Full name", description="The complete name of a person"
     )
-    number = StringField(display="Phone number", description="A phone number", max_length=None)
+    number = StringField(ref="number", display="Phone number", description="A phone number")
     email = StringField(
+        ref="email",
         display="Email",
         description="The email address that can be used for electronic correspondence with the individual",
-        max_length=None,
     )
 
 
@@ -2309,10 +2420,12 @@ class SiteVisit(SchemaNode):
     _description = "Information to help the planning authority arrange a site visit"
 
     can_be_seen_from = BooleanField(
+        ref="can-be-seen-from",
         display="Site seen from public area",
         description="Can site be seen from a public road, public footpath, bridleway or other public land",
     )
     contact_type = EnumField(
+        ref="contact-type",
         display="Site visit contact type",
         description="Indicates who the authority should contact to arrange a site visit",
         select_options=[
@@ -2323,12 +2436,13 @@ class SiteVisit(SchemaNode):
         ],
     )
     contact_reference = StringField(
+        ref="contact-reference",
         display="Contact reference",
         description="The reference of the applicant or agent who should be contacted for site visits",
-        max_length=None,
     )
 
     other_contact = SchemaNodeField(
+        ref="other-contact",
         display="Other contact",
         description="Details of another contact person for site visits when not using the applicant or agent ",
         schema_node_cls=OtherContact,
@@ -2341,106 +2455,127 @@ class OutlineAll(SchemaNode):
     _description = "Outline planning permission with all matters reserved"
 
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     bng = SchemaNodeField(
+        ref="bng",
         display="Biodiversity net gain",
         description="How any natural habitats on the development site will be improved by the proposed works.",
         schema_node_cls=Bng,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     employment = SchemaNodeField(
+        ref="employment",
         display="Employment",
         description="How the proposed development will impact existing and proposed employee numbers",
         schema_node_cls=Employment,
     )
     existing_use = SchemaNodeField(
+        ref="existing-use",
         display="Existing use",
         description="How the site is currently being used.",
         schema_node_cls=ExistingUse,
     )
     flood_risk_assessment = SchemaNodeField(
+        ref="flood-risk-assessment",
         display="Flood risk assessment",
         description="Results of any flood risk assessments made for the development site",
         schema_node_cls=FloodRiskAssessment,
     )
     hrs_operation = SchemaNodeField(
+        ref="hrs-operation",
         display="Hours of operation",
         description="Proposed operating hours if the proposed development is intended for non-residential use.",
         schema_node_cls=HrsOperation,
     )
     non_res_floorspace = SchemaNodeField(
+        ref="non-res-floorspace",
         display="Non residential floorspace",
         description="Details of changes to non-residential floorspace in the proposed development.",
         schema_node_cls=NonResFloorspace,
     )
     ownership_certs = SchemaNodeField(
+        ref="ownership-certs",
         display="Ownership certificates and agricultural land declaration",
         description="Who will be affected by the proposal and whether they have been notified, such as agricultural tenants",
         schema_node_cls=OwnershipCerts,
     )
     pre_app_advice = SchemaNodeField(
+        ref="pre-app-advice",
         display="Pre-application advice",
         description="Details of pre-application advice previously received from the planning authority",
         schema_node_cls=PreAppAdvice,
     )
     processes_machinery_waste = SchemaNodeField(
+        ref="processes-machinery-waste",
         display="Processes machinery waste",
         description="How waste will be managed on the site ",
         schema_node_cls=ProcessesMachineryWaste,
     )
     proposal_details = SchemaNodeField(
+        ref="proposal-details",
         display="Description of the proposal",
         description="What development, works or change of use is proposed",
         schema_node_cls=ProposalDetails,
     )
     res_units = SchemaNodeField(
+        ref="res-units",
         display="Residential units",
         description="Details of the residential units that make up both the current and proposed development.",
         schema_node_cls=ResUnits,
     )
     site_area = SchemaNodeField(
+        ref="site-area",
         display="Site area",
         description="How big the site is including relevant measurements",
         schema_node_cls=SiteArea,
     )
     site_details = SchemaNodeField(
+        ref="site-details",
         display="Site details",
         description="Where the proposed development will be built.",
         schema_node_cls=SiteDetails,
     )
     site_visit = SchemaNodeField(
+        ref="site-visit",
         display="Site Visit Details",
         description="Information to help the planning authority arrange a site visit",
         schema_node_cls=SiteVisit,
@@ -2453,24 +2588,24 @@ class File(SchemaNode):
     _description = "Structure for digital files to be included in the submission of an application "
 
     base64_content = StringField(
+        ref="base64-content",
         display="Base64",
         description="Base64-encoded content of the file for inline file uploads",
-        max_length=None,
     )
     filename = StringField(
+        ref="filename",
         display="Filename",
         description="Name of the file being uploaded useful for identifying and preserving the file",
-        max_length=None,
     )
     mime_type = StringField(
+        ref="mime-type",
         display="MIME type",
         description="The file's MIME type such as application/pdf or image/jpeg",
-        max_length=None,
     )
     file_size = StringField(
+        ref="file-size",
         display="File size",
         description="Size of the file in bytes that can be used to enforce limits",
-        max_length=None,
     )
 
 
@@ -2482,26 +2617,27 @@ class Documents(SchemaNode):
     )
 
     reference = StringField(
-        display="Reference", description="A unique reference for the data item", max_length=None
+        ref="reference", display="Reference", description="A unique reference for the data item"
     )
-    name = StringField(display="Name", description="A name of a person", max_length=None)
+    name = StringField(ref="name", display="Name", description="A name of a person")
     description = StringField(
+        ref="description",
         display="Description",
         description="A text description providing details about the subject.",
-        max_length=None,
     )
     document_types = StringField(
+        ref="document-types",
         display="Document types",
         description="List of codelist references that the document covers",
-        max_length=None,
     )
     uploaded_date = StringField(
+        ref="uploaded-date",
         display="Uploaded date",
         description="The date the document was uploaded to the application",
-        max_length=None,
     )
 
     file = SchemaNodeField(
+        ref="file",
         display="File",
         description="Structure for digital files to be included in the submission of an application ",
         schema_node_cls=File,
@@ -2514,19 +2650,17 @@ class Fee(SchemaNode):
     _description = "Structure for application fees including amounts due, amounts paid, and transaction references "
 
     amount = StringField(
-        display="Amount",
-        description="The total amount due for the application fee",
-        max_length=None,
+        ref="amount", display="Amount", description="The total amount due for the application fee"
     )
     amount_paid = StringField(
+        ref="amount-paid",
         display="Amount paid",
         description="The amount paid towards the application fee",
-        max_length=None,
     )
     transactions = StringField(
+        ref="transactions",
         display="Transactions",
         description="References to payments or financial transactions related to this application",
-        max_length=None,
     )
 
 
@@ -2536,16 +2670,17 @@ class SubmissionDetails(SchemaNode):
     _description = "Details about the submitted payload, including reference information, application types, specification profile, destination, documents, and fees "
 
     submission_reference = StringField(
+        ref="submission-reference",
         display="Submission reference",
         description="A unique reference for the submission",
-        max_length=None,
     )
     application_types = StringField(
+        ref="application-types",
         display="Application types",
         description="A list of planning application types that define the nature of the planning application",
-        max_length=None,
     )
     specification_profile = EnumField(
+        ref="specification-profile",
         display="Specification profile",
         description="The specification profile used to determine context-specific allowed codelist values for the application",
         select_options=[
@@ -2562,6 +2697,7 @@ class SubmissionDetails(SchemaNode):
         ],
     )
     planning_authority = EnumField(
+        ref="planning-authority",
         display="Planning authority",
         description="A reference of the planning authority the application has been submitted to, e.g. local-authority:CMD for London borough of Camden",
         select_options=[
@@ -3903,22 +4039,24 @@ class SubmissionDetails(SchemaNode):
         ],
     )
     submitted_at = StringField(
+        ref="submitted-at",
         display="Submitted at",
         description="The date and time the application was submitted",
-        max_length=None,
     )
     created_at = StringField(
+        ref="created-at",
         display="Created at",
         description="The date and time the submission payload was created",
-        max_length=None,
     )
 
     documents = SchemaNodeField(
+        ref="documents",
         display="Document",
         description="Structure for submitted documents including reference, metadata, and file information ",
         schema_node_cls=Documents,
     )
     fee = SchemaNodeField(
+        ref="fee",
         display="Fee",
         description="Structure for application fees including amounts due, amounts paid, and transaction references ",
         schema_node_cls=Fee,
@@ -3931,6 +4069,7 @@ class AccessRightsOfWay(SchemaNode):
     _description = "Details of any changes the proposed development would make to existing access arrangements or public rights of way"
 
     new_altered_vehicle = EnumField(
+        ref="new-altered-vehicle",
         display="New or altered vehicle access",
         description="Is a new or altered vehicle access proposed to/from the public highway",
         select_options=[
@@ -3940,6 +4079,7 @@ class AccessRightsOfWay(SchemaNode):
         ],
     )
     new_altered_pedestrian = EnumField(
+        ref="new-altered-pedestrian",
         display="New or altered pedestrian access",
         description="Is a new or altered pedestrian access proposed to/from the public highway",
         select_options=[
@@ -3949,6 +4089,7 @@ class AccessRightsOfWay(SchemaNode):
         ],
     )
     change_right_of_way = EnumField(
+        ref="change-right-of-way",
         display="Change to right of way",
         description="Will the proposal change public rights of way (diversion/extinguishment/creation)",
         select_options=[
@@ -3958,6 +4099,7 @@ class AccessRightsOfWay(SchemaNode):
         ],
     )
     new_right_of_way = EnumField(
+        ref="new-right-of-way",
         display="New right of way",
         description="Will new public rights of way be provided within or adjacent to the site",
         select_options=[
@@ -3967,6 +4109,7 @@ class AccessRightsOfWay(SchemaNode):
         ],
     )
     new_public_road = EnumField(
+        ref="new-public-road",
         display="New public road",
         description="Will new public roads be provided within the site",
         select_options=[
@@ -3976,6 +4119,7 @@ class AccessRightsOfWay(SchemaNode):
         ],
     )
     temp_right_of_way = EnumField(
+        ref="temp-right-of-way",
         display="Temporary right of way changes",
         description="Are temporary changes to rights of way needed while the site is worked",
         select_options=[
@@ -3985,6 +4129,7 @@ class AccessRightsOfWay(SchemaNode):
         ],
     )
     future_new_right_of_way = EnumField(
+        ref="future-new-right-of-way",
         display="Future new right of way",
         description="Will new public rights of way be provided after extraction?",
         select_options=[
@@ -3995,6 +4140,7 @@ class AccessRightsOfWay(SchemaNode):
     )
 
     supporting_documents = SchemaNodeField(
+        ref="supporting-documents",
         display="Supporting document",
         description="Reference to a supporting document already listed in application.documents ",
         schema_node_cls=SupportingDocuments,
@@ -4007,6 +4153,7 @@ class BioGeoArchCon(SchemaNode):
     _description = "Details of potential impacts to the biodiversity of the site, or any noteable archaeological or geological features."
 
     protected_species_impact = EnumField(
+        ref="protected-species-impact",
         display="Protected species impact",
         description="Where is there a likelihood of protected and priority species being affected?",
         select_options=[
@@ -4015,6 +4162,7 @@ class BioGeoArchCon(SchemaNode):
         ],
     )
     biodiversity_features_impact = EnumField(
+        ref="biodiversity-features-impact",
         display="Biodiversity features impact",
         description="Where is there a likelihood of important habitats or biodiversity features being affected?",
         select_options=[
@@ -4023,6 +4171,7 @@ class BioGeoArchCon(SchemaNode):
         ],
     )
     geological_features_impact = EnumField(
+        ref="geological-features-impact",
         display="Geological features impact",
         description="Where is there a likelihood of features of geological conservation importance being affected?",
         select_options=[
@@ -4031,6 +4180,7 @@ class BioGeoArchCon(SchemaNode):
         ],
     )
     archaeological_features_impact = EnumField(
+        ref="archaeological-features-impact",
         display="Archaeological features impact",
         description="Where is there a likelihood of features of archaeological conservation importance being affected?",
         select_options=[
@@ -4046,10 +4196,12 @@ class FoulSewage(SchemaNode):
     _description = "How waste water will leave the property as part of the proposed development"
 
     has_new_disposal_arrangements = BooleanField(
+        ref="has-new-disposal-arrangements",
         display="Has new disposal arrangements",
         description="Does the proposal include any new foul sewage disposal arrangments",
     )
     foul_sewage_disposal_types = EnumField(
+        ref="foul-sewage-disposal-types",
         display="Foul sewage disposal types",
         description="List of ways foul sewage will be disposed of",
         select_options=[
@@ -4061,14 +4213,17 @@ class FoulSewage(SchemaNode):
         ],
     )
     produce_foul_sewage = BooleanField(
+        ref="produce-foul-sewage",
         display="Produce foul sewage",
         description="Whether the proposed development will produce any foul sewage",
     )
     connect_to_drainage_system = BooleanField(
+        ref="connect-to-drainage-system",
         display="Connect to drainage system",
         description="Whether the proposal needs to connect to the existing drainage system",
     )
     connect_to_drainage_system_oil_gas = EnumField(
+        ref="connect-to-drainage-system-oil-gas",
         display="Connect to drainage system (oil and gas)",
         description="Whether the proposal needs to connect to the existing drainage system (oil and gas applications)",
         select_options=[
@@ -4083,6 +4238,7 @@ class FoulSewage(SchemaNode):
     )
 
     supporting_documents = SchemaNodeField(
+        ref="supporting-documents",
         display="Supporting document",
         description="Reference to a supporting document already listed in application.documents ",
         schema_node_cls=SupportingDocuments,
@@ -4095,6 +4251,7 @@ class SubstanceTypes(SchemaNode):
     _description = "Information about a specific hazardous substance including its type, name (if other), and quantity in tonnes "
 
     hazardous_substance_type = EnumField(
+        ref="hazardous-substance-type",
         display="Hazardous substance type",
         description="Reference of hazardous substance type from predefined list",
         select_options=[
@@ -4113,14 +4270,12 @@ class SubstanceTypes(SchemaNode):
         ],
     )
     hazardous_substance_other = StringField(
+        ref="hazardous-substance-other",
         display="Hazardous substance other",
         description="The specific name of the hazardous substance if other is selected",
-        max_length=None,
     )
     amount = StringField(
-        display="Amount",
-        description="The total amount due for the application fee",
-        max_length=None,
+        ref="amount", display="Amount", description="The total amount due for the application fee"
     )
 
 
@@ -4132,6 +4287,7 @@ class HazSubstances(SchemaNode):
     )
 
     involves_hazardous_substances = EnumField(
+        ref="involves-hazardous-substances",
         display="Involves hazardous substances",
         description="Indicates if hazardous substances are involved in the proposal",
         select_options=[
@@ -4145,16 +4301,18 @@ class HazSubstances(SchemaNode):
         ],
     )
     hazardous_sub_consent_req = BooleanField(
+        ref="hazardous-sub-consent-req",
         display="Hazardous substance consent required",
         description="Does the proposal involve the use or storage of any substances requiring hazardous substances consent",
     )
     hazardous_sub_consent_details = StringField(
+        ref="hazardous-sub-consent-details",
         display="Hazardous substance consent details",
         description="Details of hazardous substance consent requirements",
-        max_length=None,
     )
 
     substance_types = SchemaNodeField(
+        ref="substance-types",
         display="Hazardous substance",
         description="Information about a specific hazardous substance including its type, name (if other), and quantity in tonnes ",
         schema_node_cls=SubstanceTypes,
@@ -4167,6 +4325,7 @@ class BuildingElements(SchemaNode):
     _description = "Describes the materials used for a specific part of a building, such as walls, roof, windows or doors "
 
     building_element_type = EnumField(
+        ref="building-element-type",
         display="Building element type",
         description="The part of building the materials relate to, such as walls, roofs, windows, or doors",
         select_options=[
@@ -4202,16 +4361,17 @@ class BuildingElements(SchemaNode):
         ],
     )
     existing_materials = StringField(
+        ref="existing-materials",
         display="Existing materials",
         description="Description of the materials currently used for this building element",
-        max_length=None,
     )
     proposed_materials = StringField(
+        ref="proposed-materials",
         display="Proposed materials",
         description="Description of the materials proposed for this building element as part of the development",
-        max_length=None,
     )
     materials_not_known = BooleanField(
+        ref="materials-not-known",
         display="Materials not known",
         description="Indicates the materials for this building element are not yet known",
     )
@@ -4223,20 +4383,24 @@ class Materials(SchemaNode):
     _description = "What materials are being used for the proposed development"
 
     proposal_material_details = BooleanField(
+        ref="proposal-material-details",
         display="Proposal material details",
         description="Whether the proposal involves material details that need to be provided",
     )
     providing_additional_material_information = BooleanField(
+        ref="providing-additional-material-information",
         display="Providing additional material information",
         description="Is the applicant providing additional materials information on submitted plan(s)/drawing(s)/design and access statement?",
     )
 
     building_elements = SchemaNodeField(
+        ref="building-elements",
         display="Building element",
         description="Describes the materials used for a specific part of a building, such as walls, roof, windows or doors ",
         schema_node_cls=BuildingElements,
     )
     supporting_documents = SchemaNodeField(
+        ref="supporting-documents",
         display="Supporting document",
         description="Reference to a supporting document already listed in application.documents ",
         schema_node_cls=SupportingDocuments,
@@ -4249,13 +4413,14 @@ class TradeEffluent(SchemaNode):
     _description = "Details of any liquid waste produced by industial processes on the proposed site, and how it will be diposed of."
 
     is_disposal_required = BooleanField(
+        ref="is-disposal-required",
         display="Disposal required",
         description="Does the proposal involve the disposal of trade effluents or waste (true/false)",
     )
     description = StringField(
+        ref="description",
         display="Description",
         description="A text description providing details about the subject.",
-        max_length=None,
     )
 
 
@@ -4265,12 +4430,12 @@ class FallingTreesDocument(SchemaNode):
     _description = "Reference to a supporting document already listed in application.documents "
 
     reference = StringField(
-        display="Reference", description="A unique reference for the data item", max_length=None
+        ref="reference", display="Reference", description="A unique reference for the data item"
     )
     details = StringField(
+        ref="details",
         display="Details",
         description="Additional details or information about an item",
-        max_length=None,
     )
 
 
@@ -4280,12 +4445,12 @@ class TreeRemovalPlan(SchemaNode):
     _description = "Reference to a supporting document already listed in application.documents "
 
     reference = StringField(
-        display="Reference", description="A unique reference for the data item", max_length=None
+        ref="reference", display="Reference", description="A unique reference for the data item"
     )
     details = StringField(
+        ref="details",
         display="Details",
         description="Additional details or information about an item",
-        max_length=None,
     )
 
 
@@ -4297,27 +4462,34 @@ class TreesHedges(SchemaNode):
     )
 
     trees_on_site = BooleanField(
+        ref="trees-on-site",
         display="Trees on site",
         description="Whether trees or hedges are present on the proposed development site",
     )
     trees_on_adj_land = BooleanField(
+        ref="trees-on-adj-land",
         display="Trees on adjacent land",
         description="Whether trees or hedges on land adjacent to the proposed development site could influence the development or might be important as part of the local landscape character",
     )
     has_falling_trees_risk = BooleanField(
+        ref="has-falling-trees-risk",
         display="Falling trees risk",
         description="Whether there are falling trees on-premises or adjacent premises that are a risk to the development",
     )
     tree_removal = BooleanField(
-        display="Tree removal", description="Whether trees or hedges need to be pruned or removed"
+        ref="tree-removal",
+        display="Tree removal",
+        description="Whether trees or hedges need to be pruned or removed",
     )
 
     falling_trees_document = SchemaNodeField(
+        ref="falling-trees-document",
         display="Supporting document",
         description="Reference to a supporting document already listed in application.documents ",
         schema_node_cls=FallingTreesDocument,
     )
     tree_removal_plan = SchemaNodeField(
+        ref="tree-removal-plan",
         display="Supporting document",
         description="Reference to a supporting document already listed in application.documents ",
         schema_node_cls=TreeRemovalPlan,
@@ -4330,6 +4502,7 @@ class ParkingSpaces(SchemaNode):
     _description = "Information about parking spaces by vehicle type, including existing and proposed counts with net change calculations "
 
     parking_space_type = EnumField(
+        ref="parking-space-type",
         display="Parking space type",
         description="Type of parking space or vehicle type",
         select_options=[
@@ -4382,27 +4555,29 @@ class ParkingSpaces(SchemaNode):
         ],
     )
     vehicle_type_other = StringField(
+        ref="vehicle-type-other",
         display="Vehicle type other",
         description="Vehicle type when parking space type is 'other'",
-        max_length=None,
     )
     total_existing = StringField(
+        ref="total-existing",
         display="Total existing",
         description="Total number of existing parking spaces",
-        max_length=None,
     )
     total_proposed = StringField(
+        ref="total-proposed",
         display="Total proposed",
         description="Total number of proposed parking spaces",
-        max_length=None,
     )
     unknown_proposed = BooleanField(
-        display="Unknown proposed", description="If proposed parking spaces is unknown"
+        ref="unknown-proposed",
+        display="Unknown proposed",
+        description="If proposed parking spaces is unknown",
     )
     difference_in_spaces = StringField(
+        ref="difference-in-spaces",
         display="Difference in spaces",
         description="Net change in parking spaces (proposed minus existing)",
-        max_length=None,
     )
 
 
@@ -4412,6 +4587,7 @@ class VehicleParking(SchemaNode):
     _description = "Details of current parking facilities at the site and any changes that would be made by the proposed development."
 
     parking_spaces = SchemaNodeField(
+        ref="parking-spaces",
         display="Parking space",
         description="Information about parking spaces by vehicle type, including existing and proposed counts with net change calculations ",
         schema_node_cls=ParkingSpaces,
@@ -4426,10 +4602,12 @@ class WasteStorageCollection(SchemaNode):
     )
 
     needs_waste_storage_area = BooleanField(
+        ref="needs-waste-storage-area",
         display="Needs waste storage area",
         description="Does the proposal require a waste storage area",
     )
     needs_waste_storage_area_outline = EnumField(
+        ref="needs-waste-storage-area-outline",
         display="Needs waste storage area",
         description="Does the proposal require a waste storage area?",
         select_options=[
@@ -4443,15 +4621,17 @@ class WasteStorageCollection(SchemaNode):
         ],
     )
     waste_storage_area_details = StringField(
+        ref="waste-storage-area-details",
         display="Waste storage area details",
         description="Details of the waste storage area including location, size, design and access arrangements",
-        max_length=None,
     )
     separate_recycling_arrangements = BooleanField(
+        ref="separate-recycling-arrangements",
         display="Separate recycling arrangements",
         description="Does the proposal include separate recycling arrangements",
     )
     separate_recycling_arrangements_outline = EnumField(
+        ref="separate-recycling-arrangements-outline",
         display="Separate recycling arrangements (outline)",
         description="Does the proposal include separate recycling arrangements?",
         select_options=[
@@ -4465,9 +4645,9 @@ class WasteStorageCollection(SchemaNode):
         ],
     )
     separate_recycling_arrangements_details = StringField(
+        ref="separate-recycling-arrangements-details",
         display="Separate recycling arrangements details",
         description="Details of the recycling arrangements including types of materials, collection methods and storage facilities",
-        max_length=None,
     )
 
 
@@ -4477,156 +4657,187 @@ class TechnicalDetailsConsent(SchemaNode):
     _description = "Technical Details Consent (TDC) is the second stage of the 'Permission in Principle' (PiP) process in planning, primarily for housing-led development. It follows the initial 'Permission in Principle' stage, which establishes whether a site is suitable in principle for development. TDC assesses the detailed design, layout, and other technical aspects of the proposed development. "
 
     submission_details = SchemaNodeField(
+        ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including reference information, application types, specification profile, destination, documents, and fees ",
         schema_node_cls=SubmissionDetails,
     )
     access_rights_of_way = SchemaNodeField(
+        ref="access-rights-of-way",
         display="Access and rights of way",
         description="Details of any changes the proposed development would make to existing access arrangements or public rights of way",
         schema_node_cls=AccessRightsOfWay,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     bio_geo_arch_con = SchemaNodeField(
+        ref="bio-geo-arch-con",
         display="Biodiversity, geological and archaeological conservation",
         description="Details of potential impacts to the biodiversity of the site, or any noteable archaeological or geological features.",
         schema_node_cls=BioGeoArchCon,
     )
     bng = SchemaNodeField(
+        ref="bng",
         display="Biodiversity net gain",
         description="How any natural habitats on the development site will be improved by the proposed works.",
         schema_node_cls=Bng,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     employment = SchemaNodeField(
+        ref="employment",
         display="Employment",
         description="How the proposed development will impact existing and proposed employee numbers",
         schema_node_cls=Employment,
     )
     existing_use = SchemaNodeField(
+        ref="existing-use",
         display="Existing use",
         description="How the site is currently being used.",
         schema_node_cls=ExistingUse,
     )
     flood_risk_assessment = SchemaNodeField(
+        ref="flood-risk-assessment",
         display="Flood risk assessment",
         description="Results of any flood risk assessments made for the development site",
         schema_node_cls=FloodRiskAssessment,
     )
     foul_sewage = SchemaNodeField(
+        ref="foul-sewage",
         display="Foul sewage disposal",
         description="How waste water will leave the property as part of the proposed development",
         schema_node_cls=FoulSewage,
     )
     haz_substances = SchemaNodeField(
+        ref="haz-substances",
         display="Hazardous substances",
         description="Details of hazardous substances requiring consent used as part of the development",
         schema_node_cls=HazSubstances,
     )
     hrs_operation = SchemaNodeField(
+        ref="hrs-operation",
         display="Hours of operation",
         description="Proposed operating hours if the proposed development is intended for non-residential use.",
         schema_node_cls=HrsOperation,
     )
     materials = SchemaNodeField(
+        ref="materials",
         display="Materials",
         description="What materials are being used for the proposed development",
         schema_node_cls=Materials,
     )
     non_res_floorspace = SchemaNodeField(
+        ref="non-res-floorspace",
         display="Non residential floorspace",
         description="Details of changes to non-residential floorspace in the proposed development.",
         schema_node_cls=NonResFloorspace,
     )
     ownership_certs = SchemaNodeField(
+        ref="ownership-certs",
         display="Ownership certificates and agricultural land declaration",
         description="Who will be affected by the proposal and whether they have been notified, such as agricultural tenants",
         schema_node_cls=OwnershipCerts,
     )
     pre_app_advice = SchemaNodeField(
+        ref="pre-app-advice",
         display="Pre-application advice",
         description="Details of pre-application advice previously received from the planning authority",
         schema_node_cls=PreAppAdvice,
     )
     processes_machinery_waste = SchemaNodeField(
+        ref="processes-machinery-waste",
         display="Processes machinery waste",
         description="How waste will be managed on the site ",
         schema_node_cls=ProcessesMachineryWaste,
     )
     proposal_details = SchemaNodeField(
+        ref="proposal-details",
         display="Description of the proposal",
         description="What development, works or change of use is proposed",
         schema_node_cls=ProposalDetails,
     )
     res_units = SchemaNodeField(
+        ref="res-units",
         display="Residential units",
         description="Details of the residential units that make up both the current and proposed development.",
         schema_node_cls=ResUnits,
     )
     site_area = SchemaNodeField(
+        ref="site-area",
         display="Site area",
         description="How big the site is including relevant measurements",
         schema_node_cls=SiteArea,
     )
     site_details = SchemaNodeField(
+        ref="site-details",
         display="Site details",
         description="Where the proposed development will be built.",
         schema_node_cls=SiteDetails,
     )
     site_visit = SchemaNodeField(
+        ref="site-visit",
         display="Site Visit Details",
         description="Information to help the planning authority arrange a site visit",
         schema_node_cls=SiteVisit,
     )
     trade_effluent = SchemaNodeField(
+        ref="trade-effluent",
         display="Trade effluent",
         description="Details of any liquid waste produced by industial processes on the proposed site, and how it will be diposed of.",
         schema_node_cls=TradeEffluent,
     )
     trees_hedges = SchemaNodeField(
+        ref="trees-hedges",
         display="Trees and hedges information",
         description="Details of trees and/or hedges that will be affected by the proposed development",
         schema_node_cls=TreesHedges,
     )
     vehicle_parking = SchemaNodeField(
+        ref="vehicle-parking",
         display="Vehicle parking",
         description="Details of current parking facilities at the site and any changes that would be made by the proposed development.",
         schema_node_cls=VehicleParking,
     )
     waste_storage_collection = SchemaNodeField(
+        ref="waste-storage-collection",
         display="Waste storage and collection",
         description="Any waste storage or recycling arrangements are in place, such as waste storage areas",
         schema_node_cls=WasteStorageCollection,
@@ -4641,12 +4852,14 @@ class CommunityConsultation(SchemaNode):
     )
 
     have_consulted = BooleanField(
-        display="Have consulted", description="Whether community consultation has been carried out"
+        ref="have-consulted",
+        display="Have consulted",
+        description="Whether community consultation has been carried out",
     )
     description = StringField(
+        ref="description",
         display="Description",
         description="A text description providing details about the subject.",
-        max_length=None,
     )
 
 
@@ -4658,42 +4871,46 @@ class Demolition(SchemaNode):
     )
 
     is_proposing_demolition = BooleanField(
+        ref="is-proposing-demolition",
         display="Is propsing demolition",
         description="The proposal includes partial or total demolition of a listed building?",
     )
     is_total_demolition = BooleanField(
+        ref="is-total-demolition",
         display="Is total demolition",
         description="Indicating whether the proposal involves total demolition of a listed building",
     )
     is_demolishing_building_in_curtilage = BooleanField(
+        ref="is-demolishing-building-in-curtilage",
         display="Demolition building in curtilage",
         description="True or False indicating whether the proposal involves demolition of a building in the curtilage of a listed building",
     )
     is_partial_demolition = BooleanField(
+        ref="is-partial-demolition",
         display="Demolition part",
         description="True or False indicating whether the proposal involves partial demolition of a listed building",
     )
     listed_building_volume = StringField(
+        ref="listed-building-volume",
         display="Listed building volume",
         description="Volume of listed building in cubic metres",
-        max_length=None,
     )
     demolition_volume = StringField(
+        ref="demolition-volume",
         display="Demolition volume",
         description="Volume of part to be demolished in cubic metres",
-        max_length=None,
     )
     part_built_date = StringField(
+        ref="part-built-date",
         display="Part built date",
         description="The approximate date the part to be removed was built, in YYYY-MM format.",
-        max_length=None,
     )
     description = StringField(
+        ref="description",
         display="Description",
         description="A text description providing details about the subject.",
-        max_length=None,
     )
-    reason = StringField(display="Reason", description="A textual reason", max_length=None)
+    reason = StringField(ref="reason", display="Reason", description="A textual reason")
 
 
 class ImmunityFromListing(SchemaNode):
@@ -4702,6 +4919,7 @@ class ImmunityFromListing(SchemaNode):
     _description = "Whether the applicant has obtained a Certificate of Immunity (COI) meaning the building in question cannot be listed"
 
     cert_of_immunity_sought = EnumField(
+        ref="cert-of-immunity-sought",
         display="Certificate of immunity sought",
         description="Has a certificate of immunity been sought",
         select_options=[
@@ -4715,9 +4933,9 @@ class ImmunityFromListing(SchemaNode):
         ],
     )
     application_result = StringField(
+        ref="application-result",
         display="Application result",
         description="Provide the result of the application for a certificate of immunity",
-        max_length=None,
     )
 
 
@@ -4727,12 +4945,12 @@ class DocumentReference(SchemaNode):
     _description = "Reference to a supporting document already listed in application.documents "
 
     reference = StringField(
-        display="Reference", description="A unique reference for the data item", max_length=None
+        ref="reference", display="Reference", description="A unique reference for the data item"
     )
     details = StringField(
+        ref="details",
         display="Details",
         description="Additional details or information about an item",
-        max_length=None,
     )
 
 
@@ -4744,10 +4962,12 @@ class LbAlter(SchemaNode):
     )
 
     proposal_alter_lb = BooleanField(
+        ref="proposal-alter-lb",
         display="Proposal alter listed building",
         description="True or False if proposal includes alterations to a listed building",
     )
     proposal_alter_lb_types = EnumField(
+        ref="proposal-alter-lb-types",
         display="Proposal alteration types",
         description="Select from a list of listed building alteration types, select all that apply",
         select_options=[
@@ -4775,6 +4995,7 @@ class LbAlter(SchemaNode):
     )
 
     document_reference = SchemaNodeField(
+        ref="document-reference",
         display="Supporting document",
         description="Reference to a supporting document already listed in application.documents ",
         schema_node_cls=DocumentReference,
@@ -4787,16 +5008,17 @@ class LbGrade(SchemaNode):
     _description = "The grade of any listed building affected by the proposed development."
 
     listed_building_grade = StringField(
+        ref="listed-building-grade",
         display="Listed building grade",
         description='The grade of the listed building, selected from the listed-building-grade codelist or "don\'t know"',
-        max_length=None,
     )
     listed_building = StringField(
+        ref="listed-building",
         display="Listed building",
         description="Listed building reference for cross-referencing with listed building records",
-        max_length=None,
     )
     provided_by = EnumField(
+        ref="provided-by",
         display="Provided by",
         description="Whether the information was provided by the applicant or calculated by the system",
         select_options=[
@@ -4820,17 +5042,17 @@ class RelatedApplications(SchemaNode):
     _description = "Details about a related application including its reference, description and decision date "
 
     reference = StringField(
-        display="Reference", description="A unique reference for the data item", max_length=None
+        ref="reference", display="Reference", description="A unique reference for the data item"
     )
     description = StringField(
+        ref="description",
         display="Description",
         description="A text description providing details about the subject.",
-        max_length=None,
     )
     decision_date = StringField(
+        ref="decision-date",
         display="Decision date",
         description="The date when the decision was made, in YYYY-MM-DD format",
-        max_length=None,
     )
 
 
@@ -4840,11 +5062,13 @@ class RelatedApplicationsmoduleresolved(SchemaNode):
     _description = "Details of any other development proposals made for the site"
 
     has_related_applications = BooleanField(
+        ref="has-related-applications",
         display="Has related applications",
         description="Are there any related applications, previous proposals or demolitions for the site",
     )
 
     related_applications = SchemaNodeField(
+        ref="related-applications",
         display="Related application details",
         description="Details about a related application including its reference, description and decision date ",
         schema_node_cls=RelatedApplications,
@@ -4857,101 +5081,121 @@ class Lbc(SchemaNode):
     _description = "An application for works for the demolition of a listed building or for its alteration or extension in any manner which would affect its character as a building of special architectural or historic interest"
 
     submission_details = SchemaNodeField(
+        ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including reference information, application types, specification profile, destination, documents, and fees ",
         schema_node_cls=SubmissionDetails,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     community_consultation = SchemaNodeField(
+        ref="community-consultation",
         display="Community consultation",
         description="What community consultation activities have taken place as part of the application",
         schema_node_cls=CommunityConsultation,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     demolition = SchemaNodeField(
+        ref="demolition",
         display="Demolition",
         description="Details of any demolition that needs to take place as part of the development proposal.",
         schema_node_cls=Demolition,
     )
     immunity_from_listing = SchemaNodeField(
+        ref="immunity-from-listing",
         display="Immunity from listing",
         description="Whether the applicant has obtained a Certificate of Immunity (COI) meaning the building in question cannot be listed",
         schema_node_cls=ImmunityFromListing,
     )
     lb_alter = SchemaNodeField(
+        ref="lb-alter",
         display="Listed building alterations",
         description="Details of any changes being made to a listed building as part of development works",
         schema_node_cls=LbAlter,
     )
     lb_grade = SchemaNodeField(
+        ref="lb-grade",
         display="Listed building grade",
         description="The grade of any listed building affected by the proposed development.",
         schema_node_cls=LbGrade,
     )
     materials = SchemaNodeField(
+        ref="materials",
         display="Materials",
         description="What materials are being used for the proposed development",
         schema_node_cls=Materials,
     )
     ownership_certs = SchemaNodeField(
+        ref="ownership-certs",
         display="Ownership certificates and agricultural land declaration",
         description="Who will be affected by the proposal and whether they have been notified, such as agricultural tenants",
         schema_node_cls=OwnershipCerts,
     )
     pre_app_advice = SchemaNodeField(
+        ref="pre-app-advice",
         display="Pre-application advice",
         description="Details of pre-application advice previously received from the planning authority",
         schema_node_cls=PreAppAdvice,
     )
     proposal_details = SchemaNodeField(
+        ref="proposal-details",
         display="Description of the proposal",
         description="What development, works or change of use is proposed",
         schema_node_cls=ProposalDetails,
     )
     related_applications = SchemaNodeField(
+        ref="related-applications",
         display="Related applications",
         description="Details of any other development proposals made for the site",
         schema_node_cls=RelatedApplicationsmoduleresolved,
     )
     site_details = SchemaNodeField(
+        ref="site-details",
         display="Site details",
         description="Where the proposed development will be built.",
         schema_node_cls=SiteDetails,
     )
     site_visit = SchemaNodeField(
+        ref="site-visit",
         display="Site Visit Details",
         description="Information to help the planning authority arrange a site visit",
         schema_node_cls=SiteVisit,
@@ -4964,9 +5208,9 @@ class DescProposedWorksLbLdc(SchemaNode):
     _description = "Details of development plans for the work to the listed building an applicant is seeking a lawful development certificate for"
 
     description = StringField(
+        ref="description",
         display="Description",
         description="A text description providing details about the subject.",
-        max_length=None,
     )
 
 
@@ -4976,12 +5220,13 @@ class GroundsForApplication(SchemaNode):
     _description = "Why a Certificate of Lawfulness of Propose Works is being requested."
 
     grounds_for_application = StringField(
+        ref="grounds-for-application",
         display="Grounds for application",
         description="Reason(s) why Certificate of Lawfulness of Proposed Works should be granted, including explanation of why listed building consent is not required ",
-        max_length=None,
     )
 
     supporting_documents = SchemaNodeField(
+        ref="supporting-documents",
         display="Supporting document",
         description="Reference to a supporting document already listed in application.documents ",
         schema_node_cls=SupportingDocuments,
@@ -4994,12 +5239,16 @@ class OwnerDetails(SchemaNode):
     _description = "Details of property owners for Listed Building Consent applications including their personal information and whether they have been informed of the application "
 
     informed_of_application = BooleanField(
+        ref="informed-of-application",
         display="Informed of application",
         description="Whether the person has been informed of the application",
     )
 
     person = SchemaNodeField(
-        display="Person obj", description="Details of an individual ", schema_node_cls=Person
+        ref="person",
+        display="Person obj",
+        description="Details of an individual ",
+        schema_node_cls=Person,
     )
 
 
@@ -5009,22 +5258,26 @@ class InterestedPersons(SchemaNode):
     _description = "Details of persons with an interest in the property for Listed Building Consent applications including their personal information, nature of interest, and notification status "
 
     nature_of_interest = StringField(
+        ref="nature-of-interest",
         display="Nature of interest",
         description="Description of the nature of a person's interest in the property",
-        max_length=None,
     )
     informed_of_application = BooleanField(
+        ref="informed-of-application",
         display="Informed of application",
         description="Whether the person has been informed of the application",
     )
     reason_not_informed = StringField(
+        ref="reason-not-informed",
         display="Reason not informed",
         description="Reason why a person was not informed of the application",
-        max_length=None,
     )
 
     person = SchemaNodeField(
-        display="Person obj", description="Details of an individual ", schema_node_cls=Person
+        ref="person",
+        display="Person obj",
+        description="Details of an individual ",
+        schema_node_cls=Person,
     )
 
 
@@ -5036,17 +5289,19 @@ class InterestDetails(SchemaNode):
     )
 
     applicant_interest = StringField(
+        ref="applicant-interest",
         display="Applicant interest",
         description="Description of the applicant's interest in the land",
-        max_length=None,
     )
 
     owner_details = SchemaNodeField(
+        ref="owner-details",
         display="LDC Owner Details",
         description="Details of property owners for Listed Building Consent applications including their personal information and whether they have been informed of the application ",
         schema_node_cls=OwnerDetails,
     )
     interested_persons = SchemaNodeField(
+        ref="interested-persons",
         display="LDC Interested Person",
         description="Details of persons with an interest in the property for Listed Building Consent applications including their personal information, nature of interest, and notification status ",
         schema_node_cls=InterestedPersons,
@@ -5059,76 +5314,91 @@ class LdcProposedWorkLb(SchemaNode):
     _description = "An application for a certificate confirming whether proposed works to a listed building would be lawful because they do not require listed building consent"
 
     submission_details = SchemaNodeField(
+        ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including reference information, application types, specification profile, destination, documents, and fees ",
         schema_node_cls=SubmissionDetails,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     desc_proposed_works_lb_ldc = SchemaNodeField(
+        ref="desc-proposed-works-lb-ldc",
         display="Description of proposed works for listed building lawful development certificate",
         description="Details of development plans for the work to the listed building an applicant is seeking a lawful development certificate for",
         schema_node_cls=DescProposedWorksLbLdc,
     )
     grounds_for_application = SchemaNodeField(
+        ref="grounds-for-application",
         display="Grounds for application",
         description="Why a Certificate of Lawfulness of Propose Works is being requested.",
         schema_node_cls=GroundsForApplication,
     )
     interest_details = SchemaNodeField(
+        ref="interest-details",
         display="Interest details",
         description="Names and contact details for all parties with an interest in the proposed develpoment.",
         schema_node_cls=InterestDetails,
     )
     lb_grade = SchemaNodeField(
+        ref="lb-grade",
         display="Listed building grade",
         description="The grade of any listed building affected by the proposed development.",
         schema_node_cls=LbGrade,
     )
     pre_app_advice = SchemaNodeField(
+        ref="pre-app-advice",
         display="Pre-application advice",
         description="Details of pre-application advice previously received from the planning authority",
         schema_node_cls=PreAppAdvice,
     )
     site_details = SchemaNodeField(
+        ref="site-details",
         display="Site details",
         description="Where the proposed development will be built.",
         schema_node_cls=SiteDetails,
     )
     site_visit = SchemaNodeField(
+        ref="site-visit",
         display="Site Visit Details",
         description="Information to help the planning authority arrange a site visit",
         schema_node_cls=SiteVisit,
@@ -5140,20 +5410,24 @@ class HedgerowRemoval(SchemaNode):
     _display = "Hedgerow removal notice"
     _description = "Details of any hedgerows being removed as part of the development"
 
-    reason = StringField(display="Reason", description="A textual reason", max_length=None)
+    reason = StringField(ref="reason", display="Reason", description="A textual reason")
     hedgerow_length = StringField(
+        ref="hedgerow-length",
         display="Hedgerow length",
         description="Total length, in metres, of hedgerow proposed for removal",
-        max_length=None,
     )
     hedgerow_less_than_30_years = BooleanField(
-        display="Hedgerow less than 30 years", description="Is the hedgerow less than 30 years old?"
+        ref="hedgerow-less-than-30-years",
+        display="Hedgerow less than 30 years",
+        description="Is the hedgerow less than 30 years old?",
     )
     planting_evidence_attached = BooleanField(
+        ref="planting-evidence-attached",
         display="Planting evidence attached",
         description="Is evidence of the date of planting attached?",
     )
     interest_declaration = EnumField(
+        ref="interest-declaration",
         display="Interest declaration",
         description="The applicant's interest or ownership in the hedgerow",
         select_options=[
@@ -5181,6 +5455,7 @@ class HedgerowRemoval(SchemaNode):
     )
 
     supporting_documents = SchemaNodeField(
+        ref="supporting-documents",
         display="Supporting document",
         description="Reference to a supporting document already listed in application.documents ",
         schema_node_cls=SupportingDocuments,
@@ -5193,56 +5468,67 @@ class HedgerowRemovalapplicationresolved(SchemaNode):
     _description = "An application for anyone proposing to remove a hedgerow, or part of a hedgerow"
 
     submission_details = SchemaNodeField(
+        ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including reference information, application types, specification profile, destination, documents, and fees ",
         schema_node_cls=SubmissionDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     hedgerow_removal = SchemaNodeField(
+        ref="hedgerow-removal",
         display="Hedgerow removal notice",
         description="Details of any hedgerows being removed as part of the development",
         schema_node_cls=HedgerowRemoval,
     )
     pre_app_advice = SchemaNodeField(
+        ref="pre-app-advice",
         display="Pre-application advice",
         description="Details of pre-application advice previously received from the planning authority",
         schema_node_cls=PreAppAdvice,
     )
     site_details = SchemaNodeField(
+        ref="site-details",
         display="Site details",
         description="Where the proposed development will be built.",
         schema_node_cls=SiteDetails,
     )
     site_visit = SchemaNodeField(
+        ref="site-visit",
         display="Site Visit Details",
         description="Information to help the planning authority arrange a site visit",
         schema_node_cls=SiteVisit,
@@ -5255,46 +5541,55 @@ class PriorApproval(SchemaNode):
     _description = "This applies to developments with permitted development rights (where developments are granted planning permission by national legislation without the need to submit a planning application)"
 
     submission_details = SchemaNodeField(
+        ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including reference information, application types, specification profile, destination, documents, and fees ",
         schema_node_cls=SubmissionDetails,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     site_details = SchemaNodeField(
+        ref="site-details",
         display="Site details",
         description="Where the proposed development will be built.",
         schema_node_cls=SiteDetails,
@@ -5307,35 +5602,39 @@ class ProposalDetailsLdc(SchemaNode):
     _description = "Details of why a Lawful Development Certificate is required."
 
     proposal_incl_building_operations = BooleanField(
+        ref="proposal-incl-building-operations",
         display="Proposal incl building operations",
         description="Does the proposal include building operations?",
     )
     proposal_building_operations_description = StringField(
+        ref="proposal-building-operations-description",
         display="Proposal building operations description",
         description="Description of the building operations included in the proposal",
-        max_length=None,
     )
     proposal_incl_change_of_use = BooleanField(
+        ref="proposal-incl-change-of-use",
         display="Proposal incl change of use",
         description="Does the proposal include a change of use?",
     )
     proposal_change_of_use_description = StringField(
+        ref="proposal-change-of-use-description",
         display="Proposal change of use description",
         description="Description of the change of use included in the proposal",
-        max_length=None,
     )
     proposal_existing_use_description = StringField(
+        ref="proposal-existing-use-description",
         display="Proposal existing use description",
         description="Description of the existing use before the proposed change of use",
-        max_length=None,
     )
     proposal_existing_use_stop_date = StringField(
+        ref="proposal-existing-use-stop-date",
         display="Proposal existing use stop date",
         description="Date when the existing use stopped or will stop",
-        max_length=None,
     )
     proposal_started = BooleanField(
-        display="Proposal started", description="Has any work on the proposal already been started"
+        ref="proposal-started",
+        display="Proposal started",
+        description="Has any work on the proposal already been started",
     )
 
 
@@ -5344,8 +5643,9 @@ class GroundsExistingUse(SchemaNode):
     _display = "Grounds for application (information about the existing use(s))"
     _description = "Supporting inforation for a Lawful Development Certificate application relating to how the site has most recently been used."
 
-    reason = StringField(display="Reason", description="A textual reason", max_length=None)
+    reason = StringField(ref="reason", display="Reason", description="A textual reason")
     use = EnumField(
+        ref="use",
         display="Use",
         description="A use class or type of use",
         select_options=[
@@ -5499,12 +5799,13 @@ class GroundsExistingUse(SchemaNode):
         ],
     )
     specified_use = StringField(
+        ref="specified-use",
         display="Specified use",
         description="A specified use if no applicable use class is available",
-        max_length=None,
     )
 
     supporting_documents = SchemaNodeField(
+        ref="supporting-documents",
         display="Supporting document",
         description="Reference to a supporting document already listed in application.documents ",
         schema_node_cls=SupportingDocuments,
@@ -5517,6 +5818,7 @@ class GroundsProposedUse(SchemaNode):
     _description = "What the new site will be used for"
 
     use = EnumField(
+        ref="use",
         display="Use",
         description="A use class or type of use",
         select_options=[
@@ -5670,11 +5972,12 @@ class GroundsProposedUse(SchemaNode):
         ],
     )
     specified_use = StringField(
+        ref="specified-use",
         display="Specified use",
         description="A specified use if no applicable use class is available",
-        max_length=None,
     )
     operation_type = EnumField(
+        ref="operation-type",
         display="Operation type",
         description="Whether the proposed use is temporary or permanent",
         select_options=[
@@ -5683,11 +5986,11 @@ class GroundsProposedUse(SchemaNode):
         ],
     )
     temporary_details = StringField(
+        ref="temporary-details",
         display="Temporary details",
         description="Details of temporary use including duration and specific arrangements",
-        max_length=None,
     )
-    reason = StringField(display="Reason", description="A textual reason", max_length=None)
+    reason = StringField(ref="reason", display="Reason", description="A textual reason")
 
 
 class LdcProspectiveUse(SchemaNode):
@@ -5696,71 +5999,85 @@ class LdcProspectiveUse(SchemaNode):
     _description = "Prospective use of the site"
 
     proposal_details_ldc = SchemaNodeField(
+        ref="proposal-details-ldc",
         display="Proposal details LDC",
         description="Details of why a Lawful Development Certificate is required.",
         schema_node_cls=ProposalDetailsLdc,
     )
     grounds_existing_use = SchemaNodeField(
+        ref="grounds-existing-use",
         display="Grounds for application (information about the existing use(s))",
         description="Supporting inforation for a Lawful Development Certificate application relating to how the site has most recently been used.",
         schema_node_cls=GroundsExistingUse,
     )
     grounds_proposed_use = SchemaNodeField(
+        ref="grounds-proposed-use",
         display="Grounds for proposed use",
         description="What the new site will be used for",
         schema_node_cls=GroundsProposedUse,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     interest_details = SchemaNodeField(
+        ref="interest-details",
         display="Interest details",
         description="Names and contact details for all parties with an interest in the proposed develpoment.",
         schema_node_cls=InterestDetails,
     )
     pre_app_advice = SchemaNodeField(
+        ref="pre-app-advice",
         display="Pre-application advice",
         description="Details of pre-application advice previously received from the planning authority",
         schema_node_cls=PreAppAdvice,
     )
     site_details = SchemaNodeField(
+        ref="site-details",
         display="Site details",
         description="Where the proposed development will be built.",
         schema_node_cls=SiteDetails,
     )
     site_visit = SchemaNodeField(
+        ref="site-visit",
         display="Site Visit Details",
         description="Information to help the planning authority arrange a site visit",
         schema_node_cls=SiteVisit,
@@ -5773,16 +6090,16 @@ class ReplacementDrawings(SchemaNode):
     _description = "Details of an approved drawing being replaced by a new drawing, including references to both old and new drawings "
 
     old_drawing_reference = StringField(
+        ref="old-drawing-reference",
         display="Old drawing reference",
         description="Reference of the old drawing being replaced",
-        max_length=None,
     )
     new_drawing_reference = StringField(
+        ref="new-drawing-reference",
         display="New drawing reference",
         description="Reference for the new drawing that replaces the old drawing",
-        max_length=None,
     )
-    reason = StringField(display="Reason", description="A textual reason", max_length=None)
+    reason = StringField(ref="reason", display="Reason", description="A textual reason")
 
 
 class SupportingInfo(SchemaNode):
@@ -5791,6 +6108,7 @@ class SupportingInfo(SchemaNode):
     _description = "Any additional information which will help with the planning application"
 
     replacement_drawings = SchemaNodeField(
+        ref="replacement-drawings",
         display="Replacement drawing",
         description="Details of an approved drawing being replaced by a new drawing, including references to both old and new drawings ",
         schema_node_cls=ReplacementDrawings,
@@ -5803,66 +6121,79 @@ class ReservedMatters(SchemaNode):
     _description = "This application is only required when the applicant has already been granted outline planning permission. Reserved matters can include appearance, means of access, landscaping, layout and scale"
 
     submission_details = SchemaNodeField(
+        ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including reference information, application types, specification profile, destination, documents, and fees ",
         schema_node_cls=SubmissionDetails,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     pre_app_advice = SchemaNodeField(
+        ref="pre-app-advice",
         display="Pre-application advice",
         description="Details of pre-application advice previously received from the planning authority",
         schema_node_cls=PreAppAdvice,
     )
     proposal_details = SchemaNodeField(
+        ref="proposal-details",
         display="Description of the proposal",
         description="What development, works or change of use is proposed",
         schema_node_cls=ProposalDetails,
     )
     site_details = SchemaNodeField(
+        ref="site-details",
         display="Site details",
         description="Where the proposed development will be built.",
         schema_node_cls=SiteDetails,
     )
     site_visit = SchemaNodeField(
+        ref="site-visit",
         display="Site Visit Details",
         description="Information to help the planning authority arrange a site visit",
         schema_node_cls=SiteVisit,
     )
     supporting_info = SchemaNodeField(
+        ref="supporting-info",
         display="Supporting information",
         description="Any additional information which will help with the planning application",
         schema_node_cls=SupportingInfo,
@@ -5874,7 +6205,7 @@ class DemolitionReason(SchemaNode):
     _display = "Demolition reason"
     _description = "Why demolition is necessary at the development site"
 
-    reason = StringField(display="Reason", description="A textual reason", max_length=None)
+    reason = StringField(ref="reason", display="Reason", description="A textual reason")
 
 
 class DemolitionConArea(SchemaNode):
@@ -5883,86 +6214,103 @@ class DemolitionConArea(SchemaNode):
     _description = "An application for planning permission involving the demolition of any unlisted building or structure in a conservation area if permission is required"
 
     submission_details = SchemaNodeField(
+        ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including reference information, application types, specification profile, destination, documents, and fees ",
         schema_node_cls=SubmissionDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     bng = SchemaNodeField(
+        ref="bng",
         display="Biodiversity net gain",
         description="How any natural habitats on the development site will be improved by the proposed works.",
         schema_node_cls=Bng,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     community_consultation = SchemaNodeField(
+        ref="community-consultation",
         display="Community consultation",
         description="What community consultation activities have taken place as part of the application",
         schema_node_cls=CommunityConsultation,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     demolition_reason = SchemaNodeField(
+        ref="demolition-reason",
         display="Demolition reason",
         description="Why demolition is necessary at the development site",
         schema_node_cls=DemolitionReason,
     )
     ownership_certs = SchemaNodeField(
+        ref="ownership-certs",
         display="Ownership certificates and agricultural land declaration",
         description="Who will be affected by the proposal and whether they have been notified, such as agricultural tenants",
         schema_node_cls=OwnershipCerts,
     )
     pre_app_advice = SchemaNodeField(
+        ref="pre-app-advice",
         display="Pre-application advice",
         description="Details of pre-application advice previously received from the planning authority",
         schema_node_cls=PreAppAdvice,
     )
     proposal_details = SchemaNodeField(
+        ref="proposal-details",
         display="Description of the proposal",
         description="What development, works or change of use is proposed",
         schema_node_cls=ProposalDetails,
     )
     related_applications = SchemaNodeField(
+        ref="related-applications",
         display="Related applications",
         description="Details of any other development proposals made for the site",
         schema_node_cls=RelatedApplicationsmoduleresolved,
     )
     site_details = SchemaNodeField(
+        ref="site-details",
         display="Site details",
         description="Where the proposed development will be built.",
         schema_node_cls=SiteDetails,
     )
     site_visit = SchemaNodeField(
+        ref="site-visit",
         display="Site Visit Details",
         description="Information to help the planning authority arrange a site visit",
         schema_node_cls=SiteVisit,
@@ -5975,11 +6323,12 @@ class Tpo(SchemaNode):
     _description = "Details of any Tree Preservation Orders (TPO) affecting the development site"
 
     tpo_reference = StringField(
+        ref="tpo-reference",
         display="TPO reference",
         description="Reference for a Tree Preservation Order covering affected trees",
-        max_length=None,
     )
     tpo_provided_by = EnumField(
+        ref="tpo-provided-by",
         display="TPO provided by",
         description="How was the list of TPO references generated - by the applicant or system/service",
         select_options=[
@@ -6003,19 +6352,19 @@ class TreeDetails(SchemaNode):
     _description = "Detailed information about an individual tree including identification, species and proposed works "
 
     reference = StringField(
-        display="Reference", description="A unique reference for the data item", max_length=None
+        ref="reference", display="Reference", description="A unique reference for the data item"
     )
-    species = StringField(display="Species", description="The species of the tree", max_length=None)
+    species = StringField(ref="species", display="Species", description="The species of the tree")
     description_of_works = StringField(
+        ref="description-of-works",
         display="Description of works",
         description="Description of the nature of the work to be carried out on this tree",
-        max_length=None,
     )
-    reason = StringField(display="Reason", description="A textual reason", max_length=None)
+    reason = StringField(ref="reason", display="Reason", description="A textual reason")
     replanting_description = StringField(
+        ref="replanting-description",
         display="Replanting description",
         description="Details of replanting arrangements if applicable",
-        max_length=None,
     )
 
 
@@ -6027,12 +6376,13 @@ class TreeWorkDetails(SchemaNode):
     )
 
     description = StringField(
+        ref="description",
         display="Description",
         description="A text description providing details about the subject.",
-        max_length=None,
     )
 
     tree_details = SchemaNodeField(
+        ref="tree-details",
         display="Tree details",
         description="Detailed information about an individual tree including identification, species and proposed works ",
         schema_node_cls=TreeDetails,
@@ -6045,24 +6395,28 @@ class TreesAdditional(SchemaNode):
     _description = "Further details of any issues relating to trees on the site"
 
     advice_from_authority = StringField(
+        ref="advice-from-authority",
         display="Advice from authority",
         description="Any advice provided on-site by a Local Planning Authority (LPA) officer",
-        max_length=None,
     )
     condition_concerns = BooleanField(
+        ref="condition-concerns",
         display="Condition concerns",
         description="Whether there are concerns the tree(s) are diseased or might break or fall",
     )
     causing_subsidence = BooleanField(
+        ref="causing-subsidence",
         display="Causing subsidence",
         description="Whether subsidence damage is being caused by the tree(s)",
     )
     causing_structural_damage = BooleanField(
+        ref="causing-structural-damage",
         display="Causing structural damage",
         description="Whether structural damage is being caused by the tree(s)",
     )
 
     supporting_documents = SchemaNodeField(
+        ref="supporting-documents",
         display="Supporting document",
         description="Reference to a supporting document already listed in application.documents ",
         schema_node_cls=SupportingDocuments,
@@ -6077,9 +6431,13 @@ class Owner(SchemaNode):
     )
 
     person = SchemaNodeField(
-        display="Person obj", description="Details of an individual ", schema_node_cls=Person
+        ref="person",
+        display="Person obj",
+        description="Details of an individual ",
+        schema_node_cls=Person,
     )
     contact_details = SchemaNodeField(
+        ref="contact-details",
         display="Contact details",
         description="A substructure for recording contact details ",
         schema_node_cls=ContactDetails,
@@ -6092,11 +6450,13 @@ class TreesOwnership(SchemaNode):
     _description = "Who owns any trees affected by the proposed development."
 
     is_applicant_owner = BooleanField(
+        ref="is-applicant-owner",
         display="Is applicant owner",
         description="Whether the applicant owns the trees affected by the proposed works",
     )
 
     owner = SchemaNodeField(
+        ref="owner",
         display="Tree owner",
         description="Details of a tree owner including their personal information and contact details ",
         schema_node_cls=Owner,
@@ -6109,61 +6469,73 @@ class ConsentUnderTpo(SchemaNode):
     _description = "An application that will affect a protected tree including those covered by a Tree Preservation Order (TPO) or those which grow in a conservation area"
 
     submission_details = SchemaNodeField(
+        ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including reference information, application types, specification profile, destination, documents, and fees ",
         schema_node_cls=SubmissionDetails,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     tpo = SchemaNodeField(
+        ref="tpo",
         display="Tree preservation order details",
         description="Details of any Tree Preservation Orders (TPO) affecting the development site",
         schema_node_cls=Tpo,
     )
     tree_work_details = SchemaNodeField(
+        ref="tree-work-details",
         display="Identification of tree(s) and description of works",
         description="Details of trees affected by the proposed development and what work is being done to them.",
         schema_node_cls=TreeWorkDetails,
     )
     trees_additional = SchemaNodeField(
+        ref="trees-additional",
         display="Trees additional information",
         description="Further details of any issues relating to trees on the site",
         schema_node_cls=TreesAdditional,
     )
     trees_ownership = SchemaNodeField(
+        ref="trees-ownership",
         display="Trees ownership",
         description="Who owns any trees affected by the proposed development.",
         schema_node_cls=TreesOwnership,
@@ -6176,151 +6548,181 @@ class OutlineSome(SchemaNode):
     _description = "Outline planning permission with some matters reserved"
 
     access_rights_of_way = SchemaNodeField(
+        ref="access-rights-of-way",
         display="Access and rights of way",
         description="Details of any changes the proposed development would make to existing access arrangements or public rights of way",
         schema_node_cls=AccessRightsOfWay,
     )
     bio_geo_arch_con = SchemaNodeField(
+        ref="bio-geo-arch-con",
         display="Biodiversity, geological and archaeological conservation",
         description="Details of potential impacts to the biodiversity of the site, or any noteable archaeological or geological features.",
         schema_node_cls=BioGeoArchCon,
     )
     foul_sewage = SchemaNodeField(
+        ref="foul-sewage",
         display="Foul sewage disposal",
         description="How waste water will leave the property as part of the proposed development",
         schema_node_cls=FoulSewage,
     )
     haz_substances = SchemaNodeField(
+        ref="haz-substances",
         display="Hazardous substances",
         description="Details of hazardous substances requiring consent used as part of the development",
         schema_node_cls=HazSubstances,
     )
     materials = SchemaNodeField(
+        ref="materials",
         display="Materials",
         description="What materials are being used for the proposed development",
         schema_node_cls=Materials,
     )
     trade_effluent = SchemaNodeField(
+        ref="trade-effluent",
         display="Trade effluent",
         description="Details of any liquid waste produced by industial processes on the proposed site, and how it will be diposed of.",
         schema_node_cls=TradeEffluent,
     )
     trees_hedges = SchemaNodeField(
+        ref="trees-hedges",
         display="Trees and hedges information",
         description="Details of trees and/or hedges that will be affected by the proposed development",
         schema_node_cls=TreesHedges,
     )
     vehicle_parking = SchemaNodeField(
+        ref="vehicle-parking",
         display="Vehicle parking",
         description="Details of current parking facilities at the site and any changes that would be made by the proposed development.",
         schema_node_cls=VehicleParking,
     )
     waste_storage_collection = SchemaNodeField(
+        ref="waste-storage-collection",
         display="Waste storage and collection",
         description="Any waste storage or recycling arrangements are in place, such as waste storage areas",
         schema_node_cls=WasteStorageCollection,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     bng = SchemaNodeField(
+        ref="bng",
         display="Biodiversity net gain",
         description="How any natural habitats on the development site will be improved by the proposed works.",
         schema_node_cls=Bng,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     employment = SchemaNodeField(
+        ref="employment",
         display="Employment",
         description="How the proposed development will impact existing and proposed employee numbers",
         schema_node_cls=Employment,
     )
     existing_use = SchemaNodeField(
+        ref="existing-use",
         display="Existing use",
         description="How the site is currently being used.",
         schema_node_cls=ExistingUse,
     )
     flood_risk_assessment = SchemaNodeField(
+        ref="flood-risk-assessment",
         display="Flood risk assessment",
         description="Results of any flood risk assessments made for the development site",
         schema_node_cls=FloodRiskAssessment,
     )
     hrs_operation = SchemaNodeField(
+        ref="hrs-operation",
         display="Hours of operation",
         description="Proposed operating hours if the proposed development is intended for non-residential use.",
         schema_node_cls=HrsOperation,
     )
     non_res_floorspace = SchemaNodeField(
+        ref="non-res-floorspace",
         display="Non residential floorspace",
         description="Details of changes to non-residential floorspace in the proposed development.",
         schema_node_cls=NonResFloorspace,
     )
     ownership_certs = SchemaNodeField(
+        ref="ownership-certs",
         display="Ownership certificates and agricultural land declaration",
         description="Who will be affected by the proposal and whether they have been notified, such as agricultural tenants",
         schema_node_cls=OwnershipCerts,
     )
     pre_app_advice = SchemaNodeField(
+        ref="pre-app-advice",
         display="Pre-application advice",
         description="Details of pre-application advice previously received from the planning authority",
         schema_node_cls=PreAppAdvice,
     )
     processes_machinery_waste = SchemaNodeField(
+        ref="processes-machinery-waste",
         display="Processes machinery waste",
         description="How waste will be managed on the site ",
         schema_node_cls=ProcessesMachineryWaste,
     )
     proposal_details = SchemaNodeField(
+        ref="proposal-details",
         display="Description of the proposal",
         description="What development, works or change of use is proposed",
         schema_node_cls=ProposalDetails,
     )
     res_units = SchemaNodeField(
+        ref="res-units",
         display="Residential units",
         description="Details of the residential units that make up both the current and proposed development.",
         schema_node_cls=ResUnits,
     )
     site_area = SchemaNodeField(
+        ref="site-area",
         display="Site area",
         description="How big the site is including relevant measurements",
         schema_node_cls=SiteArea,
     )
     site_details = SchemaNodeField(
+        ref="site-details",
         display="Site details",
         description="Where the proposed development will be built.",
         schema_node_cls=SiteDetails,
     )
     site_visit = SchemaNodeField(
+        ref="site-visit",
         display="Site Visit Details",
         description="Information to help the planning authority arrange a site visit",
         schema_node_cls=SiteVisit,
@@ -6333,34 +6735,34 @@ class DescWorkImpactsRisks(SchemaNode):
     _description = "How the proposed development may affect nearby amenities, air traffic, defence assets or protected views."
 
     description = StringField(
+        ref="description",
         display="Description",
         description="A text description providing details about the subject.",
-        max_length=None,
     )
     dwellinghouse_height = StringField(
+        ref="dwellinghouse-height",
         display="Dwellinghouse height",
         description="Height from ground to highest point of roof in metres",
-        max_length=None,
     )
     proposed_height = StringField(
+        ref="proposed-height",
         display="Proposed height",
         description="Height once the additional storeys have been added in metres",
-        max_length=None,
     )
     impact_on_amenity = StringField(
+        ref="impact-on-amenity",
         display="Impact on amenity",
         description="Details of the impacts on the amenity of any adjoining premises including overlooking, privacy and the loss of light including how these will be mitigated",
-        max_length=None,
     )
     air_traffic_defence_impacts = StringField(
+        ref="air-traffic-defence-impacts",
         display="Air traffic defence impacts",
         description="Details of any air traffic and defence asset impacts, including how these will be mitigated",
-        max_length=None,
     )
     protected_view_impact = StringField(
+        ref="protected-view-impact",
         display="Protected view impact",
         description="Details of the impact on any protected view where relevant",
-        max_length=None,
     )
 
 
@@ -6370,6 +6772,7 @@ class EligibilityRelatedWorks(SchemaNode):
     _description = "Whether any related works such as scaffolding required will affect the eligibility of the planning proposal"
 
     external_support_required = BooleanField(
+        ref="external-support-required",
         display="External support required",
         description="Will the proposed engineering works include external support structures or extend beyond the curtilage for wall or foundation strengthening",
     )
@@ -6381,18 +6784,22 @@ class EligibilityCurrentBuilding(SchemaNode):
     _description = "How the current building meets eligibity criteria"
 
     was_constructed_btw_1948_2018 = BooleanField(
+        ref="was-constructed-btw-1948-2018",
         display="Was constructed between 1948 and 2018",
         description="Was the current building constructed between 1 July 1948 and 28 October 2018? If False, application cannot proceed.",
     )
     has_additional_storeys = BooleanField(
+        ref="has-additional-storeys",
         display="Additional storeys added",
         description="Have additional storeys already been added to the original building? If True, application cannot proceed.",
     )
     was_use_granted_by_pdr = BooleanField(
+        ref="was-use-granted-by-pdr",
         display="Use granted by permitted development right",
         description="Was the current use of the building granted by permitted development rights? If True, application cannot proceed.",
     )
     is_site_in_restricted_area = BooleanField(
+        ref="is-site-in-restricted-area",
         display="Site in restricted area",
         description="Is any part of the land or site located in a restricted area? If True, application cannot proceed.",
     )
@@ -6404,53 +6811,67 @@ class EligibilityProposal(SchemaNode):
     _description = "How the proposed development meets eligibility criteria"
 
     principal_part_only = BooleanField(
+        ref="principal-part-only",
         display="Principal part only",
         description="Will the additional storeys be constructed only on the principal part of the building",
     )
     ceiling_height_exceeds_3m = BooleanField(
+        ref="ceiling-height-exceeds-3m",
         display="Ceiling height exceeds 3m",
         description="Will the internal floor-to-ceiling height of any additional storey exceed 3 metres",
     )
     existing_ceiling_height_exceeds_3m = BooleanField(
+        ref="existing-ceiling-height-exceeds-3m",
         display="Existing ceiling height exceeds 3m",
         description="Will the internal floor-to-ceiling height of any existing storey exceed 3 metres",
     )
     building_height_exceeds_18m = BooleanField(
+        ref="building-height-exceeds-18m",
         display="Building height exceeds 18m",
         description="Will the height of the extended building exceed 18 metres",
     )
     roof_height_exceeds_3_5m = BooleanField(
+        ref="roof-height-exceeds-3-5m",
         display="Roof height exceeds 3.5m",
         description="Will the roof exceed 3.5 metres above the highest part of the existing roof",
     )
     roof_height_exceeds_7m = BooleanField(
+        ref="roof-height-exceeds-7m",
         display="Roof height exceeds 7m",
         description="Will the roof exceed 7 metres above the highest part of the existing roof",
     )
     is_dwelling_detached = BooleanField(
-        display="Dwelling detached", description="Is the dwelling detached"
+        ref="is-dwelling-detached",
+        display="Dwelling detached",
+        description="Is the dwelling detached",
     )
     extension_on_attached_dwelling = BooleanField(
+        ref="extension-on-attached-dwelling",
         display="Extension on attached dwelling",
         description="Will the extension result in the highest part exceeding 3.5 metres above the attached roof",
     )
     extension_below_terrace_roof = BooleanField(
+        ref="extension-below-terrace-roof",
         display="Extension below terrace roof",
         description="Will the extension result in the highest part exceeding 3.5 metres above any roof in the terrace",
     )
     roof_pitch_matching = BooleanField(
+        ref="roof-pitch-matching",
         display="Roof pitch matching",
         description="Will the roof pitch of the extended dwelling match the existing roof pitch",
     )
     window_on_side_elevation = BooleanField(
+        ref="window-on-side-elevation",
         display="Window on side elevation",
         description="Will the development include a side elevation window or roof slope window",
     )
     materials_similar_exterior = BooleanField(
+        ref="materials-similar-exterior",
         display="Materials similar exterior",
         description="Will exterior materials be similar to those of the existing dwelling",
     )
     dwellinghouse_use = BooleanField(
+        ref="dwellinghouse-use",
         display="Dwellinghouse use",
         description="Will the extended dwelling remain as a Class C3 dwellinghouse or ancillary use",
     )
@@ -6462,61 +6883,73 @@ class PaStorey(SchemaNode):
     _description = "Enlargement of a dwellinghouse by construction of additional storeys"
 
     desc_work_impacts_risks = SchemaNodeField(
+        ref="desc-work-impacts-risks",
         display="Description of work impacts and risks",
         description="How the proposed development may affect nearby amenities, air traffic, defence assets or protected views.",
         schema_node_cls=DescWorkImpactsRisks,
     )
     eligibility_related_works = SchemaNodeField(
+        ref="eligibility-related-works",
         display="Eligibility related works",
         description="Whether any related works such as scaffolding required will affect the eligibility of the planning proposal",
         schema_node_cls=EligibilityRelatedWorks,
     )
     eligibility_current_building = SchemaNodeField(
+        ref="eligibility-current-building",
         display="Eligibility current building",
         description="How the current building meets eligibity criteria",
         schema_node_cls=EligibilityCurrentBuilding,
     )
     eligibility_proposal = SchemaNodeField(
+        ref="eligibility-proposal",
         display="Eligibility proposal",
         description="How the proposed development meets eligibility criteria",
         schema_node_cls=EligibilityProposal,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     site_details = SchemaNodeField(
+        ref="site-details",
         display="Site details",
         description="Where the proposed development will be built.",
         schema_node_cls=SiteDetails,
@@ -6529,6 +6962,7 @@ class NonResidentialUse(SchemaNode):
     _description = "Structure for defining non-residential use amounts, which can be expressed as floorspace or site area with exact values or ranges "
 
     non_residential_measurement_type = EnumField(
+        ref="non-residential-measurement-type",
         display="Non-residential measurement type",
         description="The type of value being provided for non-residential use - either floorspace or site-area",
         select_options=[
@@ -6543,19 +6977,19 @@ class NonResidentialUse(SchemaNode):
         ],
     )
     exact_value = StringField(
+        ref="exact-value",
         display="Exact value",
         description="Exact figure of non-residential use, measured in square metres for floorspace or hectares for site area",
-        max_length=None,
     )
     min = StringField(
+        ref="min",
         display="Minimum value",
         description="Lower bound of non-residential use, measured in square metres for floorspace or hectares for site area",
-        max_length=None,
     )
     max = StringField(
+        ref="max",
         display="Maximum value",
         description="Upper bound of non-residential use, measured in square metres for floorspace or hectares for site area",
-        max_length=None,
     )
 
 
@@ -6567,22 +7001,23 @@ class ProposalDetailsIncNonResidential(SchemaNode):
     )
 
     description = StringField(
+        ref="description",
         display="Description",
         description="A text description providing details about the subject.",
-        max_length=None,
     )
     net_dwellings_min = StringField(
+        ref="net-dwellings-min",
         display="Net dwellings minimum",
         description="The minimum number of net additional dwellings proposed as part of the development, accounting for any existing dwellings lost and new dwellings created",
-        max_length=None,
     )
     net_dwellings_max = StringField(
+        ref="net-dwellings-max",
         display="Net dwellings maximum",
         description="The maximum number of net additional dwellings proposed as part of the development, allowing for flexibility in the final housing numbers",
-        max_length=None,
     )
 
     non_residential_use = SchemaNodeField(
+        ref="non-residential-use",
         display="Non-residential use",
         description="Structure for defining non-residential use amounts, which can be expressed as floorspace or site area with exact values or ranges ",
         schema_node_cls=NonResidentialUse,
@@ -6595,14 +7030,13 @@ class SiteAreacomponentresolved(SchemaNode):
     _description = "Information about the total area of a development site, including the measured value, unit, and source of the measurement "
 
     value = StringField(
+        ref="value",
         display="Value",
         description="Numeric value representing a measurement or quantity",
-        max_length=None,
     )
-    unit = StringField(
-        display="Unit", description="Unit of measurement for a value", max_length=None
-    )
+    unit = StringField(ref="unit", display="Unit", description="Unit of measurement for a value")
     provided_by = EnumField(
+        ref="provided-by",
         display="Provided by",
         description="Whether the information was provided by the applicant or calculated by the system",
         select_options=[
@@ -6626,6 +7060,7 @@ class Uses(SchemaNode):
     _description = "A specific use class or type of use for a site or building "
 
     use = EnumField(
+        ref="use",
         display="Use",
         description="A use class or type of use",
         select_options=[
@@ -6779,9 +7214,9 @@ class Uses(SchemaNode):
         ],
     )
     specified_use = StringField(
+        ref="specified-use",
         display="Specified use",
         description="A specified use if no applicable use class is available",
-        max_length=None,
     )
 
 
@@ -6791,12 +7226,13 @@ class ExistingUsecomponentresolved(SchemaNode):
     _description = "Information about the current use of a site, including the use classes and associated floorspace "
 
     floorspace = StringField(
+        ref="floorspace",
         display="Floorspace",
         description="Total floorspace for a use in square metres",
-        max_length=None,
     )
 
     uses = SchemaNodeField(
+        ref="uses",
         display="Use",
         description="A specific use class or type of use for a site or building ",
         schema_node_cls=Uses,
@@ -6809,6 +7245,7 @@ class SiteInfo(SchemaNode):
     _description = "Any additional relevant information about the development site."
 
     known_constraints = EnumField(
+        ref="known-constraints",
         display="Known constraints",
         description="A list of the known constraints affecting the site",
         select_options=[
@@ -6833,16 +7270,19 @@ class SiteInfo(SchemaNode):
     )
 
     site_area = SchemaNodeField(
+        ref="site-area",
         display="Site area",
         description="Information about the total area of a development site, including the measured value, unit, and source of the measurement ",
         schema_node_cls=SiteAreacomponentresolved,
     )
     existing_use = SchemaNodeField(
+        ref="existing-use",
         display="Existing use",
         description="Information about the current use of a site, including the use classes and associated floorspace ",
         schema_node_cls=ExistingUsecomponentresolved,
     )
     supporting_documents = SchemaNodeField(
+        ref="supporting-documents",
         display="Supporting document",
         description="Reference to a supporting document already listed in application.documents ",
         schema_node_cls=SupportingDocuments,
@@ -6855,56 +7295,67 @@ class Pip(SchemaNode):
     _description = "An alternative way of getting planning permission for housing-led development which separates the consideration of matters of principle from the technical detail of the development"
 
     submission_details = SchemaNodeField(
+        ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including reference information, application types, specification profile, destination, documents, and fees ",
         schema_node_cls=SubmissionDetails,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     proposal_details_inc_non_residential = SchemaNodeField(
+        ref="proposal-details-inc-non-residential",
         display="Description of the proposed development including any non-residential development",
         description="Details of the residential and non-residential parts of the proposed development.",
         schema_node_cls=ProposalDetailsIncNonResidential,
     )
     site_details = SchemaNodeField(
+        ref="site-details",
         display="Site details",
         description="Where the proposed development will be built.",
         schema_node_cls=SiteDetails,
     )
     site_info = SchemaNodeField(
+        ref="site-info",
         display="Site information",
         description="Any additional relevant information about the development site.",
         schema_node_cls=SiteInfo,
@@ -6916,11 +7367,11 @@ class ConRemoveVary(SchemaNode):
     _display = "Condition removal or variation"
     _description = "Why the applicant is asking for planning conditions to be removed or changed."
 
-    reason = StringField(display="Reason", description="A textual reason", max_length=None)
+    reason = StringField(ref="reason", display="Reason", description="A textual reason")
     condition_change = StringField(
+        ref="condition-change",
         display="Condition change",
         description="State how the condition should vary",
-        max_length=None,
     )
 
 
@@ -6932,38 +7383,43 @@ class DescYourProposal(SchemaNode):
     )
 
     condition_numbers = StringField(
+        ref="condition-numbers",
         display="Condition numbers",
         description="List of condition numbers related to this application",
-        max_length=None,
     )
     original_application_type = StringField(
+        ref="original-application-type",
         display="Original application type",
         description="Type of original planning application",
-        max_length=None,
     )
     is_householder_development = BooleanField(
+        ref="is-householder-development",
         display="Is householder development",
         description="Is the development to an existing dwelling-house or development within its curtilage (true/false)",
     )
     has_development_started = BooleanField(
-        display="Has development started", description="Whether the development has already started"
+        ref="has-development-started",
+        display="Has development started",
+        description="Whether the development has already started",
     )
     development_start_date = StringField(
+        ref="development-start-date",
         display="Development start date",
         description="Date when development started",
-        max_length=None,
     )
     has_development_completed = BooleanField(
+        ref="has-development-completed",
         display="Has development completed",
         description="Whether the development has been completed",
     )
     development_completed_date = StringField(
+        ref="development-completed-date",
         display="Development completed date",
         description="Date when development was completed",
-        max_length=None,
     )
 
     related_application = SchemaNodeField(
+        ref="related-application",
         display="Related application details",
         description="Details about a related application including its reference, description and decision date ",
         schema_node_cls=RelatedApplication,
@@ -6976,71 +7432,85 @@ class S73(SchemaNode):
     _description = "Applications for a removal or variation of a condition after planning permission has been granted"
 
     submission_details = SchemaNodeField(
+        ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including reference information, application types, specification profile, destination, documents, and fees ",
         schema_node_cls=SubmissionDetails,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     con_remove_vary = SchemaNodeField(
+        ref="con-remove-vary",
         display="Condition removal or variation",
         description="Why the applicant is asking for planning conditions to be removed or changed.",
         schema_node_cls=ConRemoveVary,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     desc_your_proposal = SchemaNodeField(
+        ref="desc-your-proposal",
         display="Description of your proposal",
         description="Written description of the proposed development including any additional relevant details.",
         schema_node_cls=DescYourProposal,
     )
     ownership_certs = SchemaNodeField(
+        ref="ownership-certs",
         display="Ownership certificates and agricultural land declaration",
         description="Who will be affected by the proposal and whether they have been notified, such as agricultural tenants",
         schema_node_cls=OwnershipCerts,
     )
     pre_app_advice = SchemaNodeField(
+        ref="pre-app-advice",
         display="Pre-application advice",
         description="Details of pre-application advice previously received from the planning authority",
         schema_node_cls=PreAppAdvice,
     )
     site_details = SchemaNodeField(
+        ref="site-details",
         display="Site details",
         description="Where the proposed development will be built.",
         schema_node_cls=SiteDetails,
     )
     site_visit = SchemaNodeField(
+        ref="site-visit",
         display="Site Visit Details",
         description="Information to help the planning authority arrange a site visit",
         schema_node_cls=SiteVisit,
@@ -7055,13 +7525,14 @@ class Parking(SchemaNode):
     )
 
     is_existing_parking_affected = BooleanField(
+        ref="is-existing-parking-affected",
         display="Existing parking affected",
         description="Will the proposed works affect existing car parking arrangements",
     )
     description = StringField(
+        ref="description",
         display="Description",
         description="A text description providing details about the subject.",
-        max_length=None,
     )
 
 
@@ -7071,91 +7542,109 @@ class Hh(SchemaNode):
     _description = "A simplified process for applications to alter or enlarge a single house (but not a flat), including works within the boundary/garden"
 
     submission_details = SchemaNodeField(
+        ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including reference information, application types, specification profile, destination, documents, and fees ",
         schema_node_cls=SubmissionDetails,
     )
     access_rights_of_way = SchemaNodeField(
+        ref="access-rights-of-way",
         display="Access and rights of way",
         description="Details of any changes the proposed development would make to existing access arrangements or public rights of way",
         schema_node_cls=AccessRightsOfWay,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     bng = SchemaNodeField(
+        ref="bng",
         display="Biodiversity net gain",
         description="How any natural habitats on the development site will be improved by the proposed works.",
         schema_node_cls=Bng,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     materials = SchemaNodeField(
+        ref="materials",
         display="Materials",
         description="What materials are being used for the proposed development",
         schema_node_cls=Materials,
     )
     ownership_certs = SchemaNodeField(
+        ref="ownership-certs",
         display="Ownership certificates and agricultural land declaration",
         description="Who will be affected by the proposal and whether they have been notified, such as agricultural tenants",
         schema_node_cls=OwnershipCerts,
     )
     parking = SchemaNodeField(
+        ref="parking",
         display="Parking arrangements",
         description="Details of any changes the proposed development would make to parking facilities.",
         schema_node_cls=Parking,
     )
     pre_app_advice = SchemaNodeField(
+        ref="pre-app-advice",
         display="Pre-application advice",
         description="Details of pre-application advice previously received from the planning authority",
         schema_node_cls=PreAppAdvice,
     )
     proposal_details = SchemaNodeField(
+        ref="proposal-details",
         display="Description of the proposal",
         description="What development, works or change of use is proposed",
         schema_node_cls=ProposalDetails,
     )
     site_details = SchemaNodeField(
+        ref="site-details",
         display="Site details",
         description="Where the proposed development will be built.",
         schema_node_cls=SiteDetails,
     )
     site_visit = SchemaNodeField(
+        ref="site-visit",
         display="Site Visit Details",
         description="Information to help the planning authority arrange a site visit",
         schema_node_cls=SiteVisit,
     )
     trees_hedges = SchemaNodeField(
+        ref="trees-hedges",
         display="Trees and hedges information",
         description="Details of trees and/or hedges that will be affected by the proposed development",
         schema_node_cls=TreesHedges,
@@ -7168,111 +7657,133 @@ class Outline(SchemaNode):
     _description = "Applications that are used to understand whether the basic nature of a development is viable"
 
     submission_details = SchemaNodeField(
+        ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including reference information, application types, specification profile, destination, documents, and fees ",
         schema_node_cls=SubmissionDetails,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     bng = SchemaNodeField(
+        ref="bng",
         display="Biodiversity net gain",
         description="How any natural habitats on the development site will be improved by the proposed works.",
         schema_node_cls=Bng,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     employment = SchemaNodeField(
+        ref="employment",
         display="Employment",
         description="How the proposed development will impact existing and proposed employee numbers",
         schema_node_cls=Employment,
     )
     existing_use = SchemaNodeField(
+        ref="existing-use",
         display="Existing use",
         description="How the site is currently being used.",
         schema_node_cls=ExistingUse,
     )
     flood_risk_assessment = SchemaNodeField(
+        ref="flood-risk-assessment",
         display="Flood risk assessment",
         description="Results of any flood risk assessments made for the development site",
         schema_node_cls=FloodRiskAssessment,
     )
     hrs_operation = SchemaNodeField(
+        ref="hrs-operation",
         display="Hours of operation",
         description="Proposed operating hours if the proposed development is intended for non-residential use.",
         schema_node_cls=HrsOperation,
     )
     non_res_floorspace = SchemaNodeField(
+        ref="non-res-floorspace",
         display="Non residential floorspace",
         description="Details of changes to non-residential floorspace in the proposed development.",
         schema_node_cls=NonResFloorspace,
     )
     ownership_certs = SchemaNodeField(
+        ref="ownership-certs",
         display="Ownership certificates and agricultural land declaration",
         description="Who will be affected by the proposal and whether they have been notified, such as agricultural tenants",
         schema_node_cls=OwnershipCerts,
     )
     pre_app_advice = SchemaNodeField(
+        ref="pre-app-advice",
         display="Pre-application advice",
         description="Details of pre-application advice previously received from the planning authority",
         schema_node_cls=PreAppAdvice,
     )
     processes_machinery_waste = SchemaNodeField(
+        ref="processes-machinery-waste",
         display="Processes machinery waste",
         description="How waste will be managed on the site ",
         schema_node_cls=ProcessesMachineryWaste,
     )
     proposal_details = SchemaNodeField(
+        ref="proposal-details",
         display="Description of the proposal",
         description="What development, works or change of use is proposed",
         schema_node_cls=ProposalDetails,
     )
     res_units = SchemaNodeField(
+        ref="res-units",
         display="Residential units",
         description="Details of the residential units that make up both the current and proposed development.",
         schema_node_cls=ResUnits,
     )
     site_area = SchemaNodeField(
+        ref="site-area",
         display="Site area",
         description="How big the site is including relevant measurements",
         schema_node_cls=SiteArea,
     )
     site_details = SchemaNodeField(
+        ref="site-details",
         display="Site details",
         description="Where the proposed development will be built.",
         schema_node_cls=SiteDetails,
     )
     site_visit = SchemaNodeField(
+        ref="site-visit",
         display="Site Visit Details",
         description="Information to help the planning authority arrange a site visit",
         schema_node_cls=SiteVisit,
@@ -7285,6 +7796,7 @@ class DesignatedAreas(SchemaNode):
     _description = "Details of any 'designated area' the develpoment site is on, such as a Conservation Area or National Park."
 
     designations = EnumField(
+        ref="designations",
         display="Designations",
         description="List of designated areas that apply to the site",
         select_options=[
@@ -7349,9 +7861,9 @@ class EquipMethod(SchemaNode):
     _description = "How oil and gas will be extracted as part of the proposed development."
 
     equipment_plan = StringField(
+        ref="equipment-plan",
         display="Equipment plan",
         description="Details of equipment to be used as part of the application including the maximum height and type of drilling rig to be used",
-        max_length=None,
     )
 
 
@@ -7363,12 +7875,13 @@ class PlansDrawingsSupportingMaterials(SchemaNode):
     )
 
     inspection_address = StringField(
+        ref="inspection-address",
         display="Inspection address",
         description="Full postal address where supporting material can be inspected",
-        max_length=None,
     )
 
     supporting_documents = SchemaNodeField(
+        ref="supporting-documents",
         display="Supporting document",
         description="Reference to a supporting document already listed in application.documents ",
         schema_node_cls=SupportingDocuments,
@@ -7381,12 +7894,12 @@ class SiteOwner(SchemaNode):
     _description = "Details of the owner of the development site including name and address "
 
     fullname = StringField(
-        display="Full name", description="The complete name of a person", max_length=None
+        ref="fullname", display="Full name", description="The complete name of a person"
     )
     address_text = StringField(
+        ref="address-text",
         display="Address Text",
         description="Flexible field for capturing addresses",
-        max_length=None,
     )
 
 
@@ -7398,17 +7911,18 @@ class SiteOwnership(SchemaNode):
     )
 
     applicant_interest = StringField(
+        ref="applicant-interest",
         display="Applicant interest",
         description="Description of the applicant's interest in the land",
-        max_length=None,
     )
     applicant_interest_adjoining_land = StringField(
+        ref="applicant-interest-adjoining-land",
         display="Applicant interest adjoining land",
         description="Description of the applicant's interest in the adjacent land",
-        max_length=None,
     )
 
     site_owner = SchemaNodeField(
+        ref="site-owner",
         display="Site owner",
         description="Details of the owner of the development site including name and address ",
         schema_node_cls=SiteOwner,
@@ -7421,9 +7935,9 @@ class StorageFacilities(SchemaNode):
     _description = "For oil and gas extraction developments, how chemicals will be stored"
 
     storage_facilities_description = StringField(
+        ref="storage-facilities-description",
         display="Storage facilities description",
         description="Details and proposed facilities for the storage of oil, fuel and chemicals and the proposed means of their protection",
-        max_length=None,
     )
 
 
@@ -7433,9 +7947,10 @@ class RelatedPermissions(SchemaNode):
     _description = "Details about a related permission including the reference of the original application, type and decision date, and an option condition number/reference if varying "
 
     reference = StringField(
-        display="Reference", description="A unique reference for the data item", max_length=None
+        ref="reference", display="Reference", description="A unique reference for the data item"
     )
     oilgas_permission_type = EnumField(
+        ref="oilgas-permission-type",
         display="Oil and gas permission type",
         description="An oil and gas related permission type",
         select_options=[
@@ -7476,14 +7991,14 @@ class RelatedPermissions(SchemaNode):
         ],
     )
     decision_date = StringField(
+        ref="decision-date",
         display="Decision date",
         description="The date when the decision was made, in YYYY-MM-DD format",
-        max_length=None,
     )
     condition_number = StringField(
+        ref="condition-number",
         display="Condition number",
         description="Number of any condition being breached",
-        max_length=None,
     )
 
 
@@ -7495,15 +8010,17 @@ class RelatedProposals(SchemaNode):
     )
 
     reference = StringField(
-        display="Reference", description="A unique reference for the data item", max_length=None
+        ref="reference", display="Reference", description="A unique reference for the data item"
     )
     application_type = StringField(
-        display="Application type", description="The type of planning application", max_length=None
+        ref="application-type",
+        display="Application type",
+        description="The type of planning application",
     )
     decision_date = StringField(
+        ref="decision-date",
         display="Decision date",
         description="The date when the decision was made, in YYYY-MM-DD format",
-        max_length=None,
     )
 
 
@@ -7513,6 +8030,7 @@ class OilgasPermissionType(SchemaNode):
     _description = "Module for details about types of onshore oil and gas extraction permissions already received and applying for "
 
     oilgas_permission_types = EnumField(
+        ref="oilgas-permission-types",
         display="Oil and gas permission types",
         description="List of permission types being applied for",
         select_options=[
@@ -7553,26 +8071,29 @@ class OilgasPermissionType(SchemaNode):
         ],
     )
     other_details = StringField(
+        ref="other-details",
         display="Other details",
         description="Explanation if other ground is selected",
-        max_length=None,
     )
     will_consolidate_permissions = BooleanField(
+        ref="will-consolidate-permissions",
         display="Will consolidate permissions",
         description="Is the applicant looking to consolidate permissions?",
     )
     details = StringField(
+        ref="details",
         display="Details",
         description="Additional details or information about an item",
-        max_length=None,
     )
 
     related_permissions = SchemaNodeField(
+        ref="related-permissions",
         display="Related permission-details",
         description="Details about a related permission including the reference of the original application, type and decision date, and an option condition number/reference if varying ",
         schema_node_cls=RelatedPermissions,
     )
     related_proposals = SchemaNodeField(
+        ref="related-proposals",
         display="Related proposal",
         description="Details about a related proposal including its reference, type and decision date ",
         schema_node_cls=RelatedProposals,
@@ -7587,6 +8108,7 @@ class DevType(SchemaNode):
     )
 
     development_phase = EnumField(
+        ref="development-phase",
         display="Development phase",
         description="Phases of oil and gas development the application covers",
         select_options=[
@@ -7608,31 +8130,32 @@ class DevType(SchemaNode):
         ],
     )
     description = StringField(
+        ref="description",
         display="Description",
         description="A text description providing details about the subject.",
-        max_length=None,
     )
     quantity_cubic_metres = StringField(
+        ref="quantity-cubic-metres",
         display="Quantity cubic metres",
         description="Quantity of oil or gas involved in cubic metres",
-        max_length=None,
     )
     permission_period_years = StringField(
+        ref="permission-period-years",
         display="Permission period years",
         description="Period of permission sought in years",
-        max_length=None,
     )
     hydrocarbon_licence_block = StringField(
+        ref="hydrocarbon-licence-block",
         display="Hydrocarbon licence block",
         description="Hydrocarbon licence block where the development is located",
-        max_length=None,
     )
     surface_site_area_hectares = StringField(
+        ref="surface-site-area-hectares",
         display="Surface site area hectares",
         description="Surface site area in hectares",
-        max_length=None,
     )
     site_hectares_provided_by = EnumField(
+        ref="site-hectares-provided-by",
         display="Site hectares provided by",
         description="Who provided the site hectares value (applicant or system)",
         select_options=[
@@ -7649,13 +8172,14 @@ class DevType(SchemaNode):
         ],
     )
     environmental_statement = BooleanField(
+        ref="environmental-statement",
         display="Environmental statement",
         description="Is an Environmental Statement attached to the application",
     )
     environmental_statement_reference = StringField(
+        ref="environmental-statement-reference",
         display="Environmental statement reference",
         description="Reference of the environmental statement document supplied with application",
-        max_length=None,
     )
 
 
@@ -7667,11 +8191,12 @@ class VolAgreement(SchemaNode):
     )
 
     draft_agreement_included = BooleanField(
+        ref="draft-agreement-included",
         display="Draft agreement included",
         description="Has an outline or draft agreement been included? (True / False)",
     )
     agreement_summary = StringField(
-        display="Agreement summary", description="Summary of the agreement", max_length=None
+        ref="agreement-summary", display="Agreement summary", description="Summary of the agreement"
     )
 
 
@@ -7681,151 +8206,181 @@ class ExtractionOilGas(SchemaNode):
     _description = "Development relating to the onshore extraction of oil and gas (including exploratory, appraisal and production phases) and the associated plans, documents and validation information required to support an application. "
 
     submission_details = SchemaNodeField(
+        ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including reference information, application types, specification profile, destination, documents, and fees ",
         schema_node_cls=SubmissionDetails,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     flood_risk_assessment = SchemaNodeField(
+        ref="flood-risk-assessment",
         display="Flood risk assessment",
         description="Results of any flood risk assessments made for the development site",
         schema_node_cls=FloodRiskAssessment,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     bio_geo_arch_con = SchemaNodeField(
+        ref="bio-geo-arch-con",
         display="Biodiversity, geological and archaeological conservation",
         description="Details of potential impacts to the biodiversity of the site, or any noteable archaeological or geological features.",
         schema_node_cls=BioGeoArchCon,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     designated_areas = SchemaNodeField(
+        ref="designated-areas",
         display="Designated areas",
         description="Details of any 'designated area' the develpoment site is on, such as a Conservation Area or National Park.",
         schema_node_cls=DesignatedAreas,
     )
     employment = SchemaNodeField(
+        ref="employment",
         display="Employment",
         description="How the proposed development will impact existing and proposed employee numbers",
         schema_node_cls=Employment,
     )
     equip_method = SchemaNodeField(
+        ref="equip-method",
         display="Equipment and method",
         description="How oil and gas will be extracted as part of the proposed development.",
         schema_node_cls=EquipMethod,
     )
     existing_use = SchemaNodeField(
+        ref="existing-use",
         display="Existing use",
         description="How the site is currently being used.",
         schema_node_cls=ExistingUse,
     )
     foul_sewage = SchemaNodeField(
+        ref="foul-sewage",
         display="Foul sewage disposal",
         description="How waste water will leave the property as part of the proposed development",
         schema_node_cls=FoulSewage,
     )
     haz_substances = SchemaNodeField(
+        ref="haz-substances",
         display="Hazardous substances",
         description="Details of hazardous substances requiring consent used as part of the development",
         schema_node_cls=HazSubstances,
     )
     hrs_operation = SchemaNodeField(
+        ref="hrs-operation",
         display="Hours of operation",
         description="Proposed operating hours if the proposed development is intended for non-residential use.",
         schema_node_cls=HrsOperation,
     )
     ownership_certs = SchemaNodeField(
+        ref="ownership-certs",
         display="Ownership certificates and agricultural land declaration",
         description="Who will be affected by the proposal and whether they have been notified, such as agricultural tenants",
         schema_node_cls=OwnershipCerts,
     )
     access_rights_of_way = SchemaNodeField(
+        ref="access-rights-of-way",
         display="Access and rights of way",
         description="Details of any changes the proposed development would make to existing access arrangements or public rights of way",
         schema_node_cls=AccessRightsOfWay,
     )
     plans_drawings_supporting_materials = SchemaNodeField(
+        ref="plans-drawings-supporting-materials",
         display="Plans, drawings and supporting materials",
         description="Additional materials and specifications that form part of the planning application",
         schema_node_cls=PlansDrawingsSupportingMaterials,
     )
     pre_app_advice = SchemaNodeField(
+        ref="pre-app-advice",
         display="Pre-application advice",
         description="Details of pre-application advice previously received from the planning authority",
         schema_node_cls=PreAppAdvice,
     )
     site_details = SchemaNodeField(
+        ref="site-details",
         display="Site details",
         description="Where the proposed development will be built.",
         schema_node_cls=SiteDetails,
     )
     site_ownership = SchemaNodeField(
+        ref="site-ownership",
         display="Site ownership",
         description="For oil and gas extraction developments, who owns or has an interest in the site.",
         schema_node_cls=SiteOwnership,
     )
     site_visit = SchemaNodeField(
+        ref="site-visit",
         display="Site Visit Details",
         description="Information to help the planning authority arrange a site visit",
         schema_node_cls=SiteVisit,
     )
     storage_facilities = SchemaNodeField(
+        ref="storage-facilities",
         display="Storage facilities",
         description="For oil and gas extraction developments, how chemicals will be stored",
         schema_node_cls=StorageFacilities,
     )
     trade_effluent = SchemaNodeField(
+        ref="trade-effluent",
         display="Trade effluent",
         description="Details of any liquid waste produced by industial processes on the proposed site, and how it will be diposed of.",
         schema_node_cls=TradeEffluent,
     )
     trees_hedges = SchemaNodeField(
+        ref="trees-hedges",
         display="Trees and hedges information",
         description="Details of trees and/or hedges that will be affected by the proposed development",
         schema_node_cls=TreesHedges,
     )
     oilgas_permission_type = SchemaNodeField(
+        ref="oilgas-permission-type",
         display="Oil and gas permission types",
         description="Module for details about types of onshore oil and gas extraction permissions already received and applying for ",
         schema_node_cls=OilgasPermissionType,
     )
     dev_type = SchemaNodeField(
+        ref="dev-type",
         display="Development type",
         description="Supporting information for developments used for oil and gas exploration or mining ",
         schema_node_cls=DevType,
     )
     vol_agreement = SchemaNodeField(
+        ref="vol-agreement",
         display="Voluntary agreement",
         description="Details of any voluntary agreements made as part of an oil and gas extraction application.",
         schema_node_cls=VolAgreement,
@@ -7838,13 +8393,16 @@ class NotifiedPersons(SchemaNode):
     _description = "Details of a person that has been notified (often owners and agricultural tenants of the land)"
 
     notice_date = StringField(
+        ref="notice-date",
         display="Notice date",
         description="Date when notice was served to an owner or tenant",
-        max_length=None,
     )
 
     person = SchemaNodeField(
-        display="Person obj", description="Details of an individual ", schema_node_cls=Person
+        ref="person",
+        display="Person obj",
+        description="Details of an individual ",
+        schema_node_cls=Person,
     )
 
 
@@ -7854,10 +8412,12 @@ class Eligibility(SchemaNode):
     _description = "Whether certain eligibility criteria has been met and the right people notified"
 
     applicant_land_interest = BooleanField(
+        ref="applicant-land-interest",
         display="Applicant land interest",
         description="Does the applicant have an interest in the land",
     )
     ownership_notification = EnumField(
+        ref="ownership-notification",
         display="Ownership notification",
         description="If not the sole owner, has notification been given under Article 10",
         select_options=[
@@ -7872,6 +8432,7 @@ class Eligibility(SchemaNode):
     )
 
     notified_persons = SchemaNodeField(
+        ref="notified-persons",
         display="Notified person",
         description="Details of a person that has been notified (often owners and agricultural tenants of the land)",
         schema_node_cls=NotifiedPersons,
@@ -7884,14 +8445,14 @@ class ReplacementDocuments(SchemaNode):
     _description = "Structure for documents being replaced in non-material amendments, mapping old document references to new document references held in application.documents "
 
     old_document = StringField(
+        ref="old-document",
         display="Old document",
         description="Reference of the old document being replaced in the amendment",
-        max_length=None,
     )
     new_document = StringField(
+        ref="new-document",
         display="New document",
         description="Reference for the new document replacing the old document in the amendment",
-        max_length=None,
     )
 
 
@@ -7903,17 +8464,19 @@ class NmAmendmentDetails(SchemaNode):
     )
 
     description = StringField(
+        ref="description",
         display="Description",
         description="A text description providing details about the subject.",
-        max_length=None,
     )
     is_substituting_document = BooleanField(
+        ref="is-substituting-document",
         display="Substituting document",
         description="True or False indicating whether the amendment involves substituting documents",
     )
-    reason = StringField(display="Reason", description="A textual reason", max_length=None)
+    reason = StringField(ref="reason", display="Reason", description="A textual reason")
 
     replacement_documents = SchemaNodeField(
+        ref="replacement-documents",
         display="Replacement document",
         description="Structure for documents being replaced in non-material amendments, mapping old document references to new document references held in application.documents ",
         schema_node_cls=ReplacementDocuments,
@@ -7928,71 +8491,85 @@ class NonMaterialAmendment(SchemaNode):
     )
 
     submission_details = SchemaNodeField(
+        ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including reference information, application types, specification profile, destination, documents, and fees ",
         schema_node_cls=SubmissionDetails,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     desc_your_proposal = SchemaNodeField(
+        ref="desc-your-proposal",
         display="Description of your proposal",
         description="Written description of the proposed development including any additional relevant details.",
         schema_node_cls=DescYourProposal,
     )
     eligibility = SchemaNodeField(
+        ref="eligibility",
         display="Eligibility",
         description="Whether certain eligibility criteria has been met and the right people notified",
         schema_node_cls=Eligibility,
     )
     nm_amendment_details = SchemaNodeField(
+        ref="nm-amendment-details",
         display="Non-material amendment details",
         description="Details of changes being requested to plans after permission has already been granted.",
         schema_node_cls=NmAmendmentDetails,
     )
     pre_app_advice = SchemaNodeField(
+        ref="pre-app-advice",
         display="Pre-application advice",
         description="Details of pre-application advice previously received from the planning authority",
         schema_node_cls=PreAppAdvice,
     )
     site_details = SchemaNodeField(
+        ref="site-details",
         display="Site details",
         description="Where the proposed development will be built.",
         schema_node_cls=SiteDetails,
     )
     site_visit = SchemaNodeField(
+        ref="site-visit",
         display="Site Visit Details",
         description="Information to help the planning authority arrange a site visit",
         schema_node_cls=SiteVisit,
@@ -8005,22 +8582,28 @@ class AdvertLocation(SchemaNode):
     _description = "Where the advertisement being applied to be built will be located"
 
     is_advert_in_place = BooleanField(
-        display="Is advert in place", description="Whether the advertisement is already in place"
+        ref="is-advert-in-place",
+        display="Is advert in place",
+        description="Whether the advertisement is already in place",
     )
     advert_placed_date = StringField(
+        ref="advert-placed-date",
         display="Advert placed date",
         description="Date when the advertisement was placed (YYYY-MM-DD format)",
-        max_length=None,
     )
     is_replacement_advert = BooleanField(
-        display="Is replacement advert", description="Whether this is a replacement advertisement"
+        ref="is-replacement-advert",
+        display="Is replacement advert",
+        description="Whether this is a replacement advertisement",
     )
     is_advert_overhanging = BooleanField(
+        ref="is-advert-overhanging",
         display="Is advert overhanging",
         description="Whether the advertisement will project over a footpath or other public highway",
     )
 
     document_reference = SchemaNodeField(
+        ref="document-reference",
         display="Supporting document",
         description="Reference to a supporting document already listed in application.documents ",
         schema_node_cls=DocumentReference,
@@ -8033,14 +8616,14 @@ class AdvertPeriod(SchemaNode):
     _description = "How long the proposed advertisement will be shown."
 
     advert_start_date = StringField(
+        ref="advert-start-date",
         display="Advert start date",
         description="The start of the time period that consent to advertisement is sought",
-        max_length=None,
     )
     advert_end_date = StringField(
+        ref="advert-end-date",
         display="Advert end date",
         description="The end of the time period that consent to advertisement is sought",
-        max_length=None,
     )
 
 
@@ -8050,6 +8633,7 @@ class AdvertisementProposalType(SchemaNode):
     _description = "Information about a specific type of advertisement including type, count, and additional description if 'other' type is selected "
 
     advertisement_type = EnumField(
+        ref="advertisement-type",
         display="Advertisement type",
         description="One of the advertisement-types or other",
         select_options=[
@@ -8062,14 +8646,14 @@ class AdvertisementProposalType(SchemaNode):
         ],
     )
     advertisement_count = StringField(
+        ref="advertisement-count",
         display="Advertisement count",
         description="Number of this type of advertisement",
-        max_length=None,
     )
     advertisement_other_description = StringField(
+        ref="advertisement-other-description",
         display="Advertisement other description",
         description="Details required if other advertisement type is selected",
-        max_length=None,
     )
 
 
@@ -8079,12 +8663,13 @@ class AdvertisementTypes(SchemaNode):
     _description = "What type of advertisements are proposed and how many there will be."
 
     description = StringField(
+        ref="description",
         display="Description",
         description="A text description providing details about the subject.",
-        max_length=None,
     )
 
     advertisement_proposal_type = SchemaNodeField(
+        ref="advertisement-proposal-type",
         display="Advertisement proposal type",
         description="Information about a specific type of advertisement including type, count, and additional description if 'other' type is selected ",
         schema_node_cls=AdvertisementProposalType,
@@ -8097,17 +8682,19 @@ class InterestInLand(SchemaNode):
     _description = "Whether the applicant owns or has permission to use the land where the proposed advertisement will be placed"
 
     applicant_owns_land = BooleanField(
+        ref="applicant-owns-land",
         display="Applicant owns land",
         description="True or False indicating whether the applicant owns the land where the advertisement will be displayed",
     )
     permission_obtained = BooleanField(
+        ref="permission-obtained",
         display="Permission obtained",
         description="True or False indicating whether permission of the owner for the display of an advertisement has been obtained",
     )
     permission_not_obtained_details = StringField(
+        ref="permission-not-obtained-details",
         display="Permission not obtained details",
         description="Details explaining why permission from the land owner has not been obtained for the advertisement display",
-        max_length=None,
     )
 
 
@@ -8119,41 +8706,40 @@ class Advertisements(SchemaNode):
     )
 
     height_from_ground = StringField(
+        ref="height-from-ground",
         display="Height from ground",
         description="Height, in metres, from ground to the base of the advertisement",
-        max_length=None,
     )
     height = StringField(
+        ref="height",
         display="Height",
         description="Height, in metres, of dimensions of advertisement",
-        max_length=None,
     )
     width = StringField(
-        display="Width", description="Width of dimensions of advertisement", max_length=None
+        ref="width", display="Width", description="Width of dimensions of advertisement"
     )
     depth = StringField(
-        display="Depth",
-        description="Depth, in metres, of dimensions of advertisement",
-        max_length=None,
+        ref="depth", display="Depth", description="Depth, in metres, of dimensions of advertisement"
     )
     symbol_height_max = StringField(
+        ref="symbol-height-max",
         display="Symbol height max",
         description="Maximum height, in metres, of any individual letters or symbols",
-        max_length=None,
     )
-    colour = StringField(display="Colour", description="Colour of proposed sign", max_length=None)
+    colour = StringField(ref="colour", display="Colour", description="Colour of proposed sign")
     materials = StringField(
-        display="Materials", description="Materials of proposed sign", max_length=None
+        ref="materials", display="Materials", description="Materials of proposed sign"
     )
     max_projection = StringField(
+        ref="max-projection",
         display="Max projection",
         description="Maximum projection, in metres, of the advertisement from the face of the building",
-        max_length=None,
     )
     illuminated = BooleanField(
-        display="Illuminated", description="Will the sign(s) be illuminated?"
+        ref="illuminated", display="Illuminated", description="Will the sign(s) be illuminated?"
     )
     illumination_method = EnumField(
+        ref="illumination-method",
         display="Illumination method",
         description="Method of illumination for the advertisement",
         select_options=[
@@ -8170,11 +8756,12 @@ class Advertisements(SchemaNode):
         ],
     )
     illuminance_level = StringField(
+        ref="illuminance-level",
         display="Illuminance level",
         description="Level of illuminance for the advertisement",
-        max_length=None,
     )
     illumination_type = EnumField(
+        ref="illumination-type",
         display="Illumination type",
         description="Type of illumination (static or intermittent)",
         select_options=[
@@ -8198,6 +8785,7 @@ class ProposedAdvertDetails(SchemaNode):
     _description = "Details of the proposed advertisements such as their size and how they are made"
 
     advertisements = SchemaNodeField(
+        ref="advertisements",
         display="Advertisement",
         description="Details of a proposed advertisement including dimensions, materials, and illumination",
         schema_node_cls=Advertisements,
@@ -8210,86 +8798,103 @@ class Advertising(SchemaNode):
     _description = "An application for all types of advertisements and signs"
 
     submission_details = SchemaNodeField(
+        ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including reference information, application types, specification profile, destination, documents, and fees ",
         schema_node_cls=SubmissionDetails,
     )
     advert_location = SchemaNodeField(
+        ref="advert-location",
         display="Advertisement location",
         description="Where the advertisement being applied to be built will be located",
         schema_node_cls=AdvertLocation,
     )
     advert_period = SchemaNodeField(
+        ref="advert-period",
         display="Advert period",
         description="How long the proposed advertisement will be shown.",
         schema_node_cls=AdvertPeriod,
     )
     advertisement_types = SchemaNodeField(
+        ref="advertisement-types",
         display="Advertisement types",
         description="What type of advertisements are proposed and how many there will be.",
         schema_node_cls=AdvertisementTypes,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     community_consultation = SchemaNodeField(
+        ref="community-consultation",
         display="Community consultation",
         description="What community consultation activities have taken place as part of the application",
         schema_node_cls=CommunityConsultation,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     interest_in_land = SchemaNodeField(
+        ref="interest-in-land",
         display="Interest in land",
         description="Whether the applicant owns or has permission to use the land where the proposed advertisement will be placed",
         schema_node_cls=InterestInLand,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     pre_app_advice = SchemaNodeField(
+        ref="pre-app-advice",
         display="Pre-application advice",
         description="Details of pre-application advice previously received from the planning authority",
         schema_node_cls=PreAppAdvice,
     )
     proposed_advert_details = SchemaNodeField(
+        ref="proposed-advert-details",
         display="Proposed advert details",
         description="Details of the proposed advertisements such as their size and how they are made",
         schema_node_cls=ProposedAdvertDetails,
     )
     site_details = SchemaNodeField(
+        ref="site-details",
         display="Site details",
         description="Where the proposed development will be built.",
         schema_node_cls=SiteDetails,
     )
     site_visit = SchemaNodeField(
+        ref="site-visit",
         display="Site Visit Details",
         description="Information to help the planning authority arrange a site visit",
         schema_node_cls=SiteVisit,
@@ -8302,61 +8907,73 @@ class Ldc(SchemaNode):
     _description = "A legal document stating the lawfulness of past, present or future building use, operation or other matters, signifying that enforcement action cannot be carried out against the development"
 
     submission_details = SchemaNodeField(
+        ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including reference information, application types, specification profile, destination, documents, and fees ",
         schema_node_cls=SubmissionDetails,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     interest_details = SchemaNodeField(
+        ref="interest-details",
         display="Interest details",
         description="Names and contact details for all parties with an interest in the proposed develpoment.",
         schema_node_cls=InterestDetails,
     )
     pre_app_advice = SchemaNodeField(
+        ref="pre-app-advice",
         display="Pre-application advice",
         description="Details of pre-application advice previously received from the planning authority",
         schema_node_cls=PreAppAdvice,
     )
     site_details = SchemaNodeField(
+        ref="site-details",
         display="Site details",
         description="Where the proposed development will be built.",
         schema_node_cls=SiteDetails,
     )
     site_visit = SchemaNodeField(
+        ref="site-visit",
         display="Site Visit Details",
         description="Information to help the planning authority arrange a site visit",
         schema_node_cls=SiteVisit,
@@ -8369,156 +8986,187 @@ class Full(SchemaNode):
     _description = "This application is needed when making detailed proposals for developments which are not covered by a householder application or permitted development rights"
 
     submission_details = SchemaNodeField(
+        ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including reference information, application types, specification profile, destination, documents, and fees ",
         schema_node_cls=SubmissionDetails,
     )
     access_rights_of_way = SchemaNodeField(
+        ref="access-rights-of-way",
         display="Access and rights of way",
         description="Details of any changes the proposed development would make to existing access arrangements or public rights of way",
         schema_node_cls=AccessRightsOfWay,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     bio_geo_arch_con = SchemaNodeField(
+        ref="bio-geo-arch-con",
         display="Biodiversity, geological and archaeological conservation",
         description="Details of potential impacts to the biodiversity of the site, or any noteable archaeological or geological features.",
         schema_node_cls=BioGeoArchCon,
     )
     bng = SchemaNodeField(
+        ref="bng",
         display="Biodiversity net gain",
         description="How any natural habitats on the development site will be improved by the proposed works.",
         schema_node_cls=Bng,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     employment = SchemaNodeField(
+        ref="employment",
         display="Employment",
         description="How the proposed development will impact existing and proposed employee numbers",
         schema_node_cls=Employment,
     )
     existing_use = SchemaNodeField(
+        ref="existing-use",
         display="Existing use",
         description="How the site is currently being used.",
         schema_node_cls=ExistingUse,
     )
     flood_risk_assessment = SchemaNodeField(
+        ref="flood-risk-assessment",
         display="Flood risk assessment",
         description="Results of any flood risk assessments made for the development site",
         schema_node_cls=FloodRiskAssessment,
     )
     foul_sewage = SchemaNodeField(
+        ref="foul-sewage",
         display="Foul sewage disposal",
         description="How waste water will leave the property as part of the proposed development",
         schema_node_cls=FoulSewage,
     )
     haz_substances = SchemaNodeField(
+        ref="haz-substances",
         display="Hazardous substances",
         description="Details of hazardous substances requiring consent used as part of the development",
         schema_node_cls=HazSubstances,
     )
     hrs_operation = SchemaNodeField(
+        ref="hrs-operation",
         display="Hours of operation",
         description="Proposed operating hours if the proposed development is intended for non-residential use.",
         schema_node_cls=HrsOperation,
     )
     materials = SchemaNodeField(
+        ref="materials",
         display="Materials",
         description="What materials are being used for the proposed development",
         schema_node_cls=Materials,
     )
     non_res_floorspace = SchemaNodeField(
+        ref="non-res-floorspace",
         display="Non residential floorspace",
         description="Details of changes to non-residential floorspace in the proposed development.",
         schema_node_cls=NonResFloorspace,
     )
     ownership_certs = SchemaNodeField(
+        ref="ownership-certs",
         display="Ownership certificates and agricultural land declaration",
         description="Who will be affected by the proposal and whether they have been notified, such as agricultural tenants",
         schema_node_cls=OwnershipCerts,
     )
     pre_app_advice = SchemaNodeField(
+        ref="pre-app-advice",
         display="Pre-application advice",
         description="Details of pre-application advice previously received from the planning authority",
         schema_node_cls=PreAppAdvice,
     )
     processes_machinery_waste = SchemaNodeField(
+        ref="processes-machinery-waste",
         display="Processes machinery waste",
         description="How waste will be managed on the site ",
         schema_node_cls=ProcessesMachineryWaste,
     )
     proposal_details = SchemaNodeField(
+        ref="proposal-details",
         display="Description of the proposal",
         description="What development, works or change of use is proposed",
         schema_node_cls=ProposalDetails,
     )
     res_units = SchemaNodeField(
+        ref="res-units",
         display="Residential units",
         description="Details of the residential units that make up both the current and proposed development.",
         schema_node_cls=ResUnits,
     )
     site_area = SchemaNodeField(
+        ref="site-area",
         display="Site area",
         description="How big the site is including relevant measurements",
         schema_node_cls=SiteArea,
     )
     site_details = SchemaNodeField(
+        ref="site-details",
         display="Site details",
         description="Where the proposed development will be built.",
         schema_node_cls=SiteDetails,
     )
     site_visit = SchemaNodeField(
+        ref="site-visit",
         display="Site Visit Details",
         description="Information to help the planning authority arrange a site visit",
         schema_node_cls=SiteVisit,
     )
     trade_effluent = SchemaNodeField(
+        ref="trade-effluent",
         display="Trade effluent",
         description="Details of any liquid waste produced by industial processes on the proposed site, and how it will be diposed of.",
         schema_node_cls=TradeEffluent,
     )
     trees_hedges = SchemaNodeField(
+        ref="trees-hedges",
         display="Trees and hedges information",
         description="Details of trees and/or hedges that will be affected by the proposed development",
         schema_node_cls=TreesHedges,
     )
     vehicle_parking = SchemaNodeField(
+        ref="vehicle-parking",
         display="Vehicle parking",
         description="Details of current parking facilities at the site and any changes that would be made by the proposed development.",
         schema_node_cls=VehicleParking,
     )
     waste_storage_collection = SchemaNodeField(
+        ref="waste-storage-collection",
         display="Waste storage and collection",
         description="Any waste storage or recycling arrangements are in place, such as waste storage areas",
         schema_node_cls=WasteStorageCollection,
@@ -8531,14 +9179,12 @@ class Addresses(SchemaNode):
     _description = "Address information including text representation, postcode, and UPRN "
 
     address_text = StringField(
+        ref="address-text",
         display="Address Text",
         description="Flexible field for capturing addresses",
-        max_length=None,
     )
-    postcode = StringField(display="Postcode", description="The postal code", max_length=None)
-    uprn = StringField(
-        display="UPRN", description="Unique Property Reference Number", max_length=None
-    )
+    postcode = StringField(ref="postcode", display="Postcode", description="The postal code")
+    uprn = StringField(ref="uprn", display="UPRN", description="Unique Property Reference Number")
 
 
 class AdjPremises(SchemaNode):
@@ -8547,6 +9193,7 @@ class AdjPremises(SchemaNode):
     _description = "Details of properties next to the development site"
 
     addresses = SchemaNodeField(
+        ref="addresses",
         display="Address",
         description="Address information including text representation, postcode, and UPRN ",
         schema_node_cls=Addresses,
@@ -8561,24 +9208,24 @@ class DescProposedWorks(SchemaNode):
     )
 
     proposed_works_details = StringField(
+        ref="proposed-works-details",
         display="Proposed works details",
         description="Description of the proposed works including detailed explanation of the work",
-        max_length=None,
     )
     extension_depth = StringField(
+        ref="extension-depth",
         display="Extension depth",
         description="How far the extension extends beyond the rear wall, measured externally in metres",
-        max_length=None,
     )
     max_extension_height = StringField(
+        ref="max-extension-height",
         display="Maximum extension height",
         description="Maximum height of the extension, measured externally from natural ground level in metres",
-        max_length=None,
     )
     eaves_height = StringField(
+        ref="eaves-height",
         display="Eaves height",
         description="Height at the eaves of the extension, measured externally from natural ground level in metres",
-        max_length=None,
     )
 
 
@@ -8588,29 +9235,37 @@ class EligibilityExtension(SchemaNode):
     _description = "How a proposal to build an extension meets relevant criteria."
 
     is_single_storey_extension = BooleanField(
-        display="Single storey extension", description="Will the extension be a single storey"
+        ref="is-single-storey-extension",
+        display="Single storey extension",
+        description="Will the extension be a single storey",
     )
     is_extension_height_over_4m = BooleanField(
+        ref="is-extension-height-over-4m",
         display="Extension height over 4m",
         description="Will the extension exceed 4 metres in height",
     )
     is_dwelling_detached = BooleanField(
-        display="Dwelling detached", description="Is the dwelling detached"
+        ref="is-dwelling-detached",
+        display="Dwelling detached",
+        description="Is the dwelling detached",
     )
     is_extension_beyond_rear_wall = BooleanField(
+        ref="is-extension-beyond-rear-wall",
         display="Extension beyond rear wall",
         description="Will the extension extend beyond the rear wall of the original dwelling",
     )
     extension_length = StringField(
+        ref="extension-length",
         display="Extension length",
         description="Length of rear extension in metres",
-        max_length=None,
     )
     is_within_site_constraints = BooleanField(
+        ref="is-within-site-constraints",
         display="Within site constraints",
         description="Is the dwellinghouse within any restricted area",
     )
     site_constraints = EnumField(
+        ref="site-constraints",
         display="Site constraints",
         description="List of specific site constraints that restrict development",
         select_options=[
@@ -8675,56 +9330,67 @@ class PaExtension(SchemaNode):
     _description = "Planning application for extension"
 
     adj_premises = SchemaNodeField(
+        ref="adj-premises",
         display="Adjacent premises",
         description="Details of properties next to the development site",
         schema_node_cls=AdjPremises,
     )
     desc_proposed_works = SchemaNodeField(
+        ref="desc-proposed-works",
         display="Description of proposed works",
         description="Details of development plans such as extensions measurements or work specifications",
         schema_node_cls=DescProposedWorks,
     )
     eligibility_extension = SchemaNodeField(
+        ref="eligibility-extension",
         display="Eligibility extension",
         description="How a proposal to build an extension meets relevant criteria.",
         schema_node_cls=EligibilityExtension,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     site_details = SchemaNodeField(
+        ref="site-details",
         display="Site details",
         description="Where the proposed development will be built.",
         schema_node_cls=SiteDetails,
@@ -8739,9 +9405,9 @@ class DischargeCon(SchemaNode):
     )
 
     description_list = StringField(
+        ref="description-list",
         display="Description list",
         description="Description or list of materials/details that are being submitted for approval",
-        max_length=None,
     )
 
 
@@ -8751,13 +9417,14 @@ class PartDischarge(SchemaNode):
     _description = "Details of how the applicant is meeting a specific part of a set of conditions made by the planning authority."
 
     is_discharging_part = BooleanField(
+        ref="is-discharging-part",
         display="Is discharging part",
         description="Is applicant trying to discharge part of condition?",
     )
     discharging_part_details = StringField(
+        ref="discharging-part-details",
         display="Discharging part details",
         description="Indicate which part of the condition the application relates to",
-        max_length=None,
     )
 
 
@@ -8767,71 +9434,85 @@ class ApprovalCondition(SchemaNode):
     _description = "An application to have conditions approved which have been applied at the time of granting a planning permission to limit and control the way in which the planning permission has been implemented"
 
     submission_details = SchemaNodeField(
+        ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including reference information, application types, specification profile, destination, documents, and fees ",
         schema_node_cls=SubmissionDetails,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     desc_your_proposal = SchemaNodeField(
+        ref="desc-your-proposal",
         display="Description of your proposal",
         description="Written description of the proposed development including any additional relevant details.",
         schema_node_cls=DescYourProposal,
     )
     discharge_con = SchemaNodeField(
+        ref="discharge-con",
         display="Discharge condition",
         description="How any conditions imposed as part of being given planning permission will be met",
         schema_node_cls=DischargeCon,
     )
     part_discharge = SchemaNodeField(
+        ref="part-discharge",
         display="Part discharge",
         description="Details of how the applicant is meeting a specific part of a set of conditions made by the planning authority.",
         schema_node_cls=PartDischarge,
     )
     pre_app_advice = SchemaNodeField(
+        ref="pre-app-advice",
         display="Pre-application advice",
         description="Details of pre-application advice previously received from the planning authority",
         schema_node_cls=PreAppAdvice,
     )
     site_details = SchemaNodeField(
+        ref="site-details",
         display="Site details",
         description="Where the proposed development will be built.",
         schema_node_cls=SiteDetails,
     )
     site_visit = SchemaNodeField(
+        ref="site-visit",
         display="Site Visit Details",
         description="Information to help the planning authority arrange a site visit",
         schema_node_cls=SiteVisit,
@@ -8844,11 +9525,13 @@ class TreesLocation(SchemaNode):
     _description = "Where trees affected by the proposed development are located."
 
     is_site_different = BooleanField(
+        ref="is-site-different",
         display="Is site different",
         description="Whether the site where trees are located is different from the applicant's address",
     )
 
     site_locations = SchemaNodeField(
+        ref="site-locations",
         display="Site location",
         description="Details about the location of a development site, including its boundary, address, and/or coordinates ",
         schema_node_cls=SiteLocations,
@@ -8861,61 +9544,73 @@ class NoticeTreesInConArea(SchemaNode):
     _description = "Notification, 6 weeks prior to works being carried out, of proposed works to a tree in a conservation area that is not subject to a Tree Preservation order"
 
     submission_details = SchemaNodeField(
+        ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including reference information, application types, specification profile, destination, documents, and fees ",
         schema_node_cls=SubmissionDetails,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     trees_additional = SchemaNodeField(
+        ref="trees-additional",
         display="Trees additional information",
         description="Further details of any issues relating to trees on the site",
         schema_node_cls=TreesAdditional,
     )
     trees_location = SchemaNodeField(
+        ref="trees-location",
         display="Trees location",
         description="Where trees affected by the proposed development are located.",
         schema_node_cls=TreesLocation,
     )
     trees_ownership = SchemaNodeField(
+        ref="trees-ownership",
         display="Trees ownership",
         description="Who owns any trees affected by the proposed development.",
         schema_node_cls=TreesOwnership,
     )
     tree_work_details = SchemaNodeField(
+        ref="tree-work-details",
         display="Identification of tree(s) and description of works",
         description="Details of trees affected by the proposed development and what work is being done to them.",
         schema_node_cls=TreeWorkDetails,
@@ -8928,6 +9623,7 @@ class DescExistingUse(SchemaNode):
     _description = "How the development site is used, including use class information"
 
     existing_use_details = SchemaNodeField(
+        ref="existing-use-details",
         display="Existing use detail",
         description="Information about a specific existing use on the site, including use class, additional details, and which part of the land it relates to ",
         schema_node_cls=ExistingUseDetails,
@@ -8940,6 +9636,7 @@ class UseWorksActivity(SchemaNode):
     _description = "Why a Lawful Development Certificate is required regarding how the development site is being used, or specific works taking place on the site."
 
     ldc_need = EnumField(
+        ref="ldc-need",
         display="LDC need",
         description="What is the lawful development certificate needed for?",
         select_options=[
@@ -8963,6 +9660,7 @@ class UseWorksActivity(SchemaNode):
         ],
     )
     use = EnumField(
+        ref="use",
         display="Use",
         description="A use class or type of use",
         select_options=[
@@ -9116,9 +9814,9 @@ class UseWorksActivity(SchemaNode):
         ],
     )
     specified_use = StringField(
+        ref="specified-use",
         display="Specified use",
         description="A specified use if no applicable use class is available",
-        max_length=None,
     )
 
 
@@ -9128,19 +9826,19 @@ class SupportingApplications(SchemaNode):
     _description = "Planning permissions, certificates, or notices affecting the application site "
 
     reference_number = StringField(
+        ref="reference-number",
         display="Reference number",
         description="Reference number of the planning permission",
-        max_length=None,
     )
     condition_number = StringField(
+        ref="condition-number",
         display="Condition number",
         description="Number of any condition being breached",
-        max_length=None,
     )
     decision_date = StringField(
+        ref="decision-date",
         display="Decision date",
         description="The date when the decision was made, in YYYY-MM-DD format",
-        max_length=None,
     )
 
 
@@ -9152,6 +9850,7 @@ class GroundsLdc(SchemaNode):
     )
 
     grounds_pre_2024 = EnumField(
+        ref="grounds-pre-2024",
         display="Grounds pre 2024",
         description="List of grounds pre 2024-04-25 under which the certificate is sought",
         select_options=[
@@ -9188,6 +9887,7 @@ class GroundsLdc(SchemaNode):
         ],
     )
     grounds_post_2024 = EnumField(
+        ref="grounds-post-2024",
         display="Grounds post 2024",
         description="List of grounds post 2024-04-25 under which the certificate is sought",
         select_options=[
@@ -9209,13 +9909,14 @@ class GroundsLdc(SchemaNode):
         ],
     )
     other_details = StringField(
+        ref="other-details",
         display="Other details",
         description="Explanation if other ground is selected",
-        max_length=None,
     )
-    reason = StringField(display="Reason", description="A textual reason", max_length=None)
+    reason = StringField(ref="reason", display="Reason", description="A textual reason")
 
     supporting_applications = SchemaNodeField(
+        ref="supporting-applications",
         display="Supporting applications",
         description="Planning permissions, certificates, or notices affecting the application site ",
         schema_node_cls=SupportingApplications,
@@ -9230,27 +9931,29 @@ class InfoSupportLdc(SchemaNode):
     )
 
     existing_use_start_date = StringField(
+        ref="existing-use-start-date",
         display="Existing use start date",
         description="Date when the existing use of the land or building commenced, in YYYY-MM-DD format",
-        max_length=None,
     )
     has_existing_use_interrupted = BooleanField(
+        ref="has-existing-use-interrupted",
         display="Existing use interrupted",
         description="Indicating whether the existing use has been interrupted since it commenced",
     )
     interruption_details = StringField(
+        ref="interruption-details",
         display="Interruption details",
         description="Details of any interruption to the existing use including dates and circumstances",
-        max_length=None,
     )
     has_existing_use_changed = BooleanField(
+        ref="has-existing-use-changed",
         display="Existing use change",
         description="Indicate whether there has been any change in the existing use since it commenced",
     )
     existing_use_change_details = StringField(
+        ref="existing-use-change-details",
         display="Existing use change details",
         description="Details of any changes to the existing use including nature of changes and dates",
-        max_length=None,
     )
 
 
@@ -9260,81 +9963,97 @@ class LdcExistingUse(SchemaNode):
     _description = "Existing use of the site"
 
     desc_existing_use = SchemaNodeField(
+        ref="desc-existing-use",
         display="Description of existing use",
         description="How the development site is used, including use class information",
         schema_node_cls=DescExistingUse,
     )
     use_works_activity = SchemaNodeField(
+        ref="use-works-activity",
         display="Use works activity",
         description="Why a Lawful Development Certificate is required regarding how the development site is being used, or specific works taking place on the site.",
         schema_node_cls=UseWorksActivity,
     )
     grounds_ldc = SchemaNodeField(
+        ref="grounds-ldc",
         display="Grounds for lawful development certificate",
         description="Evidence and explanations relating to a Lawful Development Certificate (LDC) application",
         schema_node_cls=GroundsLdc,
     )
     info_support_ldc = SchemaNodeField(
+        ref="info-support-ldc",
         display="Information to support LDC",
         description="Supporting information required to make a Lawful Development Certificate application",
         schema_node_cls=InfoSupportLdc,
     )
     res_units = SchemaNodeField(
+        ref="res-units",
         display="Residential units",
         description="Details of the residential units that make up both the current and proposed development.",
         schema_node_cls=ResUnits,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     interest_details = SchemaNodeField(
+        ref="interest-details",
         display="Interest details",
         description="Names and contact details for all parties with an interest in the proposed develpoment.",
         schema_node_cls=InterestDetails,
     )
     pre_app_advice = SchemaNodeField(
+        ref="pre-app-advice",
         display="Pre-application advice",
         description="Details of pre-application advice previously received from the planning authority",
         schema_node_cls=PreAppAdvice,
     )
     site_details = SchemaNodeField(
+        ref="site-details",
         display="Site details",
         description="Where the proposed development will be built.",
         schema_node_cls=SiteDetails,
     )
     site_visit = SchemaNodeField(
+        ref="site-visit",
         display="Site Visit Details",
         description="Information to help the planning authority arrange a site visit",
         schema_node_cls=SiteVisit,
@@ -9347,11 +10066,12 @@ class AgriForestDevElig(SchemaNode):
     _description = "Information needed to assess agricultural unit, land parcel, agricultural purpose and wider site constraints "
 
     agri_unit_area = StringField(
+        ref="agri-unit-area",
         display="Agricultural unit area",
         description="Total area of the entire agricultural unit",
-        max_length=None,
     )
     land_parcel_area = EnumField(
+        ref="land-parcel-area",
         display="Land parcel area",
         description="The size category for a given land parcel",
         select_options=[
@@ -9365,53 +10085,59 @@ class AgriForestDevElig(SchemaNode):
         ],
     )
     agri_start_date = StringField(
+        ref="agri-start-date",
         display="Agricultural use start date",
         description="The month and year when the land started being used for agriculture",
-        max_length=None,
     )
     is_necessary_for_agri = BooleanField(
+        ref="is-necessary-for-agri",
         display="Is necessary for agriculture",
         description="Is the proposed development reasonably necessary for the purposes of agriculture?",
     )
     details = StringField(
+        ref="details",
         display="Details",
         description="Additional details or information about an item",
-        max_length=None,
     )
     is_designed_agri = BooleanField(
+        ref="is-designed-agri",
         display="Is designed for agricultural purposes",
         description="Is the proposed development designed for the purposes of agriculture?",
     )
     design_details = StringField(
+        ref="design-details",
         display="Design details",
         description="Additional details or information about design",
-        max_length=None,
     )
     dwelling_alteration = BooleanField(
+        ref="dwelling-alteration",
         display="Dwelling alteration",
         description="Whether the proposed development involves any alteration to a dwelling.",
     )
     away_from_road = BooleanField(
+        ref="away-from-road",
         display="Is over 25 metres from road",
         description="Whether the proposed development is more than 25 metres from a metalled part of a trunk or classified road",
     )
     close_to_aerodrome = BooleanField(
+        ref="close-to-aerodrome",
         display="Within 3km of aerodrome",
         description="Whether the proposed development is within 3 kilometres of an aerodrome",
     )
     proposed_height = StringField(
+        ref="proposed-height",
         display="Proposed height",
         description="Height once the additional storeys have been added in metres",
-        max_length=None,
     )
     affects_heritage = BooleanField(
+        ref="affects-heritage",
         display="Affects heritage or nature conservation",
         description="Whether the proposed development would affect local hertiage or nature considerations",
     )
     heritage_nature_impact_details = StringField(
+        ref="heritage-nature-impact-details",
         display="Heritage and nature impact details",
         description="Details of how the proposed development would affect an ancient monument, archaeological site or listed building, or relate to a Site of Special Scientific Interest or local nature reserve.",
-        max_length=None,
     )
 
 
@@ -9421,29 +10147,29 @@ class ProposedBuildingDetails(SchemaNode):
     _description = "Details of the building being proposed, extended or altered "
 
     details = StringField(
+        ref="details",
         display="Details",
         description="Additional details or information about an item",
-        max_length=None,
     )
     building_length = StringField(
+        ref="building-length",
         display="Building length",
         description="Length of the building (in metres).",
-        max_length=None,
     )
     eaves_height = StringField(
+        ref="eaves-height",
         display="Eaves height",
         description="Height at the eaves of the extension, measured externally from natural ground level in metres",
-        max_length=None,
     )
     building_breadth = StringField(
+        ref="building-breadth",
         display="Building breadth",
         description="Breadth of the building (in metres).",
-        max_length=None,
     )
     building_ridge_height = StringField(
+        ref="building-ridge-height",
         display="Building ridge height",
         description="Height to the ridge of the building (in metres).",
-        max_length=None,
     )
 
 
@@ -9453,6 +10179,7 @@ class ProposedBuilding(SchemaNode):
     _description = "Details of the proposed agricultural or forestry building, including operation type, dimensions, materials "
 
     development_operation_types = EnumField(
+        ref="development-operation-types",
         display="Development operation types",
         description="The types of building operation included in the agricultural or forestry proposal.",
         select_options=[
@@ -9462,48 +10189,58 @@ class ProposedBuilding(SchemaNode):
         ],
     )
     building_wall_materials = StringField(
-        display="Wall materials", description="Details of the wall materials", max_length=None
+        ref="building-wall-materials",
+        display="Wall materials",
+        description="Details of the wall materials",
     )
     building_wall_colour = StringField(
-        display="Wall colour", description="Colour of the wall", max_length=None
+        ref="building-wall-colour", display="Wall colour", description="Colour of the wall"
     )
     building_roof_materials = StringField(
-        display="Roof materials", description="Details of the roof materials", max_length=None
+        ref="building-roof-materials",
+        display="Roof materials",
+        description="Details of the roof materials",
     )
     building_roof_colour = StringField(
-        display="Roof colour", description="Colour of the roof", max_length=None
+        ref="building-roof-colour", display="Roof colour", description="Colour of the roof"
     )
     has_agri_building_2_yrs = BooleanField(
+        ref="has-agri-building-2-yrs",
         display="Agricultural building built within 2 years",
         description="Whether an agricultural building has been constructed on the agricultural unit within the last two years",
     )
     agri_building_area = StringField(
+        ref="agri-building-area",
         display="Agricultural building ground area",
         description="Overall ground area of the agricultural building constructed within the last two years, in square metres",
-        max_length=None,
     )
     agri_building_distance = StringField(
+        ref="agri-building-distance",
         display="Agricultural building distance",
         description="Distance from the recent agricultural building to the proposed new building (in metres)",
-        max_length=None,
     )
     house_livestock = BooleanField(
+        ref="house-livestock",
         display="Houses livestock, slurry or sewage sludge",
         description="Whether the proposed building would be used to house livestock, slurry or sewage sludge ",
     )
     livestock_building_400m = BooleanField(
+        ref="livestock-building-400m",
         display="Livestock building distance from homes",
         description="Whether livestock building more than 400 metres from the nearest house, excluding the farmhouse",
     )
     exceeds_threshold = BooleanField(
+        ref="exceeds-threshold",
         display="Exceeds threhold",
         description="Whether the ground area covered by the proposed building exceeds the relevant Part 6 threshold",
     )
     related_work_distance = BooleanField(
+        ref="related-work-distance",
         display="Related work distance",
         description="Whether specified related works have been erected within 90 metres of the proposed development within the last two years",
     )
     engineering_operations_threshold = EnumField(
+        ref="engineering-operations-threshold",
         display="Engineering operations threshold",
         description="Whether engineering operations exceed 1,000 square metres where the agricultural unit is 5 hectares or more",
         select_options=[
@@ -9517,11 +10254,13 @@ class ProposedBuilding(SchemaNode):
         ],
     )
     within_scheduled_monument = BooleanField(
+        ref="within-scheduled-monument",
         display="Within Scheduled Momument",
         description="Would the erection, extension, or alteration be carried out on land or a building that is, or is within the curtilage of, a scheduled monument",
     )
 
     proposed_building_details = SchemaNodeField(
+        ref="proposed-building-details",
         display="Building details",
         description="Details of the building being proposed, extended or altered ",
         schema_node_cls=ProposedBuildingDetails,
@@ -9536,51 +10275,61 @@ class PaBuildAgriForest(SchemaNode):
     )
 
     agri_forest_dev_elig = SchemaNodeField(
+        ref="agri-forest-dev-elig",
         display="Agricultural and forestry development eligibility",
         description="Information needed to assess agricultural unit, land parcel, agricultural purpose and wider site constraints ",
         schema_node_cls=AgriForestDevElig,
     )
     proposed_building = SchemaNodeField(
+        ref="proposed-building",
         display="Agricultural or forestry building details",
         description="Details of the proposed agricultural or forestry building, including operation type, dimensions, materials ",
         schema_node_cls=ProposedBuilding,
     )
     agent_contact = SchemaNodeField(
+        ref="agent-contact",
         display="Agent contact details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentContact,
     )
     agent_details = SchemaNodeField(
+        ref="agent-details",
         display="Agent details",
         description="Name and contact information if an agent is being used.",
         schema_node_cls=AgentDetails,
     )
     applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
         display="Applicant contact details",
         description="Telephone number and email address of the applicant.",
         schema_node_cls=ApplicantContact,
     )
     applicant_details = SchemaNodeField(
+        ref="applicant-details",
         display="Applicant details",
         description="Name and contact information for the parties making the application.",
         schema_node_cls=ApplicantDetails,
     )
     conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
         display="Conflict of interest",
         description="Details of any conflict of interest that may exist between the applicant and planning authority.",
         schema_node_cls=ConflictOfInterest,
     )
     checklist = SchemaNodeField(
+        ref="checklist",
         display="Checklist",
         description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
         schema_node_cls=Checklist,
     )
     declaration = SchemaNodeField(
+        ref="declaration",
         display="Declaration",
         description="Signed and dated verification of the application's accuracy.",
         schema_node_cls=Declaration,
     )
     site_details = SchemaNodeField(
+        ref="site-details",
         display="Site details",
         description="Where the proposed development will be built.",
         schema_node_cls=SiteDetails,
