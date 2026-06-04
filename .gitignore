@@ -2,8 +2,8 @@
 __pycache__/
 *.pyc
 *.pyo
-!settings/local_config_template.py
 settings/local_config*.py
+!settings/local_config_template.py
 .pytest_cache/
 *.egg-info/
 dist/

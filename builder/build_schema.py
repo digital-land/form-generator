@@ -1,3 +1,4 @@
+from collections import defaultdict
 import csv
 from functools import cached_property
 import os
@@ -8,8 +9,8 @@ from jinja2 import Environment, FileSystemLoader
 from builder.planning_app_data_spec import (
     ComponentResolved,
     Field,
-    ModuleResolved,
     PlanningAppDataResolved,
+    SchemaBase,
 )
 from schema import valid_class_name, valid_field_name, tidy_string
 from schema.schema_tree import (
@@ -17,7 +18,6 @@ from schema.schema_tree import (
     EnumField,
     EnumOption,
     SchemaNodeField,
-    SchemaSegment,
     StringField,
 )
 
@@ -52,81 +52,27 @@ class FormBuilder:
         return output
 
 
-def segment_tree(schema_descriptor):
+def walk_resolved_schema(schema_items):
     """
-    Build tree of SchemaSegment objects by collapsing upstream Module, Component and Field
-    classes into a simpler tree.
+    Recursively iterate Field, ComponentResolved, ModuleResolved, ApplicationResolved yielding each
+    instance with furthest from root first.
 
-    @param namespace: (str)
-    @param schema_descriptor: (subclass of :class:`SchemaBase`)
+    The order is important as python classes are being used as class variables so must be declared
+    before reference.
+
+    This function will generate duplicate items.
     """
+    for spec_item in schema_items:
 
-    # 'ref' must be unique in the space. e.g. 'Field', 'Component' etc.
-    namespace = schema_descriptor.__class__.__name__
+        modules = getattr(spec_item, "modules", [])
+        yield from walk_resolved_schema(modules)
 
-    # ApplicationResolved, ComponentResolved, Field, ModuleResolved
+        for field_entry in getattr(spec_item, "field_entries", []):
 
-    s = SchemaSegment(
-        ref=schema_descriptor.ref,
-        namespace=namespace,
-        name=schema_descriptor.name,
-        description=schema_descriptor.description,
-    )
+            if isinstance(field_entry.target, ComponentResolved):
+                yield from walk_resolved_schema([field_entry.target])
 
-    children = getattr(schema_descriptor, "field_entries", [])
-    children.extend(getattr(schema_descriptor, "fields", []))
-    children.extend(getattr(schema_descriptor, "modules", []))
-
-    for child in children:
-        if isinstance(child, Field):
-            s.fields.append(child)
-        elif isinstance(child, (ComponentResolved, ModuleResolved)):
-            next_layer_fieldset = segment_tree(child)
-            s.descendants.append(next_layer_fieldset)
-
-        else:
-            raise NotImplementedError(f"Unknown field_entries item: {child}")
-
-    return s
-
-
-def print_segment_tree(spec_segment, depth=0):
-    print("\t" * depth + spec_segment.ref)
-    for f in spec_segment.fields:
-        print("\t" * (depth + 1) + f": {f.ref}")
-
-    for d in spec_segment.descendants:
-        print_segment_tree(d, depth=depth + 1)
-
-
-def restructured_spec(spec_path):
-    """
-
-    @param spec_path: (str) - filesystem path for .md formatted specification
-    @return (list) one item per planning application
-    """
-
-    specification = PlanningAppDataResolved(planning_app_repo_path=spec_path)
-
-    apps = []
-    for app_def in specification.applications.values():
-        application_spec_segment = segment_tree(app_def)
-        apps.append(application_spec_segment)
-
-        # print(f"----{app_name}----")
-        # print_segment_tree(application_spec_segment)
-
-    return apps
-
-
-def walk_schema_tree(spec_segment):
-    """
-    Recursively iterate a :class:`SchemaSegment` tree yielding each :class:`SchemaSegment`.
-    """
-    spec_segments = spec_segment if isinstance(spec_segment, list) else [spec_segment]
-    for s in spec_segments:
-        yield from walk_schema_tree(s.descendants)
-        yield s
+        yield spec_item
 
 
 def render_python(project_root, planning_application_spec_path, schema_items):
@@ -143,107 +89,138 @@ def render_python(project_root, planning_application_spec_path, schema_items):
     py_output = form_builder.build(dict(document_header=True), "schema_tree_class.py.j2")
 
     # assumption - refs are primary keys
-    segment_register = {}
+    segment_register = defaultdict(dict)
     segment_class_map = {}  # class_name -> schema_segment
-    for application_spec_segment in schema_items:
+    for schema_base_item in walk_resolved_schema(schema_items):
 
-        for schema_segment in walk_schema_tree(application_spec_segment):
-            # print(schema_segment.ref)
+        assert isinstance(schema_base_item, SchemaBase)
 
-            if schema_segment.namespace not in segment_register:
-                segment_register[schema_segment.namespace] = {}
+        if isinstance(schema_base_item, Field):
+            msg = (
+                "Can't render a 'Field' instance directly. Needs to be in a "
+                "module/component/application"
+            )
+            raise ValueError(msg)
 
-            if schema_segment.ref in segment_register[schema_segment.namespace]:
-                if schema_segment != segment_register[schema_segment.namespace][schema_segment.ref]:
+        namespace = schema_base_item.__class__.__name__
+        if schema_base_item.ref in segment_register[namespace]:
+            if schema_base_item != segment_register[namespace][schema_base_item.ref]:
+                msg = f"Expected ref to be primary key. Failed for {schema_base_item.ref}"
+                raise ValueError(msg)
 
-                    # debug with- print_segment_tree(segment_register[schema_segment.ref])
-                    msg = f"Expected ref to be primary key. Failed for {schema_segment.ref}"
-                    raise ValueError(msg)
+            # this schema_base_item has already been built
+            continue
 
-            else:
-                # just to ensure ref is a primary key within the namespace (type of spec file)
-                segment_register[schema_segment.namespace][schema_segment.ref] = schema_segment
+        # just to ensure ref is a primary key within the namespace (type of spec file)
+        segment_register[namespace][schema_base_item.ref] = schema_base_item
 
-                fields_simplified = []
-                for f in schema_segment.fields:
+        fields_simplified = []
+        for field_entry in getattr(schema_base_item, "field_entries", []):
 
-                    field_name = valid_field_name(f)
-                    if field_name in ["_ref", "_display", "_description"]:
-                        raise ValueError("Reserved word for schema classes found as field name.")
+            # field_x is a Field or Component
 
-                    field_info = {
-                        "ref": f.ref,
-                        "display": f.name,
-                        "description": f.description,
-                    }
+            field_x = field_entry.target
 
-                    if f.datatype == "string":
-                        schema_field = StringField(**field_info)
-                    elif f.datatype == "boolean":
-                        schema_field = BooleanField(**field_info)
-                    elif f.datatype == "enum":
-                        schema_field = build_enum_field(
-                            planning_application_spec_path, field_info, f.codelist
-                        )
+            field_name = valid_field_name(field_entry.origin.ref)
+            if field_name in ["_ref", "_display", "_description"]:
+                raise ValueError("Reserved word for schema classes found as field name.")
 
-                        if schema_field is None:
-                            # couldn't be built, for now use a string field
-                            schema_field = StringField(**field_info)
-                            if SHOW_WARNINGS:
-                                warnings.warn(f"TODO missing enum field for {f.ref}")
+            field_info = {
+                "ref": field_entry.origin.ref,
+                "display": field_entry.origin.name,
+                "description": field_entry.origin.description,
+            }
 
-                    else:
-                        # default used for now
+            if isinstance(field_x, ComponentResolved):
+
+                # create a 'link' to another node
+                # find name of component's python class
+                for py_cls_name, spec_cls in segment_class_map.items():
+                    if spec_cls == field_x:
+                        break
+                else:
+                    py_cls_name = valid_class_name(field_x.ref)
+                    segment_class_map[py_cls_name] = field_x
+
+                    # raise ValueError(f"Can't find component '{field_x.ref}' in class map")
+
+                schema_field = SchemaNodeField(**field_info, schema_node_cls=py_cls_name)
+
+            elif isinstance(field_x, Field):
+                if field_x.datatype == "string":
+                    schema_field = StringField(**field_info)
+                elif field_x.datatype == "boolean":
+                    schema_field = BooleanField(**field_info)
+                elif field_x.datatype == "enum":
+                    schema_field = build_enum_field(
+                        planning_application_spec_path, field_info, field_x.codelist
+                    )
+
+                    if schema_field is None:
+                        # couldn't be built, for now use a string field
                         schema_field = StringField(**field_info)
                         if SHOW_WARNINGS:
-                            warnings.warn(f"Unknown field type {f.datatype}")
+                            warnings.warn(f"TODO missing enum field for {field_x.ref}")
 
-                    fields_simplified.append((field_name, schema_field))
+                else:
+                    # default used for now
+                    schema_field = StringField(**field_info)
+                    if SHOW_WARNINGS:
+                        warnings.warn(f"Unknown field type {field_x.datatype}")
+            else:
+                raise NotImplementedError(f"Unprocessed field: {field_x}")
 
-                # does
-                class_name = valid_class_name(schema_segment.ref)
+            fields_simplified.append((field_name, schema_field))
 
-                # just vanity - I don't want the namespace in the class name unless it does
-                # overlap
-                if class_name in segment_class_map:
-                    class_name = valid_class_name(schema_segment.ref + schema_segment.namespace)
+        # schema_base_item is ComponentResolved or Module or Application
+        # just vanity - I don't want the namespace in the class name unless it does overlap
+        class_name = valid_class_name(schema_base_item.ref)
+        if class_name in segment_class_map and segment_class_map[class_name] != schema_base_item:
+            class_name = valid_class_name(schema_base_item.ref + namespace)
 
-                segment_class_map[class_name] = schema_segment
+        if class_name in segment_class_map:
+            assert (
+                segment_class_map[class_name] == schema_base_item
+            ), f"Mismatching py class for '{class_name}'"
+        else:
+            segment_class_map[class_name] = schema_base_item
 
-                # Look up class name of the segments that are children of schema_segment
-                # the name is needed by the template
+        # modules are a bit different as they don't have field names
+        for module_entry in getattr(schema_base_item, "modules", []):
 
-                descendants_simplified = []
-                for d_segment in schema_segment.descendants:
+            field_name = valid_field_name(module_entry.ref)
+            if field_name in ["_ref", "_display", "_description"]:
+                raise ValueError("Reserved word for schema classes found as field name.")
 
-                    # find name of class in vanity map
-                    for k, v in segment_class_map.items():
-                        if v == d_segment:
-                            # SchemaNodeField renders itself by using a str as the schema_node_cls_name
-                            # instead of real class which is out of scope here.
-                            field_info = {
-                                "ref": v.ref,
-                                "display": tidy_string(v.name),
-                                "description": tidy_string(v.description),
-                                "schema_node_cls": k,
-                            }
-                            field_name = valid_field_name(v)
-                            schema_field = SchemaNodeField(**field_info)
-                            descendants_simplified.append((field_name, schema_field))
+            if field_name in [f[0] for f in fields_simplified]:
+                raise ValueError(f"Module name {field_name} already used by actual field.")
 
-                            break
-                    else:
-                        raise ValueError("Can't find schema in class map")
+            # create a 'link' to another node
+            # find name of component's python class
+            for py_cls_name, spec_cls in segment_class_map.items():
+                if spec_cls == module_entry:
+                    break
+            else:
+                py_cls_name = valid_class_name(module_entry.ref)
+                segment_class_map[py_cls_name] = module_entry
 
-                template_context = {
-                    "class_name": class_name,
-                    "ref": schema_segment.ref,
-                    "display": tidy_string(schema_segment.name),
-                    "description": tidy_string(schema_segment.description),
-                    "schema_fields": fields_simplified,
-                    "descendants": descendants_simplified,
-                }
-                py_output += form_builder.build(template_context, "schema_tree_class.py.j2")
+            field_info = {
+                "ref": module_entry.ref,
+                "display": module_entry.name,
+                "description": module_entry.description,
+            }
+            schema_field = SchemaNodeField(**field_info, schema_node_cls=py_cls_name)
+            fields_simplified.append((field_name, schema_field))
+
+        template_context = {
+            "class_name": class_name,
+            "ref": schema_base_item.ref,
+            "display": tidy_string(schema_base_item.name),
+            "description": tidy_string(schema_base_item.description),
+            "schema_fields": fields_simplified,
+            "descendants": [],  # descendants_simplified,
+        }
+        py_output += form_builder.build(template_context, "schema_tree_class.py.j2")
 
     py_output += form_builder.build(dict(document_footer=True), "schema_tree_class.py.j2")
 
@@ -301,10 +278,11 @@ if __name__ == "__main__":
     # TODO get this from local config
     p = "/Users/si/Documents/TPXimpact/Projects/planning-application-data-specification"
 
-    spec_simplified = restructured_spec(p)
+    specification = PlanningAppDataResolved(planning_app_repo_path=p)
+
     r = render_python(
         project_root=PROJECT_ROOT,
         planning_application_spec_path=p,
-        schema_items=spec_simplified,
+        schema_items=specification.all_items,
     )
     print(r)

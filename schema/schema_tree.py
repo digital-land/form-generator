@@ -7,20 +7,6 @@ from builder.planning_app_data_spec import Field
 from schema import tidy_string
 
 
-@dataclass
-class SchemaSegment:
-    """
-    Node in the schema tree has name (ref from schema objects),
-    """
-
-    ref: str
-    namespace: str  # ref in upstream schema's data types isn't globally unique
-    name: str
-    description: str
-    descendants: List[Any] = field(default_factory=list)  # really it's SchemaSegment
-    fields: List[Field] = field(default_factory=list)
-
-
 class SchemaValidationException(Exception):
     """
     Raised when data that doesn't conform with the schema is parsed.

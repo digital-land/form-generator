@@ -58,13 +58,18 @@ class Component(ComponentBase):
 
 
 @dataclass
+class FieldEntry:
+    origin: Field
+    target: "Field | ComponentResolved"
+
+
+@dataclass
 class ComponentResolved(ComponentBase):
-    field_entries: list[Field | Component] = field(default_factory=list)
+    field_entries: list[FieldEntry] = field(default_factory=list)
 
 
 @dataclass
 class ModuleBase(SchemaBase):
-
     entry_date: str | None = None
     end_date: str | None = None
     rules: list[Rule] = field(default_factory=list)
@@ -78,16 +83,7 @@ class Module(ModuleBase):
 
 @dataclass
 class ModuleResolved(ModuleBase):
-    """
-    The spec. has module -> field -> component -> group of fields
-
-    component is a namespace as fields within the 'group of fields' could have the same name
-    as a field that is directly attached to the module. So resolve fields within components.
-
-    .field_entries need to share a list as they share an order.
-    """
-
-    field_entries: list[Field | Component] = field(default_factory=list)
+    field_entries: list[FieldEntry] = field(default_factory=list)
 
 
 @dataclass
@@ -115,7 +111,7 @@ class ApplicationResolved(Application):
     .field_entries need to share a list as they share an order.
     """
 
-    field_entries: list[Field | Component] = field(default_factory=list)
+    field_entries: list[FieldEntry] = field(default_factory=list)
 
 
 @dataclass
@@ -145,13 +141,16 @@ class PlanningAppDataSpec:
     doesn't match the assumptions of the developer. More info on this in the decision log.
     """
 
-    def __init__(self, planning_app_repo_path: str | Path, hard_fail=True):
+    def __init__(
+        self, planning_app_repo_path: str | Path, hard_fail=True, spec_files_path="specification"
+    ):
         """
         @param hard_fail: bool - raise exception if schema spec file doesn't match expected layout.
                 or else warn.
+        @param spec_files_path: (str) - subdirectory of `planning_app_repo_path`
         """
         self.hard_fail = hard_fail
-        self.spec_dir = Path(planning_app_repo_path) / "specification"
+        self.spec_dir = Path(planning_app_repo_path) / spec_files_path
 
     def _hydrate_dataclasses(self, data_cls):
         """
@@ -252,6 +251,10 @@ class PlanningAppDataResolved(PlanningAppDataSpec):
                     if parent_module not in app.modules:
                         app.modules.append(parent_module)
 
+                for field_entry in parent_app.field_entries:
+                    # TODO - correct order?
+                    app.field_entries.append(field_entry)
+
         return resolved
 
     @cached_property
@@ -306,15 +309,18 @@ class PlanningAppDataResolved(PlanningAppDataSpec):
 
                     component_is_ready = resolved.get(field.component)
                     if isinstance(component_is_ready, ComponentResolved):
-                        component_contextualised = copy.copy(component_is_ready)
-                        component_contextualised.ref = field_ref
-                        fieldset.append(component_contextualised)
+
+                        fe = FieldEntry(origin=field, target=component_is_ready)
+                        fieldset.append(fe)
                     else:
-                        # defer the resolution
-                        fieldset.append((field_ref, field.component))
+                        # defer the resolution - field.component is a str
+                        fe = FieldEntry(origin=field, target=field.component)
+                        fieldset.append(fe)
+
                 else:
                     # normal field
-                    fieldset.append(field)
+                    fe = FieldEntry(origin=field, target=field)
+                    fieldset.append(fe)
 
             component_r.field_entries = fieldset
             resolved[component_ref] = component_r
@@ -333,29 +339,27 @@ class PlanningAppDataResolved(PlanningAppDataSpec):
             waiting = 0
 
             updated_fieldset = []
-            for f in component_r.field_entries:
-                if isinstance(f, tuple):
+            for field_entry in component_r.field_entries:
 
-                    field_ref, field_component = f
-                    component_is_ready = resolved.get(field_component)
+                if isinstance(field_entry.target, str):
 
+                    component_is_ready = resolved.get(field_entry.target)
                     if isinstance(component_is_ready, ComponentResolved):
-
-                        component_contextualised = copy.copy(component_is_ready)
-                        component_contextualised.ref = field_ref
-                        updated_fieldset.append(component_contextualised)
+                        fe = FieldEntry(origin=field_entry.origin, target=component_is_ready)
+                        updated_fieldset.append(fe)
                         changes_made += 1
                     else:
                         # not ready yet
                         waiting += 1
-                        updated_fieldset.append(f)
-                elif isinstance(f, ComponentResolved):
-                    changes_made_recurse, waiting_recurse = resolve_component(f)
+                        updated_fieldset.append(field_entry)
+
+                elif isinstance(field_entry.target, ComponentResolved):
+                    changes_made_recurse, waiting_recurse = resolve_component(field_entry.target)
                     changes_made += changes_made_recurse
                     waiting += waiting_recurse
-                    updated_fieldset.append(f)
+                    updated_fieldset.append(field_entry)
                 else:
-                    updated_fieldset.append(f)
+                    updated_fieldset.append(field_entry)
 
             component_r.field_entries = updated_fieldset
 
@@ -381,17 +385,16 @@ class PlanningAppDataResolved(PlanningAppDataSpec):
 
     def resolve_fields(self, schema_fields):
         """
-        Resolve components to fields and field names into :class:`Fields`.
+        Create `field_entries`
 
         Data layout is-
         application/module -> field -> component -> group of fields
 
-        @see doc string in :class:`Module` for more info
-
         @param schema_fields: (iterable of dict) as loaded from schema file.
 
-        @return: (list) - of :class:`Field` and :class:`Component` instances. The two
-            types are combined into a single list as they share an ordering.
+        @return: (list of tuples) - (field_name, x)
+            where x is :class:`Field` or :class:`ComponentResolved` instances.
+            field_name is as per the spec. This might not be python safe name.
         """
 
         field_entries = []
@@ -404,11 +407,18 @@ class PlanningAppDataResolved(PlanningAppDataSpec):
             if field.component:
                 # resolve it
                 component = self.components[field.component]
-                component_contextualised = copy.copy(component)
-                component_contextualised.ref = field_ref
-                field_entries.append(component_contextualised)
+                fe = FieldEntry(origin=field, target=component)
+                field_entries.append(fe)
 
             else:
-                field_entries.append(field)
+                fe = FieldEntry(origin=field, target=field)
+                field_entries.append(fe)
 
         return field_entries
+
+    @property
+    def all_items(self):
+        all_spec = list(self.applications.values())
+        all_spec += list(self.modules.values())
+        all_spec += list(self.components.values())
+        return all_spec

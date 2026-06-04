@@ -4,7 +4,7 @@ from schema.schema_tree import SchemaNodeField, StringField
 from tests.sample_schema_nodes import PhoneNumber
 
 
-class TestAbstractSchemaFieldRepr(unittest.TestCase):
+class TestSchemaTree(unittest.TestCase):
 
     def test_string_field_repr(self):
         f = StringField(ref="phone-number", display="Phone number", description="A contact number")

@@ -16,7 +16,7 @@ def valid_class_name(ref):
     return class_name
 
 
-def valid_field_name(ref):
+def valid_field_name(s):
     # TODO function for safe PEP8 variable names
-    field_name = ref.ref.replace("-", "_")
+    field_name = s.replace("-", "_")
     return field_name
