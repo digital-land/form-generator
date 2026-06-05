@@ -2,6 +2,7 @@ from schema.schema_tree import (
     BooleanField,
     EnumField,
     EnumOption,
+    RepeatedField,
     schema_node_root_classes,
     SchemaNode,
     SchemaNodeField,
@@ -40,11 +41,13 @@ class ContactDetails(SchemaNode):
         display="Email",
         description="The email address that can be used for electronic correspondence with the individual",
     )
-    phone_numbers = SchemaNodeField(
-        ref="phone-numbers",
-        display="Phone number(s)",
-        description="One or more telephone numbers to contact individual",
-        schema_node_cls=PhoneNumber,
+    phone_numbers = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="phone-numbers",
+            display="Phone number(s)",
+            description="One or more telephone numbers to contact individual",
+            schema_node_cls=PhoneNumber,
+        )
     )
 
 
@@ -173,8 +176,10 @@ class ApplicantDetails(SchemaNode):
     _display = "Applicant details"
     _description = "Name and contact information for the parties making the application."
 
-    applicants = SchemaNodeField(
-        ref="applicants", display="Applicants", description="", schema_node_cls=Applicant
+    applicants = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="applicants", display="Applicants", description="", schema_node_cls=Applicant
+        )
     )
 
 
@@ -313,11 +318,13 @@ class BngDetails(SchemaNode):
         display="Irreplaceable habitats details",
         description="Description and references for any irreplaceable habitats identified on the site",
     )
-    supporting_documents = SchemaNodeField(
-        ref="supporting-documents",
-        display="Supporting documents",
-        description="References to supporting documents that have been uploaded with the application",
-        schema_node_cls=SupportingDocument,
+    supporting_documents = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="supporting-documents",
+            display="Supporting documents",
+            description="References to supporting documents that have been uploaded with the application",
+            schema_node_cls=SupportingDocument,
+        )
     )
 
 
@@ -338,11 +345,13 @@ class Bng(SchemaNode):
         display="Biodiversity gain condition applies",
         description="Does the applicant believe the Biodiversity Gain Condition applies to this application",
     )
-    bng_condition_exemption_reasons = SchemaNodeField(
-        ref="bng-condition-exemption-reasons",
-        display="Biodiversity gain condition exemption reason",
-        description="Reasons why BNG does not apply, referencing exemptions or transitional arrangements",
-        schema_node_cls=BngExemptionReason,
+    bng_condition_exemption_reasons = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="bng-condition-exemption-reasons",
+            display="Biodiversity gain condition exemption reason",
+            description="Reasons why BNG does not apply, referencing exemptions or transitional arrangements",
+            schema_node_cls=BngExemptionReason,
+        )
     )
     bng_details = SchemaNodeField(
         ref="bng-details",
@@ -357,10 +366,12 @@ class Checklist(SchemaNode):
     _display = "Checklist"
     _description = "Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation."
 
-    national_req_types = StringField(
-        ref="national-req-types",
-        display="National requirement types",
-        description="List of the document types required for the given application type",
+    national_req_types = RepeatedField(
+        schema_field=StringField(
+            ref="national-req-types",
+            display="National requirement types",
+            description="List of the document types required for the given application type",
+        )
     )
 
 
@@ -617,11 +628,13 @@ class ExistingUse(SchemaNode):
     _display = "Existing use"
     _description = "How the site is currently being used."
 
-    existing_use_details = SchemaNodeField(
-        ref="existing-use-details",
-        display="Existing use details",
-        description="List of existing site uses and related land areas",
-        schema_node_cls=ExistingUseDetail,
+    existing_use_details = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="existing-use-details",
+            display="Existing use details",
+            description="List of existing site uses and related land areas",
+            schema_node_cls=ExistingUseDetail,
+        )
     )
     site_vacant = BooleanField(
         ref="site-vacant", display="Site vacant", description="Is the site currently vacant"
@@ -700,37 +713,39 @@ class FloodRiskAssessment(SchemaNode):
         display="Increases flood risk",
         description="Whether the development increases flood risk",
     )
-    surface_water_disposal = EnumField(
-        ref="surface-water-disposal",
-        display="Surface water disposal",
-        description="Method for disposing of surface water",
-        select_options=[
-            EnumOption(
-                key="sustainable-drainage",
-                label="Sustainable drainage system",
-                description="System designed to manage surface water sustainably.",
-            ),
-            EnumOption(
-                key="soakaway",
-                label="Soakaway",
-                description="Underground pit allowing water to drain naturally.",
-            ),
-            EnumOption(
-                key="main-sewer",
-                label="Main sewer",
-                description="Surface water directed into the main sewer system.",
-            ),
-            EnumOption(
-                key="existing-watercourse",
-                label="Existing watercourse",
-                description="Water discharged into an existing river, stream, or canal.",
-            ),
-            EnumOption(
-                key="pond-lake",
-                label="Pond/lake",
-                description="Surface water discharged into a pond or lake.",
-            ),
-        ],
+    surface_water_disposal = RepeatedField(
+        schema_field=EnumField(
+            ref="surface-water-disposal",
+            display="Surface water disposal",
+            description="Method for disposing of surface water",
+            select_options=[
+                EnumOption(
+                    key="sustainable-drainage",
+                    label="Sustainable drainage system",
+                    description="System designed to manage surface water sustainably.",
+                ),
+                EnumOption(
+                    key="soakaway",
+                    label="Soakaway",
+                    description="Underground pit allowing water to drain naturally.",
+                ),
+                EnumOption(
+                    key="main-sewer",
+                    label="Main sewer",
+                    description="Surface water directed into the main sewer system.",
+                ),
+                EnumOption(
+                    key="existing-watercourse",
+                    label="Existing watercourse",
+                    description="Water discharged into an existing river, stream, or canal.",
+                ),
+                EnumOption(
+                    key="pond-lake",
+                    label="Pond/lake",
+                    description="Surface water discharged into a pond or lake.",
+                ),
+            ],
+        )
     )
 
 
@@ -748,29 +763,33 @@ class OperationalTimes(SchemaNode):
     _display = "Operational times"
     _description = "Opening times structure for operational hours by day"
 
-    schedule_days = EnumField(
-        ref="schedule-days",
-        display="Schedule days",
-        description="List of days or day categories that a schedule entry applies to",
-        select_options=[
-            EnumOption(key="monday", label="Monday", description=""),
-            EnumOption(key="tuesday", label="Tuesday", description=""),
-            EnumOption(key="wednesday", label="Wednesday", description=""),
-            EnumOption(key="thursday", label="Thursday", description=""),
-            EnumOption(key="friday", label="Friday", description=""),
-            EnumOption(key="saturday", label="Saturday", description=""),
-            EnumOption(key="sunday", label="Sunday", description=""),
-            EnumOption(key="bank-holiday", label="Bank holiday", description=""),
-        ],
+    schedule_days = RepeatedField(
+        schema_field=EnumField(
+            ref="schedule-days",
+            display="Schedule days",
+            description="List of days or day categories that a schedule entry applies to",
+            select_options=[
+                EnumOption(key="monday", label="Monday", description=""),
+                EnumOption(key="tuesday", label="Tuesday", description=""),
+                EnumOption(key="wednesday", label="Wednesday", description=""),
+                EnumOption(key="thursday", label="Thursday", description=""),
+                EnumOption(key="friday", label="Friday", description=""),
+                EnumOption(key="saturday", label="Saturday", description=""),
+                EnumOption(key="sunday", label="Sunday", description=""),
+                EnumOption(key="bank-holiday", label="Bank holiday", description=""),
+            ],
+        )
     )
     closed = BooleanField(
         ref="closed", display="Closed", description="True or False - explicitly state when closed"
     )
-    time_ranges = SchemaNodeField(
-        ref="time-ranges",
-        display="Time ranges",
-        description="Opening and closing times for the day",
-        schema_node_cls=TimeRange,
+    time_ranges = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="time-ranges",
+            display="Time ranges",
+            description="Opening and closing times for the day",
+            schema_node_cls=TimeRange,
+        )
     )
 
 
@@ -936,11 +955,13 @@ class HoursOfOperation(SchemaNode):
     use_other = StringField(
         ref="use-other", display="Use other", description='Specify use if use is "other"'
     )
-    operational_times = SchemaNodeField(
-        ref="operational-times",
-        display="Operational times",
-        description="Structured data for operational hours by day",
-        schema_node_cls=OperationalTimes,
+    operational_times = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="operational-times",
+            display="Operational times",
+            description="Structured data for operational hours by day",
+            schema_node_cls=OperationalTimes,
+        )
     )
     hours_not_known = BooleanField(
         ref="hours-not-known",
@@ -956,11 +977,13 @@ class HrsOperation(SchemaNode):
         "Proposed operating hours if the proposed development is intended for non-residential use."
     )
 
-    hours_of_operation = SchemaNodeField(
-        ref="hours-of-operation",
-        display="Hours of operation",
-        description="List the hours of operation by non-residential use",
-        schema_node_cls=HoursOfOperation,
+    hours_of_operation = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="hours-of-operation",
+            display="Hours of operation",
+            description="List the hours of operation by non-residential use",
+            schema_node_cls=HoursOfOperation,
+        )
     )
     additional_information = StringField(
         ref="additional-information",
@@ -1489,29 +1512,37 @@ class NonResFloorspace(SchemaNode):
             ),
         ],
     )
-    floorspace_details = SchemaNodeField(
-        ref="floorspace-details",
-        display="Floorspace details",
-        description="List of non-residential floorspace changes by use class",
-        schema_node_cls=FloorspaceDetails,
+    floorspace_details = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="floorspace-details",
+            display="Floorspace details",
+            description="List of non-residential floorspace changes by use class",
+            schema_node_cls=FloorspaceDetails,
+        )
     )
-    floorspace_details_outline = SchemaNodeField(
-        ref="floorspace-details-outline",
-        display="Floorspace details",
-        description="List of non-residential floorspace changes by use class.",
-        schema_node_cls=FloorspaceDetailsOutline,
+    floorspace_details_outline = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="floorspace-details-outline",
+            display="Floorspace details",
+            description="List of non-residential floorspace changes by use class.",
+            schema_node_cls=FloorspaceDetailsOutline,
+        )
     )
-    room_details = SchemaNodeField(
-        ref="room-details",
-        display="Room details",
-        description="List of room changes for hotels, residential institutions and hostels",
-        schema_node_cls=RoomDetails,
+    room_details = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="room-details",
+            display="Room details",
+            description="List of room changes for hotels, residential institutions and hostels",
+            schema_node_cls=RoomDetails,
+        )
     )
-    room_details_outline = SchemaNodeField(
-        ref="room-details-outline",
-        display="Room details",
-        description="List of room changes for hotels, residential institutions and hostels",
-        schema_node_cls=RoomDetailsOutline,
+    room_details_outline = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="room-details-outline",
+            display="Room details",
+            description="List of room changes for hotels, residential institutions and hostels",
+            schema_node_cls=RoomDetailsOutline,
+        )
     )
 
 
@@ -1526,9 +1557,9 @@ class NotifiedPerson(SchemaNode):
         description="Detail to help identify a person",
         schema_node_cls=Person,
     )
-    notice_date = StringField(
-        ref="notice-date",
-        display="Notice date",
+    notice_served_date = StringField(
+        ref="notice-served-date",
+        display="Notice served date",
         description="Date when notice was served to an owner or tenant",
     )
 
@@ -1565,28 +1596,21 @@ class OwnershipCerts(SchemaNode):
         display="Agricultural tenants",
         description="Are there any agricultural tenants on the land?",
     )
-    owners_and_tenants = SchemaNodeField(
-        ref="owners-and-tenants",
-        display="Owners and tenants",
-        description="List of known owners and agricultural tenants",
-        schema_node_cls=NotifiedPerson,
+    owners_and_tenants = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="owners-and-tenants",
+            display="Owners and tenants",
+            description="List of known owners and agricultural tenants",
+            schema_node_cls=NotifiedPerson,
+        )
     )
-    lbc_owners = SchemaNodeField(
-        ref="lbc-owners",
-        display="Owners of listed building",
-        description="List of known owners",
-        schema_node_cls=NotifiedPerson,
-    )
-    steps_taken = StringField(
-        ref="steps-taken",
-        display="Steps taken",
-        description="Description of steps taken to identify unknown owners or tenants",
-    )
-    newspaper_notices = SchemaNodeField(
-        ref="newspaper-notices",
-        display="Newspaper notices",
-        description="Details of notices published in papers",
-        schema_node_cls=NewspaperNotice,
+    lbc_owners = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="lbc-owners",
+            display="Owners of listed building",
+            description="List of known owners",
+            schema_node_cls=NotifiedPerson,
+        )
     )
     ownership_cert_option = EnumField(
         ref="ownership-cert-option",
@@ -1614,6 +1638,17 @@ class OwnershipCerts(SchemaNode):
                 description="Applicant does not know any of the other owners or agricultural tenants.",
             ),
         ],
+    )
+    steps_taken = StringField(
+        ref="steps-taken", display="Steps taken", description="Description of steps taken"
+    )
+    newspaper_notices = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="newspaper-notices",
+            display="Newspaper notices",
+            description="Details of notices published in papers",
+            schema_node_cls=NewspaperNotice,
+        )
     )
     person_reference = StringField(
         ref="person-reference",
@@ -1863,11 +1898,13 @@ class ProcessesMachineryWaste(SchemaNode):
         display="Proposal waste management",
         description="Whether the proposal involves any waste management facility that is relevant to the proposal",
     )
-    waste_management = SchemaNodeField(
-        ref="waste-management",
-        display="Waste management",
-        description="List of applicable waste management facilities involved in the proposal",
-        schema_node_cls=WasteManagement,
+    waste_management = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="waste-management",
+            display="Waste management",
+            description="List of applicable waste management facilities involved in the proposal",
+            schema_node_cls=WasteManagement,
+        )
     )
     waste_streams = SchemaNodeField(
         ref="waste-streams",
@@ -1907,17 +1944,19 @@ class ProposalDetails(SchemaNode):
         display="Description",
         description="A text description providing details about the subject.",
     )
-    reserved_matters = EnumField(
-        ref="reserved-matters",
-        display="Reserved matters",
-        description="Identifies which reserved matters are being submitted for approval as part of this application",
-        select_options=[
-            EnumOption(key="access", label="Access", description=""),
-            EnumOption(key="appearance", label="Appearance", description=""),
-            EnumOption(key="landscaping", label="Landscaping", description=""),
-            EnumOption(key="layout", label="Layout", description=""),
-            EnumOption(key="scale", label="Scale", description=""),
-        ],
+    reserved_matters = RepeatedField(
+        schema_field=EnumField(
+            ref="reserved-matters",
+            display="Reserved matters",
+            description="Identifies which reserved matters are being submitted for approval as part of this application",
+            select_options=[
+                EnumOption(key="access", label="Access", description=""),
+                EnumOption(key="appearance", label="Appearance", description=""),
+                EnumOption(key="landscaping", label="Landscaping", description=""),
+                EnumOption(key="layout", label="Layout", description=""),
+                EnumOption(key="scale", label="Scale", description=""),
+            ],
+        )
     )
     related_application = SchemaNodeField(
         ref="related-application",
@@ -1989,11 +2028,13 @@ class UnitQuantities(SchemaNode):
         display="Units unknown",
         description="Whether the number of units is unknown",
     )
-    units_per_bedroom_no = SchemaNodeField(
-        ref="units-per-bedroom-no",
-        display="Units per bedroom number",
-        description="Number of units broken down by bedroom count",
-        schema_node_cls=BedroomCount,
+    units_per_bedroom_no = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="units-per-bedroom-no",
+            display="Units per bedroom number",
+            description="Number of units broken down by bedroom count",
+            schema_node_cls=BedroomCount,
+        )
     )
     total_units = StringField(
         ref="total-units", display="Total units", description="Total number of units"
@@ -2179,17 +2220,21 @@ class ResidentialUnitSummary(SchemaNode):
             ),
         ],
     )
-    existing_unit_breakdown = SchemaNodeField(
-        ref="existing-unit-breakdown",
-        display="Existing unit breakdown",
-        description="Number of existing units by bedroom count",
-        schema_node_cls=UnitQuantities,
+    existing_unit_breakdown = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="existing-unit-breakdown",
+            display="Existing unit breakdown",
+            description="Number of existing units by bedroom count",
+            schema_node_cls=UnitQuantities,
+        )
     )
-    proposed_unit_breakdown = SchemaNodeField(
-        ref="proposed-unit-breakdown",
-        display="Proposed unit breakdown",
-        description="Number of proposed units by bedroom count",
-        schema_node_cls=UnitQuantities,
+    proposed_unit_breakdown = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="proposed-unit-breakdown",
+            display="Proposed unit breakdown",
+            description="Number of proposed units by bedroom count",
+            schema_node_cls=UnitQuantities,
+        )
     )
 
 
@@ -2205,11 +2250,13 @@ class ResUnits(SchemaNode):
         display="Residential unit change",
         description="Proposal includes the gain, loss or change of use of residential units",
     )
-    residential_unit_summary = SchemaNodeField(
-        ref="residential-unit-summary",
-        display="Residential unit summary",
-        description="Breakdown of unit counts by tenure and housing type",
-        schema_node_cls=ResidentialUnitSummary,
+    residential_unit_summary = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="residential-unit-summary",
+            display="Residential unit summary",
+            description="Breakdown of unit counts by tenure and housing type",
+            schema_node_cls=ResidentialUnitSummary,
+        )
     )
     total_existing_units = StringField(
         ref="total-existing-units",
@@ -2294,10 +2341,12 @@ class SiteLocation(SchemaNode):
         display="Description",
         description="A text description providing details about the subject.",
     )
-    uprns = StringField(
-        ref="uprns",
-        display="UPRNs",
-        description="Unique Property Reference Numbers (UPRNs) for properties within the site boundary",
+    uprns = RepeatedField(
+        schema_field=StringField(
+            ref="uprns",
+            display="UPRNs",
+            description="Unique Property Reference Numbers (UPRNs) for properties within the site boundary",
+        )
     )
 
 
@@ -2306,11 +2355,13 @@ class SiteDetails(SchemaNode):
     _display = "Site details"
     _description = "Where the proposed development will be built."
 
-    site_locations = SchemaNodeField(
-        ref="site-locations",
-        display="Site locations",
-        description="Details of the sites where development or works are proposed",
-        schema_node_cls=SiteLocation,
+    site_locations = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="site-locations",
+            display="Site locations",
+            description="Details of the sites where development or works are proposed",
+            schema_node_cls=SiteLocation,
+        )
     )
 
 
@@ -2409,10 +2460,12 @@ class Document(SchemaNode):
         display="Description",
         description="A text description providing details about the subject.",
     )
-    document_types = StringField(
-        ref="document-types",
-        display="Document types",
-        description="List of codelist references that the document covers",
+    document_types = RepeatedField(
+        schema_field=StringField(
+            ref="document-types",
+            display="Document types",
+            description="List of codelist references that the document covers",
+        )
     )
     uploaded_date = StringField(
         ref="uploaded-date",
@@ -2440,10 +2493,12 @@ class Fee(SchemaNode):
         display="Amount paid",
         description="The amount paid towards the application fee",
     )
-    transactions = StringField(
-        ref="transactions",
-        display="Transactions",
-        description="References to payments or financial transactions related to this application",
+    transactions = RepeatedField(
+        schema_field=StringField(
+            ref="transactions",
+            display="Transactions",
+            description="References to payments or financial transactions related to this application",
+        )
     )
 
 
@@ -2457,10 +2512,12 @@ class SubmissionDetails(SchemaNode):
         display="Submission reference",
         description="A unique reference for the submission",
     )
-    application_types = StringField(
-        ref="application-types",
-        display="Application types",
-        description="A list of planning application types that define the nature of the planning application",
+    application_types = RepeatedField(
+        schema_field=StringField(
+            ref="application-types",
+            display="Application types",
+            description="A list of planning application types that define the nature of the planning application",
+        )
     )
     specification_profile = EnumField(
         ref="specification-profile",
@@ -3831,11 +3888,13 @@ class SubmissionDetails(SchemaNode):
         display="Created at",
         description="The date and time the submission payload was created",
     )
-    documents = SchemaNodeField(
-        ref="documents",
-        display="Documents",
-        description="List of submitted documents with references and details",
-        schema_node_cls=Document,
+    documents = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="documents",
+            display="Documents",
+            description="List of submitted documents with references and details",
+            schema_node_cls=Document,
+        )
     )
     fee = SchemaNodeField(
         ref="fee",
@@ -4059,11 +4118,13 @@ class AccessRightsOfWay(SchemaNode):
             EnumOption(key="unknown", label="Unknown", description="The answer is unknown"),
         ],
     )
-    supporting_documents = SchemaNodeField(
-        ref="supporting-documents",
-        display="Supporting documents",
-        description="References to supporting documents that have been uploaded with the application",
-        schema_node_cls=SupportingDocument,
+    supporting_documents = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="supporting-documents",
+            display="Supporting documents",
+            description="References to supporting documents that have been uploaded with the application",
+            schema_node_cls=SupportingDocument,
+        )
     )
 
 
@@ -4120,17 +4181,21 @@ class FoulSewage(SchemaNode):
         display="Has new disposal arrangements",
         description="Does the proposal include any new foul sewage disposal arrangments",
     )
-    foul_sewage_disposal_types = EnumField(
-        ref="foul-sewage-disposal-types",
-        display="Foul sewage disposal types",
-        description="List of ways foul sewage will be disposed of",
-        select_options=[
-            EnumOption(key="mains-sewer", label="Mains sewer", description=""),
-            EnumOption(key="cess-pit", label="Cess pit", description=""),
-            EnumOption(key="septic-tank", label="Septic tank", description=""),
-            EnumOption(key="package-treatment", label="Package treatment plant", description=""),
-            EnumOption(key="other", label="Other", description=""),
-        ],
+    foul_sewage_disposal_types = RepeatedField(
+        schema_field=EnumField(
+            ref="foul-sewage-disposal-types",
+            display="Foul sewage disposal types",
+            description="List of ways foul sewage will be disposed of",
+            select_options=[
+                EnumOption(key="mains-sewer", label="Mains sewer", description=""),
+                EnumOption(key="cess-pit", label="Cess pit", description=""),
+                EnumOption(key="septic-tank", label="Septic tank", description=""),
+                EnumOption(
+                    key="package-treatment", label="Package treatment plant", description=""
+                ),
+                EnumOption(key="other", label="Other", description=""),
+            ],
+        )
     )
     produce_foul_sewage = BooleanField(
         ref="produce-foul-sewage",
@@ -4156,11 +4221,13 @@ class FoulSewage(SchemaNode):
             ),
         ],
     )
-    supporting_documents = SchemaNodeField(
-        ref="supporting-documents",
-        display="Supporting documents",
-        description="References to supporting documents that have been uploaded with the application",
-        schema_node_cls=SupportingDocument,
+    supporting_documents = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="supporting-documents",
+            display="Supporting documents",
+            description="References to supporting documents that have been uploaded with the application",
+            schema_node_cls=SupportingDocument,
+        )
     )
 
 
@@ -4219,11 +4286,13 @@ class HazSubstances(SchemaNode):
             ),
         ],
     )
-    substance_types = SchemaNodeField(
-        ref="substance-types",
-        display="Substance types",
-        description="List of hazardous substances and their quantities",
-        schema_node_cls=HazardousSubstance,
+    substance_types = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="substance-types",
+            display="Substance types",
+            description="List of hazardous substances and their quantities",
+            schema_node_cls=HazardousSubstance,
+        )
     )
     hazardous_sub_consent_req = BooleanField(
         ref="hazardous-sub-consent-req",
@@ -4305,22 +4374,26 @@ class Materials(SchemaNode):
         display="Proposal material details",
         description="Whether the proposal involves material details that need to be provided",
     )
-    building_elements = SchemaNodeField(
-        ref="building-elements",
-        display="Building elements",
-        description="Details of materials for a specific building element such as walls, roof, windows or doors",
-        schema_node_cls=BuildingElement,
+    building_elements = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="building-elements",
+            display="Building elements",
+            description="Details of materials for a specific building element such as walls, roof, windows or doors",
+            schema_node_cls=BuildingElement,
+        )
     )
     providing_additional_material_information = BooleanField(
         ref="providing-additional-material-information",
         display="Providing additional material information",
         description="Is the applicant providing additional materials information on submitted plan(s)/drawing(s)/design and access statement?",
     )
-    supporting_documents = SchemaNodeField(
-        ref="supporting-documents",
-        display="Supporting documents",
-        description="References to supporting documents that have been uploaded with the application",
-        schema_node_cls=SupportingDocument,
+    supporting_documents = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="supporting-documents",
+            display="Supporting documents",
+            description="References to supporting documents that have been uploaded with the application",
+            schema_node_cls=SupportingDocument,
+        )
     )
 
 
@@ -4472,11 +4545,13 @@ class VehicleParking(SchemaNode):
     _display = "Vehicle parking"
     _description = "Details of current parking facilities at the site and any changes that would be made by the proposed development."
 
-    parking_spaces = SchemaNodeField(
-        ref="parking-spaces",
-        display="Parking spaces",
-        description="Array of parking space information by vehicle type",
-        schema_node_cls=ParkingSpace,
+    parking_spaces = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="parking-spaces",
+            display="Parking spaces",
+            description="Array of parking space information by vehicle type",
+            schema_node_cls=ParkingSpace,
+        )
     )
 
 
@@ -4837,38 +4912,42 @@ class LbAlter(SchemaNode):
         display="Proposal alter listed building",
         description="True or False if proposal includes alterations to a listed building",
     )
-    proposal_alter_lb_types = EnumField(
-        ref="proposal-alter-lb-types",
-        display="Proposal alteration types",
-        description="Select from a list of listed building alteration types, select all that apply",
-        select_options=[
-            EnumOption(
-                key="interior",
-                label="Interior of building",
-                description="Works to the interior of the building",
-            ),
-            EnumOption(
-                key="exterior",
-                label="Exterior of building",
-                description="Works to the exterior of the building",
-            ),
-            EnumOption(
-                key="fixed",
-                label="Fixed structure or object",
-                description="Works to any structure or object fixed to the property (or buildings with the curtilage) internally or externally",
-            ),
-            EnumOption(
-                key="stripping",
-                label="Stripping out",
-                description="Stripping out of any internal wall, ceiling or floor finishes",
-            ),
-        ],
+    proposal_alter_lb_types = RepeatedField(
+        schema_field=EnumField(
+            ref="proposal-alter-lb-types",
+            display="Proposal alteration types",
+            description="Select from a list of listed building alteration types, select all that apply",
+            select_options=[
+                EnumOption(
+                    key="interior",
+                    label="Interior of building",
+                    description="Works to the interior of the building",
+                ),
+                EnumOption(
+                    key="exterior",
+                    label="Exterior of building",
+                    description="Works to the exterior of the building",
+                ),
+                EnumOption(
+                    key="fixed",
+                    label="Fixed structure or object",
+                    description="Works to any structure or object fixed to the property (or buildings with the curtilage) internally or externally",
+                ),
+                EnumOption(
+                    key="stripping",
+                    label="Stripping out",
+                    description="Stripping out of any internal wall, ceiling or floor finishes",
+                ),
+            ],
+        )
     )
-    document_reference = SchemaNodeField(
-        ref="document-reference",
-        display="Document reference",
-        description="References to documents detailing the proposed alterations",
-        schema_node_cls=SupportingDocument,
+    document_reference = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="document-reference",
+            display="Document reference",
+            description="References to documents detailing the proposed alterations",
+            schema_node_cls=SupportingDocument,
+        )
     )
 
 
@@ -4916,11 +4995,13 @@ class RelatedApplications(SchemaNode):
         display="Has related applications",
         description="Are there any related applications, previous proposals or demolitions for the site",
     )
-    related_applications = SchemaNodeField(
-        ref="related-applications",
-        display="Related applications",
-        description="List of related applications, previous proposals or demolitions for the site",
-        schema_node_cls=RelatedApplicationDetails,
+    related_applications = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="related-applications",
+            display="Related applications",
+            description="List of related applications, previous proposals or demolitions for the site",
+            schema_node_cls=RelatedApplicationDetails,
+        )
     )
 
 
@@ -5073,11 +5154,13 @@ class GroundsForApplication(SchemaNode):
         display="Grounds for application",
         description="Reason(s) why Certificate of Lawfulness of Proposed Works should be granted, including explanation of why listed building consent is not required ",
     )
-    supporting_documents = SchemaNodeField(
-        ref="supporting-documents",
-        display="Supporting documents",
-        description="References to supporting documents that have been uploaded with the application",
-        schema_node_cls=SupportingDocument,
+    supporting_documents = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="supporting-documents",
+            display="Supporting documents",
+            description="References to supporting documents that have been uploaded with the application",
+            schema_node_cls=SupportingDocument,
+        )
     )
 
 
@@ -5139,17 +5222,21 @@ class InterestDetails(SchemaNode):
         display="Applicant interest",
         description="Description of the applicant's interest in the land",
     )
-    owner_details = SchemaNodeField(
-        ref="owner-details",
-        display="Owner details",
-        description="Details of property owners including their personal information and notification status",
-        schema_node_cls=LdcOwnerDetails,
+    owner_details = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="owner-details",
+            display="Owner details",
+            description="Details of property owners including their personal information and notification status",
+            schema_node_cls=LdcOwnerDetails,
+        )
     )
-    interested_persons = SchemaNodeField(
-        ref="interested-persons",
-        display="Interested persons",
-        description="Details of persons with an interest in the property including their personal information, nature of interest, and notification status",
-        schema_node_cls=LdcInterestedPerson,
+    interested_persons = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="interested-persons",
+            display="Interested persons",
+            description="Details of persons with an interest in the property including their personal information, nature of interest, and notification status",
+            schema_node_cls=LdcInterestedPerson,
+        )
     )
 
 
@@ -5256,11 +5343,13 @@ class HedgerowRemoval(SchemaNode):
     _description = "Details of any hedgerows being removed as part of the development"
 
     reason = StringField(ref="reason", display="Reason", description="A textual reason")
-    supporting_documents = SchemaNodeField(
-        ref="supporting-documents",
-        display="Supporting documents",
-        description="References to supporting documents that have been uploaded with the application",
-        schema_node_cls=SupportingDocument,
+    supporting_documents = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="supporting-documents",
+            display="Supporting documents",
+            description="References to supporting documents that have been uploaded with the application",
+            schema_node_cls=SupportingDocument,
+        )
     )
     hedgerow_length = StringField(
         ref="hedgerow-length",
@@ -5488,11 +5577,13 @@ class GroundsExistingUse(SchemaNode):
     _description = "Supporting inforation for a Lawful Development Certificate application relating to how the site has most recently been used."
 
     reason = StringField(ref="reason", display="Reason", description="A textual reason")
-    supporting_documents = SchemaNodeField(
-        ref="supporting-documents",
-        display="Supporting documents",
-        description="References to supporting documents that have been uploaded with the application",
-        schema_node_cls=SupportingDocument,
+    supporting_documents = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="supporting-documents",
+            display="Supporting documents",
+            description="References to supporting documents that have been uploaded with the application",
+            schema_node_cls=SupportingDocument,
+        )
     )
     use = EnumField(
         ref="use",
@@ -5956,11 +6047,13 @@ class SupportingInfo(SchemaNode):
     _display = "Supporting information"
     _description = "Any additional information which will help with the planning application"
 
-    replacement_drawings = SchemaNodeField(
-        ref="replacement-drawings",
-        display="Replacement drawings",
-        description="List of approved drawings being replaced by new drawings",
-        schema_node_cls=ReplacementDrawing,
+    replacement_drawings = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="replacement-drawings",
+            display="Replacement drawings",
+            description="List of approved drawings being replaced by new drawings",
+            schema_node_cls=ReplacementDrawing,
+        )
     )
 
 
@@ -6171,10 +6264,12 @@ class Tpo(SchemaNode):
     _display = "Tree preservation order details"
     _description = "Details of any Tree Preservation Orders (TPO) affecting the development site"
 
-    tpo_reference = StringField(
-        ref="tpo-reference",
-        display="TPO reference",
-        description="Reference for a Tree Preservation Order covering affected trees",
+    tpo_reference = RepeatedField(
+        schema_field=StringField(
+            ref="tpo-reference",
+            display="TPO reference",
+            description="Reference for a Tree Preservation Order covering affected trees",
+        )
     )
     tpo_provided_by = EnumField(
         ref="tpo-provided-by",
@@ -6229,11 +6324,13 @@ class TreeWorkDetails(SchemaNode):
         display="Description",
         description="A text description providing details about the subject.",
     )
-    tree_details = SchemaNodeField(
-        ref="tree-details",
-        display="Tree details",
-        description="Details of each tree that is part of the proposal including work to be carried out",
-        schema_node_cls=TreeDetails,
+    tree_details = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="tree-details",
+            display="Tree details",
+            description="Details of each tree that is part of the proposal including work to be carried out",
+            schema_node_cls=TreeDetails,
+        )
     )
 
 
@@ -6262,11 +6359,13 @@ class TreesAdditional(SchemaNode):
         display="Causing structural damage",
         description="Whether structural damage is being caused by the tree(s)",
     )
-    supporting_documents = SchemaNodeField(
-        ref="supporting-documents",
-        display="Supporting documents",
-        description="References to supporting documents that have been uploaded with the application",
-        schema_node_cls=SupportingDocument,
+    supporting_documents = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="supporting-documents",
+            display="Supporting documents",
+            description="References to supporting documents that have been uploaded with the application",
+            schema_node_cls=SupportingDocument,
+        )
     )
 
 
@@ -6301,11 +6400,13 @@ class TreesOwnership(SchemaNode):
         display="Is applicant owner",
         description="Whether the applicant owns the trees affected by the proposed works",
     )
-    owner = SchemaNodeField(
-        ref="owner",
-        display="Tree owner",
-        description="Details of the owner of trees when the applicant is not the owner",
-        schema_node_cls=Owner,
+    owner = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="owner",
+            display="Tree owner",
+            description="Details of the owner of trees when the applicant is not the owner",
+            schema_node_cls=Owner,
+        )
     )
 
 
@@ -6873,23 +6974,23 @@ class ProposalDetailsIncNonResidential(SchemaNode):
         display="Net dwellings maximum",
         description="The maximum number of net additional dwellings proposed as part of the development, allowing for flexibility in the final housing numbers",
     )
-    non_residential_use = SchemaNodeField(
-        ref="non-residential-use",
-        display="Non-residential use",
-        description="The amount of non-residential use, which can be expressed as floorspace, site area, or both",
-        schema_node_cls=NonResidentialUse,
+    non_residential_use = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="non-residential-use",
+            display="Non-residential use",
+            description="The amount of non-residential use, which can be expressed as floorspace, site area, or both",
+            schema_node_cls=NonResidentialUse,
+        )
     )
 
 
 class SiteAreacomponentresolved(SchemaNode):
     _ref = "site-area"
     _display = "Site area"
-    _description = "Information about the total area of a development site, including the measured value, unit, and source of the measurement "
+    _description = "Information about the total area of a development site, including the measured size, unit, and source of the measurement "
 
-    value = StringField(
-        ref="value",
-        display="Value",
-        description="Numeric value representing a measurement or quantity",
+    size = StringField(
+        ref="size", display="Size", description="Numeric size of something being measured"
     )
     unit = StringField(ref="unit", display="Unit", description="Unit of measurement for a value")
     provided_by = EnumField(
@@ -7082,11 +7183,13 @@ class ExistingUsecomponentresolved(SchemaNode):
     _display = "Existing use"
     _description = "Information about the current use of a site, including the use classes and associated floorspace "
 
-    uses = SchemaNodeField(
-        ref="uses",
-        display="Uses",
-        description="List of applicable uses for a site or development",
-        schema_node_cls=Use,
+    uses = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="uses",
+            display="Uses",
+            description="List of applicable uses for a site or development",
+            schema_node_cls=Use,
+        )
     )
     floorspace = StringField(
         ref="floorspace",
@@ -7106,41 +7209,47 @@ class SiteInfo(SchemaNode):
         description="The total area of the site where development is proposed",
         schema_node_cls=SiteAreacomponentresolved,
     )
-    existing_use = SchemaNodeField(
-        ref="existing-use",
-        display="Existing use",
-        description="Structured information on the current use of the site",
-        schema_node_cls=ExistingUsecomponentresolved,
+    existing_use = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="existing-use",
+            display="Existing use",
+            description="Structured information on the current use of the site",
+            schema_node_cls=ExistingUsecomponentresolved,
+        )
     )
-    known_constraints = EnumField(
-        ref="known-constraints",
-        display="Known constraints",
-        description="A list of the known constraints affecting the site",
-        select_options=[
-            EnumOption(key="conservation-area", label="Conservation Area", description=""),
-            EnumOption(
-                key="aona-beauty", label="Area of Outstanding Natural Beauty", description=""
-            ),
-            EnumOption(
-                key="secretary-specified-area",
-                label="Secretary of State Protected Area",
-                description="",
-            ),
-            EnumOption(key="the-broads", label="The Broads", description=""),
-            EnumOption(key="national-park", label="National Park", description=""),
-            EnumOption(key="world-heritage-site", label="World Heritage Site", description=""),
-            EnumOption(
-                key="site-of-special-interest",
-                label="Site of Special Scientific Interest",
-                description="",
-            ),
-        ],
+    known_constraints = RepeatedField(
+        schema_field=EnumField(
+            ref="known-constraints",
+            display="Known constraints",
+            description="A list of the known constraints affecting the site",
+            select_options=[
+                EnumOption(key="conservation-area", label="Conservation Area", description=""),
+                EnumOption(
+                    key="aona-beauty", label="Area of Outstanding Natural Beauty", description=""
+                ),
+                EnumOption(
+                    key="secretary-specified-area",
+                    label="Secretary of State Protected Area",
+                    description="",
+                ),
+                EnumOption(key="the-broads", label="The Broads", description=""),
+                EnumOption(key="national-park", label="National Park", description=""),
+                EnumOption(key="world-heritage-site", label="World Heritage Site", description=""),
+                EnumOption(
+                    key="site-of-special-interest",
+                    label="Site of Special Scientific Interest",
+                    description="",
+                ),
+            ],
+        )
     )
-    supporting_documents = SchemaNodeField(
-        ref="supporting-documents",
-        display="Supporting documents",
-        description="References to supporting documents that have been uploaded with the application",
-        schema_node_cls=SupportingDocument,
+    supporting_documents = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="supporting-documents",
+            display="Supporting documents",
+            description="References to supporting documents that have been uploaded with the application",
+            schema_node_cls=SupportingDocument,
+        )
     )
 
 
@@ -7243,10 +7352,12 @@ class DescYourProposal(SchemaNode):
         description="Details about the approved development, as shown in the decision letter",
         schema_node_cls=RelatedApplicationDetails,
     )
-    condition_numbers = StringField(
-        ref="condition-numbers",
-        display="Condition numbers",
-        description="List of condition numbers related to this application",
+    condition_numbers = RepeatedField(
+        schema_field=StringField(
+            ref="condition-numbers",
+            display="Condition numbers",
+            description="List of condition numbers related to this application",
+        )
     )
     original_application_type = StringField(
         ref="original-application-type",
@@ -7649,63 +7760,65 @@ class DesignatedAreas(SchemaNode):
     _display = "Designated areas"
     _description = "Details of any 'designated area' the develpoment site is on, such as a Conservation Area or National Park."
 
-    designations = EnumField(
-        ref="designations",
-        display="Designations",
-        description="List of designated areas that apply to the site",
-        select_options=[
-            EnumOption(
-                key="world-heritage-site",
-                label="World Heritage Site",
-                description="Site of global cultural or natural importance",
-            ),
-            EnumOption(
-                key="national-park",
-                label="National Park",
-                description="Protected area for natural beauty and recreation",
-            ),
-            EnumOption(
-                key="area-outstanding-natural-beauty",
-                label="Area of Outstanding Natural Beauty (AONB)",
-                description="Designated for distinctive landscape value",
-            ),
-            EnumOption(
-                key="site-special-scientific-interest",
-                label="Site of Special Scientific Interest (SSSI)",
-                description="Protected for wildlife, geology, or landform",
-            ),
-            EnumOption(
-                key="national-nature-reserve",
-                label="National Nature Reserve",
-                description="Important area for wildlife and conservation",
-            ),
-            EnumOption(
-                key="conservation-area",
-                label="Conservation Area",
-                description="Area designated for historical or architectural significance",
-            ),
-            EnumOption(
-                key="special-area-conservation",
-                label="Special Area of Conservation",
-                description="Designated under the EU Habitats Directive",
-            ),
-            EnumOption(
-                key="special-protection-area",
-                label="Special Protection Area/Ramsar site",
-                description="Protected for bird species under the EU Birds Directive",
-            ),
-            EnumOption(
-                key="green-belt",
-                label="Green Belt",
-                description="Area designated to prevent urban sprawl",
-            ),
-            EnumOption(
-                key="secretary-specified-area",
-                label="Secretary of State Protected Area",
-                description="",
-            ),
-            EnumOption(key="the-broads", label="The Broads", description=""),
-        ],
+    designations = RepeatedField(
+        schema_field=EnumField(
+            ref="designations",
+            display="Designations",
+            description="List of designated areas that apply to the site",
+            select_options=[
+                EnumOption(
+                    key="world-heritage-site",
+                    label="World Heritage Site",
+                    description="Site of global cultural or natural importance",
+                ),
+                EnumOption(
+                    key="national-park",
+                    label="National Park",
+                    description="Protected area for natural beauty and recreation",
+                ),
+                EnumOption(
+                    key="area-outstanding-natural-beauty",
+                    label="Area of Outstanding Natural Beauty (AONB)",
+                    description="Designated for distinctive landscape value",
+                ),
+                EnumOption(
+                    key="site-special-scientific-interest",
+                    label="Site of Special Scientific Interest (SSSI)",
+                    description="Protected for wildlife, geology, or landform",
+                ),
+                EnumOption(
+                    key="national-nature-reserve",
+                    label="National Nature Reserve",
+                    description="Important area for wildlife and conservation",
+                ),
+                EnumOption(
+                    key="conservation-area",
+                    label="Conservation Area",
+                    description="Area designated for historical or architectural significance",
+                ),
+                EnumOption(
+                    key="special-area-conservation",
+                    label="Special Area of Conservation",
+                    description="Designated under the EU Habitats Directive",
+                ),
+                EnumOption(
+                    key="special-protection-area",
+                    label="Special Protection Area/Ramsar site",
+                    description="Protected for bird species under the EU Birds Directive",
+                ),
+                EnumOption(
+                    key="green-belt",
+                    label="Green Belt",
+                    description="Area designated to prevent urban sprawl",
+                ),
+                EnumOption(
+                    key="secretary-specified-area",
+                    label="Secretary of State Protected Area",
+                    description="",
+                ),
+                EnumOption(key="the-broads", label="The Broads", description=""),
+            ],
+        )
     )
 
 
@@ -7721,6 +7834,85 @@ class EquipMethod(SchemaNode):
     )
 
 
+class PostedNotice(SchemaNode):
+    _ref = "posted-notice"
+    _display = "Posted notice"
+    _description = "Details of a notice posted on or near the application site"
+
+    parish_ward = StringField(
+        ref="parish-ward",
+        display="Parish or ward",
+        description="Parish or ward where a notice was posted",
+    )
+    notice_location = StringField(
+        ref="notice-location",
+        display="Notice location",
+        description="Location where a notice was posted",
+    )
+    notice_posted_date = StringField(
+        ref="notice-posted-date",
+        display="Notice posted date",
+        description="Date when a notice was posted",
+    )
+
+
+class OilGasOwnershipNotices(SchemaNode):
+    _ref = "oil-gas-ownership-notices"
+    _display = "Oil and gas ownership and notices"
+    _description = "Ownership, agricultural tenant and public notice details for extraction of oil and gas applications"
+
+    owners_and_tenants = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="owners-and-tenants",
+            display="Owners and tenants",
+            description="List of known owners and agricultural tenants",
+            schema_node_cls=NotifiedPerson,
+        )
+    )
+    valid_posted_notices = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="valid-posted-notices",
+            display="Valid posted notices",
+            description="Details of notices posted on or near the application site and displayed for the required period (7 days)",
+            schema_node_cls=PostedNotice,
+        )
+    )
+    invalid_posted_notices = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="invalid-posted-notices",
+            display="Invalid posted notices",
+            description="Details of notices posted on or near the application site that were not displayed for the required period (7 days)",
+            schema_node_cls=PostedNotice,
+        )
+    )
+    steps_taken = StringField(
+        ref="steps-taken", display="Steps taken", description="Description of steps taken"
+    )
+    newspaper_notices = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="newspaper-notices",
+            display="Newspaper notices",
+            description="Details of notices published in papers",
+            schema_node_cls=NewspaperNotice,
+        )
+    )
+    person_reference = StringField(
+        ref="person-reference",
+        display="Person reference",
+        description="A reference to an applicant, agent or named individual",
+    )
+    declaration_confirmed = BooleanField(
+        ref="declaration-confirmed",
+        display="Declaration confirmed",
+        description="Confirms the applicant or agent has reviewed and validated the information provided in the application",
+    )
+    declaration_date = StringField(
+        ref="declaration-date",
+        display="Declaration date",
+        description="The date the declaration was made",
+    )
+
+
 class PlansDrawingsSupportingMaterials(SchemaNode):
     _ref = "plans-drawings-supporting-materials"
     _display = "Plans, drawings and supporting materials"
@@ -7728,11 +7920,13 @@ class PlansDrawingsSupportingMaterials(SchemaNode):
         "Additional materials and specifications that form part of the planning application"
     )
 
-    supporting_documents = SchemaNodeField(
-        ref="supporting-documents",
-        display="Supporting documents",
-        description="References to supporting documents that have been uploaded with the application",
-        schema_node_cls=SupportingDocument,
+    supporting_documents = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="supporting-documents",
+            display="Supporting documents",
+            description="References to supporting documents that have been uploaded with the application",
+            schema_node_cls=SupportingDocument,
+        )
     )
     inspection_address = StringField(
         ref="inspection-address",
@@ -7881,52 +8075,58 @@ class OilgasPermissionType(SchemaNode):
     _display = "Oil and gas permission types"
     _description = "Module for details about types of onshore oil and gas extraction permissions already received and applying for "
 
-    oilgas_permission_types = EnumField(
-        ref="oilgas-permission-types",
-        display="Oil and gas permission types",
-        description="List of permission types being applied for",
-        select_options=[
-            EnumOption(
-                key="oil-gas-full-permission",
-                label="Full planning permission for oil and gas working",
-                description="",
-            ),
-            EnumOption(
-                key="waste-full-permission",
-                label="Full planning permission for controlled waste",
-                description="",
-            ),
-            EnumOption(
-                key="renewal-unimplemented",
-                label="Renewal of unimplemented permission",
-                description="",
-            ),
-            EnumOption(
-                key="renewal-temporary", label="Renewal of temporary permission", description=""
-            ),
-            EnumOption(
-                key="extension-existing-site", label="Extension to an existing site", description=""
-            ),
-            EnumOption(
-                key="variation-condition", label="Variation of condition(s)", description=""
-            ),
-            EnumOption(
-                key="romp-review",
-                label="Review of conditions for Mineral Permissions (ROMPs)",
-                description="",
-            ),
-            EnumOption(
-                key="minerals-development",
-                label="Previous permissions for minerals development on the site",
-                description="",
-            ),
-        ],
+    oilgas_permission_types = RepeatedField(
+        schema_field=EnumField(
+            ref="oilgas-permission-types",
+            display="Oil and gas permission types",
+            description="List of permission types being applied for",
+            select_options=[
+                EnumOption(
+                    key="oil-gas-full-permission",
+                    label="Full planning permission for oil and gas working",
+                    description="",
+                ),
+                EnumOption(
+                    key="waste-full-permission",
+                    label="Full planning permission for controlled waste",
+                    description="",
+                ),
+                EnumOption(
+                    key="renewal-unimplemented",
+                    label="Renewal of unimplemented permission",
+                    description="",
+                ),
+                EnumOption(
+                    key="renewal-temporary", label="Renewal of temporary permission", description=""
+                ),
+                EnumOption(
+                    key="extension-existing-site",
+                    label="Extension to an existing site",
+                    description="",
+                ),
+                EnumOption(
+                    key="variation-condition", label="Variation of condition(s)", description=""
+                ),
+                EnumOption(
+                    key="romp-review",
+                    label="Review of conditions for Mineral Permissions (ROMPs)",
+                    description="",
+                ),
+                EnumOption(
+                    key="minerals-development",
+                    label="Previous permissions for minerals development on the site",
+                    description="",
+                ),
+            ],
+        )
     )
-    related_permissions = SchemaNodeField(
-        ref="related-permissions",
-        display="Related permissions",
-        description="List of related permissions",
-        schema_node_cls=RelatedPermissionDetails,
+    related_permissions = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="related-permissions",
+            display="Related permissions",
+            description="List of related permissions",
+            schema_node_cls=RelatedPermissionDetails,
+        )
     )
     other_details = StringField(
         ref="other-details",
@@ -7943,11 +8143,13 @@ class OilgasPermissionType(SchemaNode):
         display="Details",
         description="Additional details or information about an item",
     )
-    related_proposals = SchemaNodeField(
-        ref="related-proposals",
-        display="Related proposals",
-        description="A set of related proposals with application type and decision date",
-        schema_node_cls=RelatedProposal,
+    related_proposals = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="related-proposals",
+            display="Related proposals",
+            description="A set of related proposals with application type and decision date",
+            schema_node_cls=RelatedProposal,
+        )
     )
 
 
@@ -8158,11 +8360,11 @@ class ExtractionOilGas(SchemaNode):
         description="Proposed operating hours if the proposed development is intended for non-residential use.",
         schema_node_cls=HrsOperation,
     )
-    ownership_certs = SchemaNodeField(
-        ref="ownership-certs",
-        display="Ownership certificates and agricultural land declaration",
-        description="Who will be affected by the proposal and whether they have been notified, such as agricultural tenants",
-        schema_node_cls=OwnershipCerts,
+    oil_gas_ownership_notices = SchemaNodeField(
+        ref="oil-gas-ownership-notices",
+        display="Oil and gas ownership and notices",
+        description="Ownership, agricultural tenant and public notice details for extraction of oil and gas applications",
+        schema_node_cls=OilGasOwnershipNotices,
     )
     access_rights_of_way = SchemaNodeField(
         ref="access-rights-of-way",
@@ -8262,11 +8464,13 @@ class Eligibility(SchemaNode):
             ),
         ],
     )
-    notified_persons = SchemaNodeField(
-        ref="notified-persons",
-        display="Notified persons",
-        description="List of persons notified, including address and date",
-        schema_node_cls=NotifiedPerson,
+    notified_persons = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="notified-persons",
+            display="Notified persons",
+            description="List of persons notified, including address and date",
+            schema_node_cls=NotifiedPerson,
+        )
     )
 
 
@@ -8304,11 +8508,13 @@ class NmAmendmentDetails(SchemaNode):
         display="Substituting document",
         description="True or False indicating whether the amendment involves substituting documents",
     )
-    replacement_documents = SchemaNodeField(
-        ref="replacement-documents",
-        display="Replacement documents",
-        description="List of documents being replaced in the amendment with old and new document references",
-        schema_node_cls=ReplacementDocument,
+    replacement_documents = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="replacement-documents",
+            display="Replacement documents",
+            description="List of documents being replaced in the amendment with old and new document references",
+            schema_node_cls=ReplacementDocument,
+        )
     )
     reason = StringField(ref="reason", display="Reason", description="A textual reason")
 
@@ -8426,11 +8632,13 @@ class AdvertLocation(SchemaNode):
         display="Is replacement advert",
         description="Whether this is a replacement advertisement",
     )
-    document_reference = SchemaNodeField(
-        ref="document-reference",
-        display="Document reference",
-        description="References to documents detailing the proposed alterations",
-        schema_node_cls=SupportingDocument,
+    document_reference = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="document-reference",
+            display="Document reference",
+            description="References to documents detailing the proposed alterations",
+            schema_node_cls=SupportingDocument,
+        )
     )
     is_advert_overhanging = BooleanField(
         ref="is-advert-overhanging",
@@ -8496,11 +8704,13 @@ class AdvertisementTypes(SchemaNode):
         display="Description",
         description="A text description providing details about the subject.",
     )
-    advertisement_proposal_type = SchemaNodeField(
-        ref="advertisement-proposal-type",
-        display="Advertisement proposal type",
-        description="Expected to provide counts for each advertisement type",
-        schema_node_cls=AdvertisementProposalType,
+    advertisement_proposal_type = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="advertisement-proposal-type",
+            display="Advertisement proposal type",
+            description="Expected to provide counts for each advertisement type",
+            schema_node_cls=AdvertisementProposalType,
+        )
     )
 
 
@@ -8612,11 +8822,13 @@ class ProposedAdvertDetails(SchemaNode):
     _display = "Proposed advert details"
     _description = "Details of the proposed advertisements such as their size and how they are made"
 
-    advertisements = SchemaNodeField(
-        ref="advertisements",
-        display="Advertisements",
-        description="Structured data about each proposed advertisement",
-        schema_node_cls=Advertisement,
+    advertisements = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="advertisements",
+            display="Advertisements",
+            description="Structured data about each proposed advertisement",
+            schema_node_cls=Advertisement,
+        )
     )
 
 
@@ -9020,11 +9232,13 @@ class AdjPremises(SchemaNode):
     _display = "Adjacent premises"
     _description = "Details of properties next to the development site"
 
-    addresses = SchemaNodeField(
-        ref="addresses",
-        display="Addresses",
-        description="A list of addresses for the adjoining properties",
-        schema_node_cls=Address,
+    addresses = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="addresses",
+            display="Addresses",
+            description="A list of addresses for the adjoining properties",
+            schema_node_cls=Address,
+        )
     )
 
 
@@ -9092,63 +9306,65 @@ class EligibilityExtension(SchemaNode):
         display="Within site constraints",
         description="Is the dwellinghouse within any restricted area",
     )
-    site_constraints = EnumField(
-        ref="site-constraints",
-        display="Site constraints",
-        description="List of specific site constraints that restrict development",
-        select_options=[
-            EnumOption(
-                key="world-heritage-site",
-                label="World Heritage Site",
-                description="Site of global cultural or natural importance",
-            ),
-            EnumOption(
-                key="national-park",
-                label="National Park",
-                description="Protected area for natural beauty and recreation",
-            ),
-            EnumOption(
-                key="area-outstanding-natural-beauty",
-                label="Area of Outstanding Natural Beauty (AONB)",
-                description="Designated for distinctive landscape value",
-            ),
-            EnumOption(
-                key="site-special-scientific-interest",
-                label="Site of Special Scientific Interest (SSSI)",
-                description="Protected for wildlife, geology, or landform",
-            ),
-            EnumOption(
-                key="national-nature-reserve",
-                label="National Nature Reserve",
-                description="Important area for wildlife and conservation",
-            ),
-            EnumOption(
-                key="conservation-area",
-                label="Conservation Area",
-                description="Area designated for historical or architectural significance",
-            ),
-            EnumOption(
-                key="special-area-conservation",
-                label="Special Area of Conservation",
-                description="Designated under the EU Habitats Directive",
-            ),
-            EnumOption(
-                key="special-protection-area",
-                label="Special Protection Area/Ramsar site",
-                description="Protected for bird species under the EU Birds Directive",
-            ),
-            EnumOption(
-                key="green-belt",
-                label="Green Belt",
-                description="Area designated to prevent urban sprawl",
-            ),
-            EnumOption(
-                key="secretary-specified-area",
-                label="Secretary of State Protected Area",
-                description="",
-            ),
-            EnumOption(key="the-broads", label="The Broads", description=""),
-        ],
+    site_constraints = RepeatedField(
+        schema_field=EnumField(
+            ref="site-constraints",
+            display="Site constraints",
+            description="List of specific site constraints that restrict development",
+            select_options=[
+                EnumOption(
+                    key="world-heritage-site",
+                    label="World Heritage Site",
+                    description="Site of global cultural or natural importance",
+                ),
+                EnumOption(
+                    key="national-park",
+                    label="National Park",
+                    description="Protected area for natural beauty and recreation",
+                ),
+                EnumOption(
+                    key="area-outstanding-natural-beauty",
+                    label="Area of Outstanding Natural Beauty (AONB)",
+                    description="Designated for distinctive landscape value",
+                ),
+                EnumOption(
+                    key="site-special-scientific-interest",
+                    label="Site of Special Scientific Interest (SSSI)",
+                    description="Protected for wildlife, geology, or landform",
+                ),
+                EnumOption(
+                    key="national-nature-reserve",
+                    label="National Nature Reserve",
+                    description="Important area for wildlife and conservation",
+                ),
+                EnumOption(
+                    key="conservation-area",
+                    label="Conservation Area",
+                    description="Area designated for historical or architectural significance",
+                ),
+                EnumOption(
+                    key="special-area-conservation",
+                    label="Special Area of Conservation",
+                    description="Designated under the EU Habitats Directive",
+                ),
+                EnumOption(
+                    key="special-protection-area",
+                    label="Special Protection Area/Ramsar site",
+                    description="Protected for bird species under the EU Birds Directive",
+                ),
+                EnumOption(
+                    key="green-belt",
+                    label="Green Belt",
+                    description="Area designated to prevent urban sprawl",
+                ),
+                EnumOption(
+                    key="secretary-specified-area",
+                    label="Secretary of State Protected Area",
+                    description="",
+                ),
+                EnumOption(key="the-broads", label="The Broads", description=""),
+            ],
+        )
     )
 
 
@@ -9363,11 +9579,13 @@ class TreesLocation(SchemaNode):
         display="Is site different",
         description="Whether the site where trees are located is different from the applicant's address",
     )
-    site_locations = SchemaNodeField(
-        ref="site-locations",
-        display="Site locations",
-        description="Details of the sites where development or works are proposed",
-        schema_node_cls=SiteLocation,
+    site_locations = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="site-locations",
+            display="Site locations",
+            description="Details of the sites where development or works are proposed",
+            schema_node_cls=SiteLocation,
+        )
     )
 
 
@@ -9455,11 +9673,13 @@ class DescExistingUse(SchemaNode):
     _display = "Description of existing use"
     _description = "How the development site is used, including use class information"
 
-    existing_use_details = SchemaNodeField(
-        ref="existing-use-details",
-        display="Existing use details",
-        description="List of existing site uses and related land areas",
-        schema_node_cls=ExistingUseDetail,
+    existing_use_details = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="existing-use-details",
+            display="Existing use details",
+            description="List of existing site uses and related land areas",
+            schema_node_cls=ExistingUseDetail,
+        )
     )
 
 
@@ -9468,29 +9688,33 @@ class UseWorksActivity(SchemaNode):
     _display = "Use works activity"
     _description = "Why a Lawful Development Certificate is required regarding how the development site is being used, or specific works taking place on the site."
 
-    ldc_need = EnumField(
-        ref="ldc-need",
-        display="LDC need",
-        description="What is the lawful development certificate needed for?",
-        select_options=[
-            EnumOption(key="existing-use", label="Existing use", description=""),
-            EnumOption(
-                key="existing-building-work", label="Existing building work", description=""
-            ),
-            EnumOption(
-                key="breach-con-existing-use",
-                label="Existing use in breach of condition",
-                description="",
-            ),
-            EnumOption(
-                key="breach-con-building-work",
-                label="Building work in breach of condition",
-                description="",
-            ),
-            EnumOption(
-                key="breach-con-activity", label="Activity in breach of condition", description=""
-            ),
-        ],
+    ldc_need = RepeatedField(
+        schema_field=EnumField(
+            ref="ldc-need",
+            display="LDC need",
+            description="What is the lawful development certificate needed for?",
+            select_options=[
+                EnumOption(key="existing-use", label="Existing use", description=""),
+                EnumOption(
+                    key="existing-building-work", label="Existing building work", description=""
+                ),
+                EnumOption(
+                    key="breach-con-existing-use",
+                    label="Existing use in breach of condition",
+                    description="",
+                ),
+                EnumOption(
+                    key="breach-con-building-work",
+                    label="Building work in breach of condition",
+                    description="",
+                ),
+                EnumOption(
+                    key="breach-con-activity",
+                    label="Activity in breach of condition",
+                    description="",
+                ),
+            ],
+        )
     )
     use = EnumField(
         ref="use",
@@ -9682,75 +9906,81 @@ class GroundsLdc(SchemaNode):
         "Evidence and explanations relating to a Lawful Development Certificate (LDC) application"
     )
 
-    grounds_pre_2024 = EnumField(
-        ref="grounds-pre-2024",
-        display="Grounds pre 2024",
-        description="List of grounds pre 2024-04-25 under which the certificate is sought",
-        select_options=[
-            EnumOption(
-                key="use-10y",
-                label="Use over 10 years ago",
-                description="The use began more than 10 years before the date of this application.",
-            ),
-            EnumOption(
-                key="breach-10y",
-                label="Breach of condition over 10 years ago",
-                description="The use, building works or activity in breach of condition began more than 10 years before the date of this application.",
-            ),
-            EnumOption(
-                key="lawful-change-no-pp",
-                label="Lawful change of use within 10 years",
-                description="The use began within the last 10 years, as a result of a change of use not requiring planning permission, and there has not been a change of use requiring planning permission in the last 10 years.",
-            ),
-            EnumOption(
-                key="works-complete-4y",
-                label="Building works completed over 4 years ago",
-                description="The building works (for instance, building or engineering works) were substantially completed more than four years before the date of this application.",
-            ),
-            EnumOption(
-                key="dwelling-change-4y",
-                label="Dwelling change of use over 4 years ago",
-                description="The change of use to use as a single dwelling house began more than four years before the date of this application.",
-            ),
-            EnumOption(
-                key="other",
-                label="Other",
-                description="Other – please specify (this might include claims that the change of use or building work was not development, or that it benefited from planning permission granted under the Act or by the General Permitted Development Order).",
-            ),
-        ],
+    grounds_pre_2024 = RepeatedField(
+        schema_field=EnumField(
+            ref="grounds-pre-2024",
+            display="Grounds pre 2024",
+            description="List of grounds pre 2024-04-25 under which the certificate is sought",
+            select_options=[
+                EnumOption(
+                    key="use-10y",
+                    label="Use over 10 years ago",
+                    description="The use began more than 10 years before the date of this application.",
+                ),
+                EnumOption(
+                    key="breach-10y",
+                    label="Breach of condition over 10 years ago",
+                    description="The use, building works or activity in breach of condition began more than 10 years before the date of this application.",
+                ),
+                EnumOption(
+                    key="lawful-change-no-pp",
+                    label="Lawful change of use within 10 years",
+                    description="The use began within the last 10 years, as a result of a change of use not requiring planning permission, and there has not been a change of use requiring planning permission in the last 10 years.",
+                ),
+                EnumOption(
+                    key="works-complete-4y",
+                    label="Building works completed over 4 years ago",
+                    description="The building works (for instance, building or engineering works) were substantially completed more than four years before the date of this application.",
+                ),
+                EnumOption(
+                    key="dwelling-change-4y",
+                    label="Dwelling change of use over 4 years ago",
+                    description="The change of use to use as a single dwelling house began more than four years before the date of this application.",
+                ),
+                EnumOption(
+                    key="other",
+                    label="Other",
+                    description="Other – please specify (this might include claims that the change of use or building work was not development, or that it benefited from planning permission granted under the Act or by the General Permitted Development Order).",
+                ),
+            ],
+        )
     )
-    grounds_post_2024 = EnumField(
-        ref="grounds-post-2024",
-        display="Grounds post 2024",
-        description="List of grounds post 2024-04-25 under which the certificate is sought",
-        select_options=[
-            EnumOption(
-                key="use-10y",
-                label="Use over 10 years ago",
-                description="The use, building works or activity began more than 10 years before the date of this application.",
-            ),
-            EnumOption(
-                key="lawful-change-no-pp",
-                label="Lawful change of use within 10 years",
-                description="The use began within the last 10 years, as a result of a change of use not requiring planning permission, and there has not been a change of use requiring planning permission in the last 10 years.",
-            ),
-            EnumOption(
-                key="other",
-                label="Other",
-                description="Other – please specify (this might include claims that the change of use or building work was not development, or that it benefited from planning permission granted under the Act or by the General Permitted Development Order).",
-            ),
-        ],
+    grounds_post_2024 = RepeatedField(
+        schema_field=EnumField(
+            ref="grounds-post-2024",
+            display="Grounds post 2024",
+            description="List of grounds post 2024-04-25 under which the certificate is sought",
+            select_options=[
+                EnumOption(
+                    key="use-10y",
+                    label="Use over 10 years ago",
+                    description="The use, building works or activity began more than 10 years before the date of this application.",
+                ),
+                EnumOption(
+                    key="lawful-change-no-pp",
+                    label="Lawful change of use within 10 years",
+                    description="The use began within the last 10 years, as a result of a change of use not requiring planning permission, and there has not been a change of use requiring planning permission in the last 10 years.",
+                ),
+                EnumOption(
+                    key="other",
+                    label="Other",
+                    description="Other – please specify (this might include claims that the change of use or building work was not development, or that it benefited from planning permission granted under the Act or by the General Permitted Development Order).",
+                ),
+            ],
+        )
     )
     other_details = StringField(
         ref="other-details",
         display="Other details",
         description="Explanation if other ground is selected",
     )
-    supporting_applications = SchemaNodeField(
-        ref="supporting-applications",
-        display="Supporting applications",
-        description="List of supporting planning permissions, certificates, or notices affecting the application site",
-        schema_node_cls=SupportingApplications,
+    supporting_applications = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="supporting-applications",
+            display="Supporting applications",
+            description="List of supporting planning permissions, certificates, or notices affecting the application site",
+            schema_node_cls=SupportingApplications,
+        )
     )
     reason = StringField(ref="reason", display="Reason", description="A textual reason")
 
@@ -10016,15 +10246,17 @@ class ProposedBuilding(SchemaNode):
     _display = "Agricultural or forestry building details"
     _description = "Details of the proposed agricultural or forestry building, including operation type, dimensions, materials "
 
-    development_operation_types = EnumField(
-        ref="development-operation-types",
-        display="Development operation types",
-        description="The types of building operation included in the agricultural or forestry proposal.",
-        select_options=[
-            EnumOption(key="new-build", label="A new building", description=""),
-            EnumOption(key="extension", label="An extension", description=""),
-            EnumOption(key="alteration", label="An alteration", description=""),
-        ],
+    development_operation_types = RepeatedField(
+        schema_field=EnumField(
+            ref="development-operation-types",
+            display="Development operation types",
+            description="The types of building operation included in the agricultural or forestry proposal.",
+            select_options=[
+                EnumOption(key="new-build", label="A new building", description=""),
+                EnumOption(key="extension", label="An extension", description=""),
+                EnumOption(key="alteration", label="An alteration", description=""),
+            ],
+        )
     )
     proposed_building_details = SchemaNodeField(
         ref="proposed-building-details",
@@ -10188,17 +10420,21 @@ class LdcInterest(SchemaNode):
         display="Applicant interest",
         description="Description of the applicant's interest in the land",
     )
-    owner_details = SchemaNodeField(
-        ref="owner-details",
-        display="Owner details",
-        description="Details of property owners including their personal information and notification status",
-        schema_node_cls=LdcOwnerDetails,
+    owner_details = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="owner-details",
+            display="Owner details",
+            description="Details of property owners including their personal information and notification status",
+            schema_node_cls=LdcOwnerDetails,
+        )
     )
-    interested_persons = SchemaNodeField(
-        ref="interested-persons",
-        display="Interested persons",
-        description="Details of persons with an interest in the property including their personal information, nature of interest, and notification status",
-        schema_node_cls=LdcInterestedPerson,
+    interested_persons = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="interested-persons",
+            display="Interested persons",
+            description="Details of persons with an interest in the property including their personal information, nature of interest, and notification status",
+            schema_node_cls=LdcInterestedPerson,
+        )
     )
 
 
@@ -10395,11 +10631,13 @@ class ProcessesMachineryWasteOutline(SchemaNode):
             ),
         ],
     )
-    waste_management_outline = SchemaNodeField(
-        ref="waste-management-outline",
-        display="Waste management",
-        description="List of applicable waste management facilities involved in the proposal. Specifically for outline applications",
-        schema_node_cls=WasteManagementOutline,
+    waste_management_outline = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="waste-management-outline",
+            display="Waste management",
+            description="List of applicable waste management facilities involved in the proposal. Specifically for outline applications",
+            schema_node_cls=WasteManagementOutline,
+        )
     )
     waste_streams = SchemaNodeField(
         ref="waste-streams",
