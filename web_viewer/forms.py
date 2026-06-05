@@ -6,8 +6,41 @@ from wtforms import StringField as WTFStringField
 from schema.schema_tree import AbstractSchemaField
 from schema.schema_tree import BooleanField as SchemaBooleanField
 from schema.schema_tree import EnumField as SchemaEnumField
+from schema.schema_tree import RepeatedField as SchemaRepeatedField
 from schema.schema_tree import StringField as SchemaStringField
 from schema.schema_tree import SchemaNodeField as SchemaSchemaNodeField
+
+
+def _map_schema_field(schema_field, label, render_kw=None):
+    """
+    Map a single schema field to a WTForms field.
+
+    @param schema_field: (AbstractSchemaField)
+    @param label: (str) label for the rendered field
+    @param render_kw: (dict) extra attributes passed to the WTForms field
+    @return: (WTForms field) or None when the field describes descendant nodes (handled
+        separately as their own form card)
+    """
+    if isinstance(schema_field, SchemaSchemaNodeField):
+        # this field describes descendants - ignore it
+        return None
+    elif isinstance(schema_field, SchemaBooleanField):
+        return WTFBooleanField(label, render_kw=render_kw)
+    elif isinstance(schema_field, SchemaStringField):
+        return WTFStringField(label, render_kw=render_kw)
+    elif isinstance(schema_field, SchemaEnumField):
+
+        # Optional description field
+        choices = []
+        for opt in schema_field.select_options:
+            opt_label = opt.label
+            if opt.description:
+                opt_label += f" - {opt.description}"
+            choices.append((opt.key, opt_label))
+
+        return WTFRadioField(label, choices=choices, render_kw=render_kw)
+    else:
+        raise ValueError("Unknown schema field can't be mapped to a WTForms field")
 
 
 def schema_auto_form(schema_node_class):
@@ -20,27 +53,19 @@ def schema_auto_form(schema_node_class):
     for attr_name, attr_value in vars(schema_node_class).items():
         if attr_name.startswith("_") or not isinstance(attr_value, AbstractSchemaField):
             continue
-        label = attr_value.display or attr_name
-        if isinstance(attr_value, SchemaSchemaNodeField):
-            # this field describe descendants - ignore it
-            pass
-        elif isinstance(attr_value, SchemaBooleanField):
-            form_fields[attr_name] = WTFBooleanField(label)
-        elif isinstance(attr_value, SchemaStringField):
-            form_fields[attr_name] = WTFStringField(label)
-        elif isinstance(attr_value, SchemaEnumField):
 
-            # Optional description field
-            choices = []
-            for opt in attr_value.select_options:
-                opt_label = opt.label
-                if opt.description:
-                    opt_label += f" - {opt.description}"
-                choices.append((opt.key, opt_label))
-
-            form_fields[attr_name] = WTFRadioField(label, choices=choices)
+        if isinstance(attr_value, SchemaRepeatedField):
+            # multiple values allowed - render the wrapped field once and flag it so the
+            # template can offer a '+' control. Repeating is not implemented yet.
+            inner = attr_value.schema_field
+            label = attr_value.display or inner.display or attr_name
+            wt_field = _map_schema_field(inner, label, render_kw={"data-repeated": "true"})
         else:
-            raise ValueError("Unknown schema field can't be mapped to a WTForms field")
+            label = attr_value.display or attr_name
+            wt_field = _map_schema_field(attr_value, label)
+
+        if wt_field is not None:
+            form_fields[attr_name] = wt_field
 
     form_fields["_display"] = getattr(schema_node_class, "_display", None)
     form_fields["_description"] = getattr(schema_node_class, "_description", None)

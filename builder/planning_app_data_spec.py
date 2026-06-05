@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 from dataclasses import asdict, dataclass, field, fields
 from functools import cached_property
 from glob import glob

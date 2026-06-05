@@ -12,6 +12,7 @@
     {{ form.hidden_tag() }}
     <div class="row g-3">
       {% for field in visible_fields %}
+      {% set is_repeated = field.render_kw and field.render_kw.get('data-repeated') %}
       <div class="col-md-6">
         {% if field.type == 'BooleanField' %}
         <div class="form-check mt-2">
@@ -40,6 +41,10 @@
         {% for error in field.errors %}
           <div class="invalid-feedback">{{ error }}</div>
         {% endfor %}
+        {% endif %}
+        {% if is_repeated %}
+        <button type="button" class="btn btn-sm btn-outline-secondary mt-2"
+                title="Add another" onclick="repeatedFieldComingSoon()">+</button>
         {% endif %}
       </div>
       {% endfor %}

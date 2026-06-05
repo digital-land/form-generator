@@ -17,6 +17,7 @@ from schema.schema_tree import (
     BooleanField,
     EnumField,
     EnumOption,
+    RepeatedField,
     SchemaNodeField,
     StringField,
 )
@@ -167,8 +168,18 @@ def render_python(project_root, planning_application_spec_path, schema_items):
                     schema_field = StringField(**field_info)
                     if SHOW_WARNINGS:
                         warnings.warn(f"Unknown field type {field_x.datatype}")
+
             else:
                 raise NotImplementedError(f"Unprocessed field: {field_x}")
+
+            if field_entry.origin.cardinality not in [1, "1"]:
+                # schema allows multiple answers for this field.
+
+                if field_entry.origin.cardinality != "n":
+                    raise NotImplementedError("TODO - number other than infinity")
+
+                # wrap field built above
+                schema_field = RepeatedField(schema_field=schema_field)
 
             fields_simplified.append((field_name, schema_field))
 

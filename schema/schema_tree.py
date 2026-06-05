@@ -1,9 +1,5 @@
 from collections import namedtuple
-from dataclasses import dataclass, field
-from typing import Any, List
 
-
-from builder.planning_app_data_spec import Field
 from schema import tidy_string
 
 
@@ -36,6 +32,10 @@ class SchemaNode:
         for cls_attr in vars(cls).values():
             if isinstance(cls_attr, SchemaNodeField):
                 descendants.append(cls_attr.schema_node_cls)
+            elif isinstance(cls_attr, RepeatedField) and isinstance(
+                cls_attr.schema_field, SchemaNodeField
+            ):
+                descendants.append(cls_attr.schema_field.schema_node_cls)
         return descendants
 
     def load_payload(self, payload):
@@ -59,7 +59,11 @@ class SchemaNode:
                 failure_reasons.append(f"Attempt to set non-field value: {k}")
                 continue
 
-            setattr(self, k, v)
+            try:
+                setattr(self, k, v)
+            except SchemaValidationException as e:
+                # descendant fields validate their own values; aggregate their reasons
+                failure_reasons.extend(e.reasons)
 
         if len(failure_reasons) > 0:
             raise SchemaValidationException(failure_reasons)
@@ -130,7 +134,18 @@ class AbstractSchemaField:
         return instance.__dict__.get(self._descriptor_name)
 
     def __set__(self, instance, value) -> None:
-        instance.__dict__[self._descriptor_name] = value
+        instance.__dict__[self._descriptor_name] = self.prepare_value(value)
+
+    def prepare_value(self, value):
+        """
+        Coerce a user supplied value into the value stored on the node.
+
+        Default behaviour stores the value unchanged. Subclasses representing nested structures
+        or where validation is needed override this.
+
+        @return: value to store on the node instance
+        """
+        return value
 
     def _common_construction_params(self) -> dict:
         """
@@ -249,13 +264,59 @@ class SchemaNodeField(AbstractSchemaField):
             return [f"schema_node_cls={self.schema_node_cls}"]
         return [f"schema_node_cls={self.schema_node_cls.__name__}"]
 
-    def __set__(self, instance, value) -> None:
+    def prepare_value(self, value):
         """
         Load dictionary of values into child node.
         """
-        assert isinstance(value, dict), "Keys become attributes of self.schema_node_cls"
+        if not isinstance(value, dict):
+            raise SchemaValidationException([f"Field '{self.ref}' expects an object"])
 
         node = self.schema_node_cls()
         node.load_payload(value)
 
-        instance.__dict__[self._descriptor_name] = node
+        return node
+
+
+class RepeatedField(AbstractSchemaField):
+    """
+    Used when multiple responses can be supplied for a single field.
+
+    `RepeatedField` holds another field (subclass of :class:`AbstractSchemaField`).
+    """
+
+    def __init__(self, **kwargs):
+        """
+        Additional args-
+            schema_field (instance of subclass of :class:`AbstractSchemaField`)
+        """
+
+        self.schema_field = kwargs.pop("schema_field", None)
+        if self.schema_field is None:
+            raise ValueError("schema_field is a required value")
+
+        super().__init__(**kwargs)
+
+    def _subclass_construction_params(self):
+        r = repr(self.schema_field)
+        return [f"schema_field={r}"]
+
+    def prepare_value(self, value):
+        """
+        Load a list of values, each conforming to `self.schema_field`.
+        """
+        if not isinstance(value, list):
+            field_ref = self.ref or self.schema_field.ref
+            raise SchemaValidationException([f"Field '{field_ref}' expects a list of values"])
+
+        loaded = []
+        failure_reasons = []
+        for item in value:
+            try:
+                loaded.append(self.schema_field.prepare_value(item))
+            except SchemaValidationException as e:
+                failure_reasons.extend(e.reasons)
+
+        if failure_reasons:
+            raise SchemaValidationException(failure_reasons)
+
+        return loaded
