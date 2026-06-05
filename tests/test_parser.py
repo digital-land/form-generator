@@ -41,18 +41,18 @@ class TestSchemaTreeParser(unittest.TestCase):
 
     def test_simple_descendant(self):
         parser = SchemaTreeParser(schema_node_cls=ContactDetail)
-        payload = '{"email": "me@somewhere.co.uk", "phone": {"number": "012222222"}}'
+        payload = '{"email": "me@somewhere.co.uk", "fax": {"number": "012222222"}}'
         node = parser.load(payload)
         self.assertEqual("me@somewhere.co.uk", node.email)
         # note dict and attribute access are both supported
-        self.assertEqual("012222222", node.phone.number)
+        self.assertEqual("012222222", node.fax.number)
 
     def test_dict_attributes(self):
         """
-        node.phone and node['phone-number'] should be the same thing. The former is the class
+        node.fax and node['fax-number'] should be the same thing. The former is the class
         attribute, the latter is the field's 'ref'. Needed because '-' is used all over the schema.
         """
         parser = SchemaTreeParser(schema_node_cls=ContactDetail)
-        payload = '{"email": "me@somewhere.co.uk", "phone": {"number": "012222222"}}'
+        payload = '{"email": "me@somewhere.co.uk", "fax": {"number": "012222222"}}'
         node = parser.load(payload)
-        self.assertEqual(node["phone-number"].number, node.phone.number)
+        self.assertEqual(node["fax-number"].number, node.fax.number)

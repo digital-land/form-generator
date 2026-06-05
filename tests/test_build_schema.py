@@ -30,7 +30,10 @@ class TestBuildSchema(unittest.TestCase):
         expected_snippets = [
             ("class SiteLocation(SchemaNode):", "Descendant of SiteDetails"),
             ("class SiteDetails(SchemaNode):", "Parent node passed to render function"),
-            ("site_locations = SchemaNodeField(", "SiteDetails field describing a descendant"),
+            (
+                'site_locations = RepeatedField(schema_field=SchemaNodeField(ref="site-locations"',
+                "SiteDetails field describing a descendant",
+            ),
             ("schema_node_cls=SiteLocation", "Link to child class"),
         ]
         for expected, msg in expected_snippets:

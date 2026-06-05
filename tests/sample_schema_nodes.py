@@ -9,7 +9,7 @@ this project.
 
 """
 
-from schema.schema_tree import SchemaNode, SchemaNodeField, StringField
+from schema.schema_tree import RepeatedField, SchemaNode, SchemaNodeField, StringField
 
 
 class PhoneNumber(SchemaNode):
@@ -18,8 +18,19 @@ class PhoneNumber(SchemaNode):
     number = StringField()
 
 
+class FaxNumber(SchemaNode):
+    _ref = "faxnumber"
+
+    number = StringField()
+
+
 class ContactDetail(SchemaNode):
     _ref = "contact-details"
 
     email = StringField(ref="email")
-    phone = SchemaNodeField(ref="phone-number", schema_node_cls=PhoneNumber)
+    fax = SchemaNodeField(ref="fax-number", schema_node_cls=FaxNumber)
+
+    phones = RepeatedField(
+        ref="phones",
+        schema_field=SchemaNodeField(ref="phone", schema_node_cls=PhoneNumber),
+    )
