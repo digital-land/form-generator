@@ -9,6 +9,7 @@ flask-wtf = "*"
 markdown = "*"
 python-frontmatter = "*"
 reportlab = "*"
+gunicorn = "*"
 
 [dev-packages]
 black = "*"
