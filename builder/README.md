@@ -52,7 +52,7 @@ For convenience, this repo includes the current build of the schema in [schema/p
 
 
 ```python
-python builder/build_schema.py|black - > schema/planning_applications.py
+python builder/build_schema.py|black - > schema/planning_applications_specification.py
 ```
 
 When re-generating the schema there is the opportunity to see a simple summary by viewing the code diff. e.g. for git repos `git diff`.

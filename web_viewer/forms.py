@@ -3,12 +3,11 @@ from wtforms import BooleanField as WTFBooleanField
 from wtforms import RadioField as WTFRadioField
 from wtforms import StringField as WTFStringField
 
-from schema.schema_tree import AbstractSchemaField
-from schema.schema_tree import BooleanField as SchemaBooleanField
-from schema.schema_tree import EnumField as SchemaEnumField
-from schema.schema_tree import RepeatedField as SchemaRepeatedField
-from schema.schema_tree import StringField as SchemaStringField
-from schema.schema_tree import SchemaNodeField as SchemaSchemaNodeField
+from schema.fields import BooleanField as SchemaBooleanField
+from schema.fields import EnumField as SchemaEnumField
+from schema.fields import RepeatedField as SchemaRepeatedField
+from schema.fields import StringField as SchemaStringField
+from schema.fields import SchemaNodeField as SchemaSchemaNodeField
 
 
 def _map_schema_field(schema_field, label, render_kw=None):
@@ -50,9 +49,7 @@ def schema_auto_form(schema_node_class):
     """
 
     form_fields = {}
-    for attr_name, attr_value in vars(schema_node_class).items():
-        if attr_name.startswith("_") or not isinstance(attr_value, AbstractSchemaField):
-            continue
+    for attr_name, attr_value in schema_node_class.schema_fields().items():
 
         if isinstance(attr_value, SchemaRepeatedField):
             # multiple values allowed - render the wrapped field once and flag it so the

@@ -1,6 +1,7 @@
 import json
 
-from schema.schema_tree import SchemaNode, SchemaValidationException
+from schema import SchemaValidationException
+from schema.node import SchemaNode
 
 
 class SchemaTreeParser:

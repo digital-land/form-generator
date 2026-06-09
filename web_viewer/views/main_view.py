@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template
 
-from schema.planning_applications import schema_node_root_mapping
+from schema.planning_application import fusion_cls_map, planning_application_roots_mapping
 from web_viewer.forms import schema_auto_form
 
 main_blueprint = Blueprint("main", __name__)
@@ -8,7 +8,7 @@ main_blueprint = Blueprint("main", __name__)
 
 @main_blueprint.route("/", methods=["GET"])
 def index():
-    page_vars = {"application_types": schema_node_root_mapping}
+    page_vars = {"application_types": planning_application_roots_mapping}
     return render_template("main/index.html", **page_vars)
 
 
@@ -23,10 +23,14 @@ def application(application_ref):
         results = [form]
         for descendant in node.descendant_schema_nodes():
             child_prefix = f"{prefix}.{descendant._ref}" if prefix else descendant._ref
-            results.extend(collect_forms(descendant, prefix=child_prefix))
+
+            # fusion nodes = user interface + specification
+            fusion_descendant = fusion_cls_map[descendant.__name__]
+
+            results.extend(collect_forms(fusion_descendant, prefix=child_prefix))
         return results
 
-    root_schema_class = schema_node_root_mapping[application_ref]
+    root_schema_class = planning_application_roots_mapping[application_ref]
     forms = collect_forms(root_schema_class)
 
     return render_template("main/application.html", application_ref=application_ref, forms=forms)

@@ -13,7 +13,7 @@ from builder.planning_app_data_spec import (
     SchemaBase,
 )
 from schema import valid_class_name, valid_field_name, tidy_string
-from schema.schema_tree import (
+from schema.fields import (
     BooleanField,
     EnumField,
     EnumOption,
