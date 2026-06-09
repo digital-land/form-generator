@@ -1,13 +1,12 @@
-from schema.schema_tree import (
+from schema.fields import (
     BooleanField,
     EnumField,
     EnumOption,
     RepeatedField,
-    schema_node_root_classes,
-    SchemaNode,
     SchemaNodeField,
     StringField,
 )
+from schema.node import SchemaNode, sub_class_search
 
 
 class PhoneNumber(SchemaNode):
@@ -10661,9 +10660,4 @@ class PlansDocument(SchemaNode):
     )
 
 
-# list of roots are loaded here so all the processing is done on startup not for each request.
-# roots are expected to be planning application nodes
-schema_node_roots = schema_node_root_classes()
-
-# convenience ref -> schema map
-schema_node_root_mapping = {schema_node._ref: schema_node for schema_node in schema_node_roots}
+all_schema_node_classes = sub_class_search(SchemaNode)

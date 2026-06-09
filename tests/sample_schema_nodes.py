@@ -9,7 +9,8 @@ this project.
 
 """
 
-from schema.schema_tree import RepeatedField, SchemaNode, SchemaNodeField, StringField
+from schema.fields import RepeatedField, SchemaNodeField, StringField
+from schema.node import SchemaNode
 
 
 class PhoneNumber(SchemaNode):

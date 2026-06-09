@@ -5,7 +5,7 @@ from reportlab.rl_config import defaultPageSize
 from reportlab.lib.units import inch
 
 from schema.schema_tree import AbstractSchemaField, SchemaNodeField
-from schema.planning_applications import schema_node_root_mapping
+from schema.planning_applications import planning_application_roots_mapping
 
 cm = 2.54
 PAGE_HEIGHT = defaultPageSize[1]
@@ -86,7 +86,7 @@ class GenerateApplication:
         )
         doc_elements = [Spacer(1, 2 * inch)]
 
-        schema_node_class = schema_node_root_mapping[self.application_ref]
+        schema_node_class = planning_application_roots_mapping[self.application_ref]
 
         data = []
         for field in self._dump_all_fields(schema_node_class):

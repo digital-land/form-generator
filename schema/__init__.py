@@ -20,3 +20,13 @@ def valid_field_name(s):
     # TODO function for safe PEP8 variable names
     field_name = s.replace("-", "_")
     return field_name
+
+
+class SchemaValidationException(Exception):
+    """
+    Raised when data that doesn't conform with the schema is parsed.
+    """
+
+    def __init__(self, reasons):
+        self.reasons = reasons
+        super().__init__("; ".join(reasons))
