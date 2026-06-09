@@ -11,8 +11,8 @@ from reportlab.platypus import (
     TableStyle,
 )
 
-from schema.planning_applications import schema_node_root_mapping
-from schema.schema_tree import (
+from schema.planning_application import planning_application_roots_mapping
+from schema.fields import (
     AbstractSchemaField,
     BooleanField,
     EnumField,
@@ -250,7 +250,7 @@ class GenerateApplication:
             title=f"Planning application: {self.application_ref}",
         )
 
-        schema_node_class = schema_node_root_mapping[self.application_ref]
+        schema_node_class = planning_application_roots_mapping[self.application_ref]
         elements = self._node_flowables(schema_node_class)
 
         doc.build(elements, onFirstPage=self._on_page, onLaterPages=self._on_page)
