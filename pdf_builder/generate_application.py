@@ -212,7 +212,7 @@ class GenerateApplication:
             )
             elements.append(Paragraph(description, desc_style))
 
-        for attr_name, attr_value in vars(schema_node_class).items():
+        for attr_name, attr_value in schema_node_class.schema_fields().items():
             if attr_name.startswith("_") or not isinstance(attr_value, AbstractSchemaField):
                 continue
 
