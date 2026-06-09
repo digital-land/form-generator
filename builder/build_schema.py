@@ -76,12 +76,10 @@ def walk_resolved_schema(schema_items):
         yield spec_item
 
 
-def render_python(project_root, planning_application_spec_path, schema_items):
+def render_python(project_root, planning_spec):
     """
     @param project_root: (str)
-    @param planning_application_spec_path: (str) filesystem location of git repo
-            https://github.com/digital-land/planning-application-data-specification/
-    @param schema_items: (iterable of subclasses of :class:`SchemaBase`) to convert into Python
+    @param planning_spec: (:class:`PlanningAppDataResolved` obj) to convert into Python
             code.
     @return: (str) Python code - see package level README.md for details on how to use this.
     """
@@ -92,7 +90,7 @@ def render_python(project_root, planning_application_spec_path, schema_items):
     # assumption - refs are primary keys
     segment_register = defaultdict(dict)
     segment_class_map = {}  # class_name -> schema_segment
-    for schema_base_item in walk_resolved_schema(schema_items):
+    for schema_base_item in walk_resolved_schema(planning_spec.all_items):
 
         assert isinstance(schema_base_item, SchemaBase)
 
@@ -153,9 +151,7 @@ def render_python(project_root, planning_application_spec_path, schema_items):
                 elif field_x.datatype == "boolean":
                     schema_field = BooleanField(**field_info)
                 elif field_x.datatype == "enum":
-                    schema_field = build_enum_field(
-                        planning_application_spec_path, field_info, field_x.codelist
-                    )
+                    schema_field = build_enum_field(planning_spec, field_info, field_x.codelist)
 
                     if schema_field is None:
                         # couldn't be built, for now use a string field
@@ -238,46 +234,30 @@ def render_python(project_root, planning_application_spec_path, schema_items):
     return py_output
 
 
-def build_enum_field(planning_application_spec_path, field_info, codelist):
+def build_enum_field(planning_spec, field_info, codelist_ref):
     """
     Utility function to build :class:`EnumField`
 
-    @param planning_application_spec_path: (str(
+    @param planning_spec: (:class:`PlanningAppDataResolved` obj)
     @param field_info: (dict) - kwargs for EnumField
+    @param codelist_ref: (str)
 
     @return: EnumField or None if not possible
         - not possible if data isn't available
     """
-    # there is a codelist .md file with field names, for now, I'm
-    # not using this.
-    csv_file = os.path.join(
-        planning_application_spec_path,
-        "data",
-        "codelist",
-        f"{codelist}.csv",
-    )
-
-    if not os.path.exists(csv_file):
-
-        # csv_file is probably an http source"
-        return None
 
     select_options = []
-    with open(csv_file) as f:
+    for r in planning_spec.codelist_data(codelist_ref):
+        e = EnumOption(
+            key=r["reference"],
+            label=r["name"],
+            description=r.get("description", None),
+        )
+        select_options.append(e)
 
-        csv_r = csv.DictReader(f)
-
-        if "reference" not in csv_r.fieldnames or "name" not in csv_r.fieldnames:
-            msg = "TODO: Field names should be mapped from field schema"
-            raise NotImplementedError(msg)
-
-        for r in csv_r:
-            e = EnumOption(
-                key=r["reference"],
-                label=r["name"],
-                description=r.get("description", None),
-            )
-            select_options.append(e)
+    if len(select_options) == 0:
+        # no data , not possible to build enum, warning/exception handled elsewhere
+        return None
 
     schema_field = EnumField(select_options=select_options, **field_info)
     return schema_field
@@ -293,7 +273,6 @@ if __name__ == "__main__":
 
     r = render_python(
         project_root=PROJECT_ROOT,
-        planning_application_spec_path=p,
-        schema_items=specification.all_items,
+        planning_spec=specification,
     )
     print(r)

@@ -10,6 +10,7 @@ markdown = "*"
 python-frontmatter = "*"
 reportlab = "*"
 gunicorn = "*"
+requests = "*"
 
 [dev-packages]
 black = "*"
