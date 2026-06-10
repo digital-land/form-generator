@@ -47,7 +47,6 @@ def schema_auto_form(schema_node_class):
     @param schema_node_class: (SchemaNode)
     @return: (FlaskForm)
     """
-
     form_fields = {}
     for attr_name, attr_value in schema_node_class.schema_fields().items():
 
@@ -68,3 +67,58 @@ def schema_auto_form(schema_node_class):
     form_fields["_description"] = getattr(schema_node_class, "_description", None)
     form_class = type(schema_node_class.__name__, (FlaskForm,), form_fields)
     return form_class
+
+
+def forms_extract(forms):
+    """
+    Transform fields in forms into Python native data structure (i.e. dict, list, str etc.).
+
+    Forms have a prefix like 'interest-details.ldc-owner-details.person'. Data from this form
+    should be in dictionary position-
+    payload['interest-details']['ldc-owner-details']['person']
+
+    @param forms: (list of FlaskForm)
+    @return: (dict)
+    """
+
+    r = {}
+    for form in forms:
+
+        # Remove hyphen added by WTForms
+        prefix_full = form._prefix.removesuffix("-")
+        prefix_parts = prefix_full.split(".")
+
+        # walk through dictionary to find position for this form's data
+        pointer = r
+        for prefix_sub in prefix_parts[:-1]:
+
+            if prefix_sub not in pointer:
+                # defaultdict might confuse this?
+                pointer[prefix_sub] = {}
+            pointer = pointer[prefix_sub]
+
+        # can't just use form.data as Repeated fields need to be lists
+        d = {}
+        for field in form:
+
+            # CSRF token is a transport concern, not part of the schema payload
+            if field.type == "CSRFTokenField":
+                continue
+
+            assert field.short_name not in d, "Coding assumption to not override existing"
+
+            # SchemaRepeatedField is marked up into this attribute
+            render_kw = getattr(field, "render_kw", {})
+            is_repeated = render_kw and render_kw.get("data-repeated", "false") == "true"
+
+            if is_repeated:
+                d[field.short_name] = [field.data]
+            else:
+                d[field.short_name] = field.data
+
+        assert prefix_parts[-1] not in pointer, "Coding assumption to not override existing"
+
+        if len(d) > 0:
+            pointer[prefix_parts[-1]] = d
+
+    return r

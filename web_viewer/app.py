@@ -1,9 +1,16 @@
 from flask import Flask
+from flask_wtf.csrf import CSRFProtect
+
+csrf = CSRFProtect()
 
 
 def create_app(settings_class):
     app = Flask(__name__)
     app.config.from_object(settings_class)
+
+    # validates the csrf_token on every state changing request (honours WTF_CSRF_ENABLED) and
+    # exposes csrf_token() to templates
+    csrf.init_app(app)
 
     from web_viewer.views.main_view import main_blueprint
 

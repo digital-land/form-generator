@@ -89,9 +89,9 @@ def planning_application_root_classes(fusion_classes, schema_node_classes):
         if issubclass(cls, UserInterfaceOverride):
             continue
 
-        for schema_node_cls in cls.descendant_schema_nodes():
-            assert not issubclass(schema_node_cls, UserInterfaceOverride)
-            referenced.add(schema_node_cls)
+        for schema_node_field in cls.descendant_schema_nodes():
+            assert not issubclass(schema_node_field.schema_node_cls, UserInterfaceOverride)
+            referenced.add(schema_node_field.schema_node_cls)
 
     root_spec_cls = [cls for cls in schema_node_classes if cls not in referenced]
 
