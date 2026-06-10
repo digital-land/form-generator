@@ -29,16 +29,17 @@ class SchemaNode:
     @classmethod
     def descendant_schema_nodes(cls):
         """
-        @return: list of `SchemaNode` for nodes that are descendants of current node.
+        @return: list of `SchemaNodeField` for nodes that are direct descendants of current node
+        or repeated and direct.
         """
         descendants = []
         for field_attr in cls.schema_fields().values():
             if isinstance(field_attr, SchemaNodeField):
-                descendants.append(field_attr.schema_node_cls)
+                descendants.append(field_attr)
             elif isinstance(field_attr, RepeatedField) and isinstance(
                 field_attr.schema_field, SchemaNodeField
             ):
-                descendants.append(field_attr.schema_field.schema_node_cls)
+                descendants.append(field_attr.schema_field)
 
         return descendants
 
@@ -74,14 +75,22 @@ class SchemaNode:
 
     def __getitem__(self, key):
         """
-        Dictionary like access to fields.
+        Dictionary like access to fields by their schema 'ref'.
 
         node.phone and node['phone-number'] should be the same thing. The former is the class
         attribute, the latter is the field's 'ref'.
         """
-        for k, v in vars(self.__class__).items():
-            if isinstance(v, AbstractSchemaField) and v.ref == key:
-                return getattr(self, k)
+        # uses :meth:`schema_fields` so multiple inheritance safe
+        for attr_name, field in self.schema_fields().items():
+
+            # A `RepeatedField` carries its ref on the wrapped field.
+            ref = (
+                (field.ref or field.schema_field.ref)
+                if isinstance(field, RepeatedField)
+                else field.ref
+            )
+            if ref == key:
+                return getattr(self, attr_name)
 
         raise KeyError(f"Field {key} not found in {self.__class__.__name__}")
 

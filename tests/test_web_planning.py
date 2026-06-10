@@ -1,5 +1,4 @@
 from tests.base import WebTestCase
-
 from web_viewer.forms import schema_auto_form
 
 
@@ -30,3 +29,11 @@ class TestWebPlanning(WebTestCase):
 
         msg = "In _specification it's 'Person obj' , in _ui it's 'A Person'"
         self.assertEqual("A Person", form._display, msg)
+
+    def test_application_post_returns_json_document(self):
+        response = self.client.post("/application/outline-all", data={})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual("application/json", response.mimetype)
+
+        # data not checked
+        self.assertTrue(response.is_json)

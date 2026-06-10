@@ -9,7 +9,6 @@
   {% set visible_fields = form | selectattr("widget.input_type", "ne", "hidden") | list %}
   {% if visible_fields %}
   <div class="card-body">
-    {{ form.hidden_tag() }}
     <div class="row g-3">
       {% for field in visible_fields %}
       {% set is_repeated = field.render_kw and field.render_kw.get('data-repeated') %}
@@ -50,8 +49,6 @@
       {% endfor %}
     </div>
   </div>
-  {% else %}
-  {{ form.hidden_tag() }}
   {% endif %}
 </div>
 {% endmacro %}

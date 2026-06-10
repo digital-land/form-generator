@@ -8,6 +8,7 @@
 </div>
 
 <form method="POST" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
   {% for form in forms %}
   {% set depth = (form._prefix.split('.')|length) if form._prefix else 0 %}
