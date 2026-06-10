@@ -21,10 +21,11 @@ class TestBuildSchema(unittest.TestCase):
             spec_files_path="specification_a",
         )
 
+        specification.spec_data = Path(DATA_PATH) / "specification_a" / "data"
+
         py_out = render_python(
             project_root=PROJECT_ROOT,
-            planning_application_spec_path=DATA_PATH,
-            schema_items=specification.all_items,
+            planning_spec=specification,
         )
 
         expected_snippets = [
@@ -50,11 +51,11 @@ class TestBuildSchema(unittest.TestCase):
             planning_app_repo_path=DATA_PATH,
             spec_files_path="specification_b",
         )
+        specification.spec_data = Path(DATA_PATH) / "specification_a" / "data"
 
         py_out = render_python(
             project_root=PROJECT_ROOT,
-            planning_application_spec_path=DATA_PATH,
-            schema_items=specification.all_items,
+            planning_spec=specification,
         )
 
         # just looking at one field in `class Menu(SchemaNode):`

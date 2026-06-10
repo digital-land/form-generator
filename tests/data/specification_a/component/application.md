@@ -7,6 +7,8 @@ description: |
 fields:
   - field: reference
     required: true
+  - field: tenure-type
+    required: true
 validation:
   - rule: "reference must be a valid UUID format"
   - rule: "application-types must reference valid application type codelist values"

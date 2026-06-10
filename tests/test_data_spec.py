@@ -67,3 +67,12 @@ class TestDataSpec(unittest.TestCase):
         site_location = spec_resolved.components["site-location"]
         field_refs = [f.origin.ref for f in site_location.field_entries]
         self.assertIn("address-text", field_refs)
+
+    def test_codelist_fields(self):
+        """
+        Check a codelist is loaded
+        """
+        _, spec_resolved = self.planning_app_specs("a")
+        tenure_type = spec_resolved.codelist["tenure-type"]
+        # check known value in one field
+        self.assertEqual("data/codelist/tenure-type.csv", tenure_type.source)

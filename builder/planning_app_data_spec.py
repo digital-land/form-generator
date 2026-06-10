@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import csv
+import io
 from dataclasses import asdict, dataclass, field, fields
 from functools import cached_property
 from glob import glob
@@ -8,6 +10,7 @@ from typing import Any
 import warnings
 
 import frontmatter
+import requests
 
 
 @dataclass
@@ -122,6 +125,25 @@ class Rule:
     when: dict
 
 
+@dataclass
+class Codelist:
+    ref: str
+    name: str
+    description: str
+    content: str
+    notes: str | None = None
+    fields: list[dict] = field(default_factory=list)
+    entry_date: str | None = None
+    end_date: str | None = None
+    github_discussion: str | None = None
+    key_field: str | None = None
+    licence: str | None = None
+    organisation: str | None = None
+    plural: str | None = None
+    source: str | None = None
+    usage: str | None = None
+
+
 class PlanningAppDataSpec:
     """
     Loads and exposes the planning application data specification.
@@ -141,15 +163,25 @@ class PlanningAppDataSpec:
     """
 
     def __init__(
-        self, planning_app_repo_path: str | Path, hard_fail=True, spec_files_path="specification"
+        self,
+        planning_app_repo_path: str | Path,
+        hard_fail=True,
+        spec_files_path="specification",
+        allow_http_requests=True,
     ):
         """
+        @param planning_app_repo_path: (str) filesystem location of git repo
+            https://github.com/digital-land/planning-application-data-specification/
         @param hard_fail: bool - raise exception if schema spec file doesn't match expected layout.
                 or else warn.
         @param spec_files_path: (str) - subdirectory of `planning_app_repo_path`
         """
         self.hard_fail = hard_fail
+        self.allow_http_requests = allow_http_requests
+
+        # these two are fixed-up by unittests
         self.spec_dir = Path(planning_app_repo_path) / spec_files_path
+        self.spec_data = Path(planning_app_repo_path) / "data"
 
     def _hydrate_dataclasses(self, data_cls):
         """
@@ -209,6 +241,51 @@ class PlanningAppDataSpec:
     @cached_property
     def applications(self) -> dict[str, Application]:
         return self._hydrate_dataclasses(Application)
+
+    @cached_property
+    def codelist(self) -> dict[str, Codelist]:
+        return self._hydrate_dataclasses(Codelist)
+
+    def codelist_data(self, codelist_ref):
+        """
+        Generator yield (dict) for each row in CSV referenced by codelist definition
+        @param codelist_ref: (str)
+        """
+        codelist = self.codelist[codelist_ref]
+
+        if codelist.source.startswith("https://"):
+            # remote file
+
+            if not self.allow_http_requests:
+                msg = (
+                    f"Can't fetch codelist : {codelist.source}, 'allow_http_requests permissions"
+                    " flag is False"
+                )
+                if self.hard_fail:
+                    raise ValueError(msg)
+                else:
+                    warnings.warn(msg)
+
+                return
+
+            response = requests.get(codelist.source, timeout=10)
+            response.raise_for_status()
+            csv_r = csv.DictReader(io.StringIO(response.text))
+            yield from csv_r
+
+        else:
+            # local file
+
+            # remove overlap between repo relative path and path in codelist definition
+            path_prefix = "data/"
+            msg = f"Can't process codelist source : {codelist.source}"
+            assert codelist.source.startswith(path_prefix), msg
+
+            csv_path = self.spec_data / codelist.source[len(path_prefix) :]
+            with open(csv_path) as f:
+
+                csv_r = csv.DictReader(f)
+                yield from csv_r
 
 
 class PlanningAppDataResolved(PlanningAppDataSpec):
