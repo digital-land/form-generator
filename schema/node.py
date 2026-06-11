@@ -85,8 +85,27 @@ class SchemaNode:
                 # descendant fields validate their own values; aggregate their reasons
                 failure_reasons.extend(e.reasons)
 
+        # at this point all recursive building is done, nodes and fields are populated so run
+        # node level checks
+        self.valid_node()
+
         if len(failure_reasons) > 0:
             raise SchemaValidationException(failure_reasons)
+
+    def valid_node(self):
+        """
+        Hook to be optionally implemented by subclasses for performing node level checks on
+        new values.
+
+        Node level is a logical place for intra field checks.
+
+        @see :meth:`AbstractSchemaField.valid_update` for field level validation.
+
+        @return: None
+         or
+        @raise SchemaValidationException
+        """
+        return
 
     def __getitem__(self, key):
         """

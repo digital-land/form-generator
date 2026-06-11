@@ -42,7 +42,24 @@ class AbstractSchemaField:
 
     def __set__(self, instance, value) -> None:
         self._parent_node = instance
+
+        # raise exception if field isn't happy about the new value
+        self.valid_update(value)
+
         instance.__dict__[self._descriptor_name] = self.prepare_value(value)
+
+    def valid_update(self, proposed_value):
+        """
+        Hook to be optionally implemented by subclasses for performing field level checks on
+        new values.
+
+        @see :meth:`SchemaNode.valid_node` for node level validation.
+
+        @return: None
+         or
+        @raise SchemaValidationException
+        """
+        return
 
     def prepare_value(self, value):
         """
@@ -172,15 +189,18 @@ class SchemaNodeField(AbstractSchemaField):
             return [f"schema_node_cls={self.schema_node_cls}"]
         return [f"schema_node_cls={self.schema_node_cls.__name__}"]
 
+    def valid_update(self, proposed_value):
+        """ """
+        super().valid_update(proposed_value)
+        if proposed_value is not None and not isinstance(proposed_value, dict):
+            raise SchemaValidationException([f"Field '{self.ref}' expects an object"])
+
     def prepare_value(self, value):
         """
         Load dictionary of values into child node.
 
         @param value: (dict or None) - None means empty node, don't load payload
         """
-        if value is not None and not isinstance(value, dict):
-            raise SchemaValidationException([f"Field '{self.ref}' expects an object"])
-
         node = self.schema_node_cls()
 
         if value:
