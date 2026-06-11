@@ -14,6 +14,13 @@ class AbstractSchemaField:
         self.display = display
         self.description = description
 
+        # used by nodes to find values from other parts of the tree. Field also needs this as
+        # :class:`SchemaNodeField` creates nodes. Slightly breaking open closed principal.
+        # parent is only known when a value is set (i.e. scope of descriptor) so this will
+        # be None before use.
+        # is subclass of :class:`SchemaNode`
+        self._parent_node = None
+
     def __set_name__(self, owner, name):
         self._descriptor_name = name
 
@@ -25,9 +32,16 @@ class AbstractSchemaField:
             #
             # see https://docs.python.org/3/howto/descriptor.html
             return self
+
+        if self._descriptor_name not in instance.__dict__:
+            # empty node - this avoids key errors when finding a value within the tree that isn't
+            # set.
+            self.__set__(instance, None)
+
         return instance.__dict__.get(self._descriptor_name)
 
     def __set__(self, instance, value) -> None:
+        self._parent_node = instance
         instance.__dict__[self._descriptor_name] = self.prepare_value(value)
 
     def prepare_value(self, value):
@@ -161,12 +175,19 @@ class SchemaNodeField(AbstractSchemaField):
     def prepare_value(self, value):
         """
         Load dictionary of values into child node.
+
+        @param value: (dict or None) - None means empty node, don't load payload
         """
-        if not isinstance(value, dict):
+        if value is not None and not isinstance(value, dict):
             raise SchemaValidationException([f"Field '{self.ref}' expects an object"])
 
         node = self.schema_node_cls()
-        node.load_payload(value)
+
+        if value:
+            node.load_payload(value)
+
+        # relay field's parent to new node
+        node._parent_node = self._parent_node
 
         return node
 

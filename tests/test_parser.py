@@ -12,13 +12,13 @@ class TestSchemaTreeParser(unittest.TestCase):
         Node without descendants.
         """
         parser = SchemaTreeParser(schema_node_cls=PhoneNumber)
-        node = parser.load('{"number": "07700000000"}')
+        node = parser.load_json('{"number": "07700000000"}')
         self.assertEqual("07700000000", node.number)
 
     def test_invalid_json_raises(self):
         parser = SchemaTreeParser(schema_node_cls=PhoneNumber)
         with self.assertRaises(SchemaValidationException) as ctx:
-            parser.load("{not valid json}")
+            parser.load_json("{not valid json}")
         self.assertEqual(1, len(ctx.exception.reasons))
 
     def test_unknown_field(self):
@@ -27,8 +27,8 @@ class TestSchemaTreeParser(unittest.TestCase):
         """
         parser = SchemaTreeParser(schema_node_cls=PhoneNumber)
         with self.assertRaises(SchemaValidationException) as ctx:
-            parser.load('{"colour": "red", "number": "07700000000"}')
-        self.assertEqual(["Unknown field 'colour'"], ctx.exception.reasons)
+            parser.load_json('{"colour": "red", "number": "07700000000"}')
+        self.assertEqual(["Unknown field: 'colour'"], ctx.exception.reasons)
 
     def test_set_non_abstract_schema_field(self):
         """
@@ -36,13 +36,13 @@ class TestSchemaTreeParser(unittest.TestCase):
         """
         parser = SchemaTreeParser(schema_node_cls=PhoneNumber)
         with self.assertRaises(SchemaValidationException) as ctx:
-            parser.load('{"_ref": "naughty attempt to modify non-field variable"}')
-        self.assertEqual(["Attempt to set non-field value: _ref"], ctx.exception.reasons)
+            parser.load_json('{"_ref": "naughty attempt to modify non-field variable"}')
+        self.assertEqual(["Unknown field: '_ref'"], ctx.exception.reasons)
 
     def test_simple_descendant(self):
         parser = SchemaTreeParser(schema_node_cls=ContactDetail)
-        payload = '{"email": "me@somewhere.co.uk", "fax": {"number": "012222222"}}'
-        node = parser.load(payload)
+        payload = '{"email": "me@somewhere.co.uk", "fax-number": {"number": "012222222"}}'
+        node = parser.load_json(payload)
         self.assertEqual("me@somewhere.co.uk", node.email)
         # note dict and attribute access are both supported
         self.assertEqual("012222222", node.fax.number)
@@ -53,6 +53,7 @@ class TestSchemaTreeParser(unittest.TestCase):
         attribute, the latter is the field's 'ref'. Needed because '-' is used all over the schema.
         """
         parser = SchemaTreeParser(schema_node_cls=ContactDetail)
-        payload = '{"email": "me@somewhere.co.uk", "fax": {"number": "012222222"}}'
-        node = parser.load(payload)
+        payload = '{"email": "me@somewhere.co.uk", "fax-number": {"number": "012222222"}}'
+        node = parser.load_json(payload)
+
         self.assertEqual(node["fax-number"].number, node.fax.number)

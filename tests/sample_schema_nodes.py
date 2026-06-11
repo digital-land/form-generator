@@ -35,3 +35,9 @@ class ContactDetail(SchemaNode):
         ref="phones",
         schema_field=SchemaNodeField(ref="phone", schema_node_cls=PhoneNumber),
     )
+
+
+class Partnership(SchemaNode):
+    _ref = "two-people"
+    a = SchemaNodeField(ref="person-a", schema_node_cls=ContactDetail)
+    b = SchemaNodeField(ref="person-b", schema_node_cls=ContactDetail)

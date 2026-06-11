@@ -12,6 +12,10 @@ class SchemaNode:
     _display = None
     _description = None
 
+    def __init__(self):
+        # is subclass of :class:`SchemaNode`
+        self._parent_node = None
+
     @classmethod
     def schema_fields(cls):
         """
@@ -25,6 +29,21 @@ class SchemaNode:
                 sf[cls_att] = v
 
         return sf
+
+    @classmethod
+    def schema_refs(cls):
+        """
+        field.ref doesn't always match the class attribute. i.e. hyphens in refs can't be Python
+        variables.
+
+        @return dict with field refs as keys and tuple (class_attr, AbstractSchemaField) as value
+        """
+        r = {}
+        for attr_name, f in cls.schema_fields().items():
+            # when ref isn't set
+            ref = f.ref or attr_name
+            r[ref] = (attr_name, f)
+        return r
 
     @classmethod
     def descendant_schema_nodes(cls):
@@ -49,23 +68,19 @@ class SchemaNode:
         @return None
         @raise :class:`SchemaValidationException` is payload doesn't conform to schema
         """
-        schema_node_cls = self.__class__
+        field_map = self.schema_refs()
         failure_reasons = []
         for k, v in payload.items():
 
-            try:
-                schema_field = getattr(schema_node_cls, k)
-            except AttributeError:
-                failure_reasons.append(f"Unknown field '{k}'")
+            if k not in field_map:
+                failure_reasons.append(f"Unknown field: '{k}'")
                 continue
 
-            if not isinstance(schema_field, AbstractSchemaField):
-                # possible security fail if this was allowed
-                failure_reasons.append(f"Attempt to set non-field value: {k}")
-                continue
+            # class attrib doesn't always match k
+            node_att, _ = field_map.get(k)
 
             try:
-                setattr(self, k, v)
+                setattr(self, node_att, v)
             except SchemaValidationException as e:
                 # descendant fields validate their own values; aggregate their reasons
                 failure_reasons.extend(e.reasons)
@@ -83,16 +98,43 @@ class SchemaNode:
         # uses :meth:`schema_fields` so multiple inheritance safe
         for attr_name, field in self.schema_fields().items():
 
-            # A `RepeatedField` carries its ref on the wrapped field.
-            ref = (
-                (field.ref or field.schema_field.ref)
-                if isinstance(field, RepeatedField)
-                else field.ref
-            )
+            # A `RepeatedField` can carry its ref on the wrapped field.
+            ref = field.ref
+            if ref is None and isinstance(field, RepeatedField):
+                ref = field.schema_field.ref
+
+            if ref is None:
+                # class variable the `Field` is assigned to always exists
+                ref = attr_name
+
             if ref == key:
                 return getattr(self, attr_name)
 
-        raise KeyError(f"Field {key} not found in {self.__class__.__name__}")
+        raise KeyError(f"Field '{key}' not found in '{self.__class__.__name__}'")
+
+    @property
+    def _root_node(self):
+        """
+        Find the node without parents and return it.
+
+        Public method, dunder is to differentiate with other fields as this is used as a property.
+
+        @return: :class:`SchemaNode` - either root of tree or node specified by offset
+        """
+        node = self._parent_node
+        if node is None:
+            # current node is the root
+            # this could also happen if new nodes aren't added to the tree by :class:`SchemaNodeField`
+            node = self
+
+        while True:
+            if node._parent_node is None:
+                # got to the top
+                break
+
+            node = node._parent_node
+
+        return node
 
 
 def sub_class_search(target_cls):
