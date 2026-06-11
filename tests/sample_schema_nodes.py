@@ -10,7 +10,8 @@ this project.
 """
 
 from schema import SchemaValidationException
-from schema.fields import RepeatedField, SchemaNodeField, StringField
+from schema.fields import BooleanField, RepeatedField, SchemaNodeField, StringField
+
 from schema.node import SchemaNode
 
 
@@ -33,6 +34,19 @@ class FaxNumber(SchemaNode):
     _ref = "faxnumber"
 
     number = StringField()
+    is_international = BooleanField()
+    international_code = StringField()
+
+    def valid_node(self):
+        "required field depends on boolean"
+        super().valid_node()
+        # both dictionary and attribute access patterns work here
+        reasons = []
+        if self.is_international and not self.international_code:
+            reasons.append("International code needed")
+
+        if reasons:
+            raise SchemaValidationException(reasons)
 
 
 class ContactDetail(SchemaNode):

@@ -1,12 +1,7 @@
 import unittest
 
 from schema import SchemaValidationException
-from schema.fields import (
-    RepeatedField,
-    SchemaNodeField,
-    StringField,
-)
-from tests.sample_schema_nodes import ContactDetail, PhoneNumber, Partnership, FaxNumber
+from tests.sample_schema_nodes import Partnership, FaxNumber
 
 
 class TestSchemaConditional(unittest.TestCase):
@@ -42,33 +37,24 @@ class TestSchemaConditional(unittest.TestCase):
 
         self.assertIn("Duplicate email addresses", ctx.exception.reasons)
 
+    def test_boolean_field_requirement(self):
+        """
+        Boolean field determines if another field is required
+        """
+        payload = {"number": "0123", "is_international": False}
 
-#
-#
-# Applies for application type
-# `applies-if` + `application-type` + `value` or `in`
-# Field is in scope only for one or more application types.
-#
-# Required when answer equals a value
-# `required-if` + `field` + `value`
-# Field is required when another field has a specific value.
-#
-# Required when answer is in a list
-# `required-if` + `field` + `in`
-# Field is required when another field is one of several values.
-#
-# Required when answer contains a value
-# `required-if` + `field` + `contains`
-# Field is required when a list or multi-value field contains a value.
-#
-# Required when value is empty
-# `required-if` + `operator: empty`
-# Field is required when another value has not been provided.
-#
-# Required when value is not empty
-# `required-if` + `operator: not_empty`
-# Field is required when another value has been provided.
-#
-# Required when any or all conditions match
-# `any` / `all`
-# Multi-condition rules must state whether one condition or every condition is needed.
+        node = FaxNumber()
+
+        # valid
+        node.load_payload(payload)
+
+        # invalid
+        payload["is_international"] = True
+        with self.assertRaises(SchemaValidationException) as ctx:
+            node.load_payload(payload)
+
+        self.assertIn("International code needed", ctx.exception.reasons)
+
+        # valid
+        payload["international_code"] = "+44"
+        node.load_payload(payload)

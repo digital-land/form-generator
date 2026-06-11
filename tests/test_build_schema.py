@@ -75,15 +75,19 @@ class TestBuildSchema(unittest.TestCase):
         expected_snippet = 'menu = SchemaNodeField(ref="menu"'
         self.assertIn(expected_snippet, py_out, msg)
 
+        msg = "valid node rule: Reason should be given if dish doesn't contain cheese"
+        expected_snippet = 'if self["contains-cheese"] == False and not self["reason"]:'
+        self.assertIn(expected_snippet, py_out, msg)
+
     def test_reorder(self):
 
         specification = PlanningAppDataResolved(
             planning_app_repo_path=DATA_PATH,
             spec_files_path="specification_b",
         )
-        spec_summary = set([(s.ref, s.__class__.__name__) for s in specification.all_items])
+        spec_summary = set([(s.ref, s.__class__.__name__) for s in specification.schema_top_level])
 
-        py_ordered = walk_resolved_schema(specification.all_items)
+        py_ordered = walk_resolved_schema(specification.schema_top_level)
         py_summary = set([(s.ref, s.__class__.__name__) for s in py_ordered])
 
         # not checking for correct order
