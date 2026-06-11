@@ -547,8 +547,6 @@ class PlanningAppDataResolved(PlanningAppDataSpec):
         for f in schema_fields:
 
             # hard failure on incomplete spec. with missing references
-            if isinstance(f, dict):
-                pass
             field_ref = f.field
 
             # see doc. in components version of this.
