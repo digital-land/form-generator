@@ -1,7 +1,5 @@
 from collections import defaultdict
-import csv
 from functools import cached_property
-import os
 import warnings
 
 from jinja2 import Environment, FileSystemLoader
@@ -90,7 +88,7 @@ def render_python(project_root, planning_spec):
     # assumption - refs are primary keys
     segment_register = defaultdict(dict)
     segment_class_map = {}  # class_name -> schema_segment
-    for schema_base_item in walk_resolved_schema(planning_spec.all_items):
+    for schema_base_item in walk_resolved_schema(planning_spec.schema_top_level):
 
         assert isinstance(schema_base_item, SchemaBase)
 
@@ -114,6 +112,7 @@ def render_python(project_root, planning_spec):
         segment_register[namespace][schema_base_item.ref] = schema_base_item
 
         fields_simplified = []
+        validation_simplified = []
         for field_entry in getattr(schema_base_item, "field_entries", []):
 
             # field_x is a Field or Component
@@ -141,11 +140,27 @@ def render_python(project_root, planning_spec):
                     py_cls_name = valid_class_name(field_x.ref)
                     segment_class_map[py_cls_name] = field_x
 
-                    # raise ValueError(f"Can't find component '{field_x.ref}' in class map")
-
                 schema_field = SchemaNodeField(**field_info, schema_node_cls=py_cls_name)
 
             elif isinstance(field_x, Field):
+
+                if field_x.required_if:
+                    # Used to build SchemaNode.valid_node method in template
+                    for rule in field_x.required_if:
+                        # if bool rule
+
+                        if "value" not in rule:
+                            if SHOW_WARNINGS:
+                                warnings.warn(f"Missing comparison value for rule in {field_x.ref}")
+                            continue
+
+                        # TODO - should render python safe values - this is enough for trusted spec.
+                        v = rule["value"]
+                        if isinstance(v, str):
+                            v = f'"{v}"'
+
+                        validation_simplified.append((rule["field"], v, field_x.ref))
+
                 if field_x.datatype == "string":
                     schema_field = StringField(**field_info)
                 elif field_x.datatype == "boolean":
@@ -225,7 +240,7 @@ def render_python(project_root, planning_spec):
             "display": tidy_string(schema_base_item.name),
             "description": tidy_string(schema_base_item.description),
             "schema_fields": fields_simplified,
-            "descendants": [],  # descendants_simplified,
+            "validation_rules": validation_simplified,
         }
         py_output += form_builder.build(template_context, "schema_tree_class.py.j2")
 

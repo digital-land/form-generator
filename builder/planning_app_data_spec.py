@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import csv
 import io
-from dataclasses import asdict, dataclass, field, fields
+from dataclasses import asdict, dataclass, field, fields, replace
 from functools import cached_property
 from glob import glob
 from pathlib import Path
@@ -31,6 +31,8 @@ class Field(SchemaBase):
     datatype: str | None = None
     cardinality: int | str = 1
     required: bool = False
+    required_if: list | None = None
+    applies_if: list | None = None
     component: str | None = None
     codelist: str | None = None
     entry_date: str | None = None
@@ -43,6 +45,32 @@ class Field(SchemaBase):
     start_date: str | None = None
     replacement_field: str | None = None
     rules: list[Rule] = field(default_factory=list)
+    minimum_items: int | None = None
+
+
+@dataclass
+class FieldLink:
+    """
+    A reference from a component to a field, carrying usage-level overrides.
+
+    Distinct from :class:`Field`: a ``Field`` is the field's own definition (name,
+    datatype, etc.) whereas a ``FieldLink`` is how a component *uses* that field. The
+    ``field`` attribute is the referenced field's ref.
+
+    Default should be None, i.e. all are optional. None values are skipped when Field is built
+    by overriding normal `Field` with these values. See :meth:`PlanningAppDataResolved.components`.
+    """
+
+    field: str
+    required: bool | None = None
+    required_if: list | None = None
+    applies_if: list | None = None
+    description: str | None = None
+    notes: str | None = None
+    codelist: str | None = None
+    default: Any | None = None
+    name: str | None = None
+    minimum_items: int | None = None
 
 
 @dataclass
@@ -56,7 +84,7 @@ class ComponentBase(SchemaBase):
 
 @dataclass
 class Component(ComponentBase):
-    fields: list[dict] = field(default_factory=list)
+    fields: list[FieldLink] = field(default_factory=list)
 
 
 @dataclass
@@ -80,7 +108,7 @@ class ModuleBase(SchemaBase):
 
 @dataclass
 class Module(ModuleBase):
-    fields: list[dict] = field(default_factory=list)
+    fields: list[FieldLink] = field(default_factory=list)
 
 
 @dataclass
@@ -104,7 +132,7 @@ class ApplicationBase(SchemaBase):
 
 @dataclass
 class Application(ApplicationBase):
-    fields: list[dict] = field(default_factory=list)
+    fields: list[FieldLink] = field(default_factory=list)
 
 
 @dataclass
@@ -222,9 +250,42 @@ class PlanningAppDataSpec:
                 else:
                     warnings.warn(msg)
 
+            if data_cls is Component or data_cls is Module or data_cls is Application:
+                post_native["fields"] = [
+                    self.build_field_link(entry, path) for entry in post_native.get("fields", [])
+                ]
+
             index[post_native["ref"]] = data_cls(**post_native)
 
         return index
+
+    def build_field_link(self, entry: dict, path: str) -> FieldLink:
+        """
+        Build a :class:`FieldLink` from a component's raw ``fields`` list entry.
+
+        Nested keys aren't touched by the top-level dash->underscore remap in
+        :meth:`_hydrate_dataclasses`, so normalise them here. Unexpected keys are
+        treated with the same brittleness as the rest of the loader.
+        """
+        entry = dict(entry)
+        for k in list(entry.keys()):
+            if "-" in k:
+                entry[k.replace("-", "_")] = entry.pop(k)
+
+        expected_field_names = set([f.name for f in fields(FieldLink)])
+        extra_keys = set(entry.keys()) - expected_field_names
+        if len(extra_keys) > 0:
+            e_keys = ", ".join(list(extra_keys))
+            msg = (
+                f"Unexpected attributes in Component Fields needed to build FieldLink in {path}: "
+                f"{e_keys}. Should field(s) be added to the 'FieldLink' dataclass?"
+            )
+            if self.hard_fail:
+                raise ValueError(msg)
+            else:
+                warnings.warn(msg)
+
+        return FieldLink(**entry)
 
     @cached_property
     def fields(self) -> dict[str, Field]:
@@ -376,8 +437,18 @@ class PlanningAppDataResolved(PlanningAppDataSpec):
 
             fieldset = []
             for f in component.fields:
-                field_ref = f["field"]
-                field = self.fields[field_ref]
+                field_ref = f.field
+                # apply the FieldLink's usage-level overrides onto a copy of the field
+                # definition (replace avoids mutating the shared cached Field) and allows
+                # the field to be used in multiple places with different (FieldLink) overrides.
+                # Only override with values that were actually set on the link (not None), so
+                # the field's own definition is preserved where the link is silent.
+                overrides = {
+                    fl_field.name: getattr(f, fl_field.name)
+                    for fl_field in fields(f)
+                    if fl_field.name != "field" and getattr(f, fl_field.name) is not None
+                }
+                field = replace(self.fields[field_ref], **overrides)
 
                 if field.component:
 
@@ -472,13 +543,19 @@ class PlanningAppDataResolved(PlanningAppDataSpec):
             where x is :class:`Field` or :class:`ComponentResolved` instances.
             field_name is as per the spec. This might not be python safe name.
         """
-
         field_entries = []
-        for field_obj in schema_fields:
+        for f in schema_fields:
 
             # hard failure on incomplete spec. with missing references
-            field_ref = field_obj["field"]
-            field = self.fields[field_ref]
+            field_ref = f.field
+
+            # see doc. in components version of this.
+            overrides = {
+                fl_field.name: getattr(f, fl_field.name)
+                for fl_field in fields(f)
+                if fl_field.name != "field" and getattr(f, fl_field.name) is not None
+            }
+            field = replace(self.fields[field_ref], **overrides)
 
             if field.component:
                 # resolve it
@@ -493,7 +570,15 @@ class PlanningAppDataResolved(PlanningAppDataSpec):
         return field_entries
 
     @property
-    def all_items(self):
+    def schema_top_level(self):
+        """
+        Simple list of schema items to render into Python classes.
+
+        Fields are not rendered directly into classes so are not returned directly but are
+        linked to other types of item here.
+
+        @return: (list of subclasses of `SchemaBase`)
+        """
         all_spec = list(self.applications.values())
         all_spec += list(self.modules.values())
         all_spec += list(self.components.values())

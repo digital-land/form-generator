@@ -6,7 +6,7 @@ from schema.fields import (
     SchemaNodeField,
     StringField,
 )
-from tests.sample_schema_nodes import ContactDetail, PhoneNumber
+from tests.sample_schema_nodes import ContactDetail, PhoneNumber, Partnership, FaxNumber
 
 
 class TestSchemaTree(unittest.TestCase):
@@ -52,10 +52,56 @@ class TestSchemaTree(unittest.TestCase):
             # PhoneNumber has no 'bad' field; both items should be reported
             ContactDetail().load_payload({"phones": [{"bad": "x"}, {"worse": "y"}]})
 
-        self.assertEqual(["Unknown field 'bad'", "Unknown field 'worse'"], ctx.exception.reasons)
+        self.assertEqual(["Unknown field: 'bad'", "Unknown field: 'worse'"], ctx.exception.reasons)
 
     def test_schema_fields(self):
 
         fields = ContactDetail.schema_fields()
         expected = {"email", "fax", "phones"}
         self.assertEqual(expected, set(fields))
+
+    def test_sub_level_access(self):
+        """
+        A field should be able to access values elsewhere in the tree it belongs to. This is needed
+        for conditional validation.
+        """
+        payload = {
+            "person-a": {"email": "me@somewhere.co.uk", "fax-number": {"number": "0123"}},
+            "person-b": {"email": "you@somewhere.co.uk", "fax-number": {"number": "4567"}},
+        }
+        node = Partnership()
+        node.load_payload(payload)
+
+        fax_a = node.a.fax
+        self.assertEqual("0123", fax_a.number)
+
+        root_node = fax_a._root_node
+        root_field_names = set(root_node.schema_refs().keys())
+        self.assertEqual({"person-a", "person-b"}, root_field_names)
+
+        # access another node within the tree from fax_a
+        fax_b = fax_a._root_node["person-b"]["fax-number"]
+        self.assertEqual("4567", fax_b.number)
+
+        # access a field value within the tree
+        fax_b_number = fax_a._root_node["person-b"]["fax-number"]["number"]
+        self.assertEqual("4567", fax_b_number)
+
+        self.assertEqual(fax_b_number, fax_a._root_node.b.fax.number, "Attrib and dict access")
+
+    def test_sub_level_access_empty_tree(self):
+        """
+        Same access as :meth:`test_sub_level_access` without data.
+        """
+        node = Partnership()
+
+        root_node = node._root_node
+        self.assertEqual(node, root_node, "Root of the root is still the root")
+
+        root_field_names = set(root_node.schema_refs().keys())
+        self.assertEqual({"person-a", "person-b"}, root_field_names)
+
+        # access another part of the tree from fax_a
+        fax_b = root_node._root_node["person-b"]["fax-number"]
+        self.assertIsInstance(fax_b, FaxNumber, "Even without data it should resolve to a node")
+        self.assertIsNone(fax_b.number, "Data hasn't been loaded")

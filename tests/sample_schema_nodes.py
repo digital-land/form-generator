@@ -9,8 +9,19 @@ this project.
 
 """
 
-from schema.fields import RepeatedField, SchemaNodeField, StringField
+from schema import SchemaValidationException
+from schema.fields import BooleanField, RepeatedField, SchemaNodeField, StringField
+
 from schema.node import SchemaNode
+
+
+# test only field
+class EmailField(StringField):
+    def valid_update(self, proposed_value):
+
+        super().valid_update(proposed_value)
+        if proposed_value and "@" not in proposed_value:
+            raise SchemaValidationException(["Email addresses must have an @"])
 
 
 class PhoneNumber(SchemaNode):
@@ -23,15 +34,44 @@ class FaxNumber(SchemaNode):
     _ref = "faxnumber"
 
     number = StringField()
+    is_international = BooleanField()
+    international_code = StringField()
+
+    def valid_node(self):
+        "required field depends on boolean"
+        super().valid_node()
+        # both dictionary and attribute access patterns work here
+        reasons = []
+        if self.is_international and not self.international_code:
+            reasons.append("International code needed")
+
+        if reasons:
+            raise SchemaValidationException(reasons)
 
 
 class ContactDetail(SchemaNode):
     _ref = "contact-details"
 
-    email = StringField(ref="email")
+    email = EmailField(ref="email")
     fax = SchemaNodeField(ref="fax-number", schema_node_cls=FaxNumber)
 
     phones = RepeatedField(
         ref="phones",
         schema_field=SchemaNodeField(ref="phone", schema_node_cls=PhoneNumber),
     )
+
+
+class Partnership(SchemaNode):
+    _ref = "two-people"
+    a = SchemaNodeField(ref="person-a", schema_node_cls=ContactDetail)
+    b = SchemaNodeField(ref="person-b", schema_node_cls=ContactDetail)
+
+    def valid_node(self):
+        """
+        Example validation check looks at a couple of places in the tree.
+        """
+        super().valid_node()
+
+        r = self._root_node
+        if r["person-a"].email and r["person-a"].email == r["person-b"].email:
+            raise SchemaValidationException(["Duplicate email addresses"])

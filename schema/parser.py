@@ -23,8 +23,11 @@ class SchemaTreeParser:
         assert issubclass(schema_node_cls, SchemaNode)
         self.schema_node_cls = schema_node_cls
 
-    def load(self, serialised_payload):
+    def load_json(self, serialised_payload):
         """
+        @param serialised_payload: (str)
+        @return: (subclass of :class:`SchemaNode` obj.) recursively loaded with data.
+        @raise SchemaValidationException:
 
         Implementation notes-
         * just JSON for now
@@ -37,6 +40,14 @@ class SchemaTreeParser:
         if not isinstance(payload, dict):
             raise SchemaValidationException(["Payload is expected to be a dictionary"])
 
+        return self.load(payload)
+
+    def load(self, payload):
+        """
+        @param payload: (mixed) - probably a dict. Whatever the `schema_node_cls` is expecting.
+        @return: (subclass of :class:`SchemaNode` obj.) recursively loaded with data.
+        @raise SchemaValidationException:
+        """
         s_node = self.schema_node_cls()
 
         # this will raise an exception if the payload isn't valid
