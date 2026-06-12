@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from flask_wtf import FlaskForm
 from wtforms import BooleanField as WTFBooleanField
 from wtforms import RadioField as WTFRadioField
@@ -44,6 +46,8 @@ def _map_schema_field(schema_field, label, render_kw=None):
 
 def schema_auto_form(schema_node_class):
     """
+    Build a single form from a single `SchemaNode`.
+
     @param schema_node_class: (SchemaNode)
     @return: (FlaskForm)
     """
@@ -69,56 +73,156 @@ def schema_auto_form(schema_node_class):
     return form_class
 
 
-def forms_extract(forms):
+class FormTree:
     """
-    Transform fields in forms into Python native data structure (i.e. dict, list, str etc.).
+    Work with WTForms for a `SchemaNode` and all the child nodes in it's tree.
 
-    Forms have a prefix like 'interest-details.ldc-owner-details.person'. Data from this form
-    should be in dictionary position-
-    payload['interest-details']['ldc-owner-details']['person']
-
-    @param forms: (list of FlaskForm)
-    @return: (dict)
+    This class is builds forms and manipulates the data within them.
     """
 
-    r = {}
-    for form in forms:
+    def __init__(self, root_node, fusion_cls_map):
+        """
+        @param root_node: (SchemaNode)
+        @param fusion_cls_map: (dict) class_name (str) -> FusionClass
+                Fusion classes are the specification SchemaNodes with optional user interface
+                overrides.
+        """
+        self.root_node = root_node
 
-        # Remove hyphen added by WTForms
-        prefix_full = form._prefix.removesuffix("-")
-        prefix_parts = prefix_full.split(".")
+        # Implementation note - `FormTree` deals with the user interface so should be using the
+        # fusion versions. IMO this lookup table is a separate concern. A fusion tree should be
+        # built and just that should be passed.
+        self.fusion_cls_map = fusion_cls_map
 
-        # walk through dictionary to find position for this form's data
-        pointer = r
-        for prefix_sub in prefix_parts[:-1]:
+        self.loaded_values = defaultdict(list)
 
-            if prefix_sub not in pointer:
-                # defaultdict might confuse this?
-                pointer[prefix_sub] = {}
-            pointer = pointer[prefix_sub]
+    def load(self, payload):
+        """
+        Setup field values in a form within the collection using a nested dictionary.
 
-        # can't just use form.data as Repeated fields need to be lists
-        d = {}
-        for field in form:
+        The dictionary doesn't need to be a complete representation of the schema tree, just
+        a snippet it fine.
 
-            # CSRF token is a transport concern, not part of the schema payload
-            if field.type == "CSRFTokenField":
-                continue
+        @param payload: (dict) in the same format as :meth:`FormTree.as_native`
+        """
 
-            assert field.short_name not in d, "Coding assumption to not override existing"
+        # build a 'prefix' strings in the same format as used by WTForms
+        # these prefixes are used as an index to find a form in a collection in order
+        # lookup will contain list of tuples (str, str, mixed) - (prefix, field_name, value)
+        lookup = []
 
-            # SchemaRepeatedField is marked up into this attribute
-            render_kw = getattr(field, "render_kw", {})
-            is_repeated = render_kw and render_kw.get("data-repeated", "false") == "true"
+        def walk(node, path):
+            for key, value in node.items():
+                if isinstance(value, dict):
+                    child_path = f"{path}.{key}" if path else key
+                    walk(value, child_path)
+                else:
 
-            if is_repeated:
-                d[field.short_name] = [field.data]
+                    if not isinstance(key, str):
+                        # this is likely to be a list
+                        raise NotImplementedError("TODO - can't update repeated values")
+
+                    # scalar leaf - WTForms prefixes carry a trailing hyphen
+                    lookup.append((f"{path}-", key, value))
+
+        walk(payload, "")
+
+        for prefix, field_name, value in lookup:
+            self.loaded_values[prefix].append((field_name, value))
+
+    def collection(self):
+        """
+        Build all the forms corresponding the `SchemaNodes` descending from `self.root_node`.
+
+        @return: list of `FlaskForm` in order of tree traversal
+        """
+        collection = self._collection(self.root_node)
+
+        for form in collection:
+
+            # set values given to :meth:`load`
+            for key, value in self.loaded_values.get(form._prefix, []):
+                form_field = getattr(form, key)
+                form_field.data = value
+
+        return collection
+
+    def _collection(self, node, prefix=None):
+        """
+        Internal tree traverse to build forms.
+        """
+        if prefix is None:
+            prefix = ""
+
+        form = schema_auto_form(node)(prefix=prefix)
+        results = [form]
+
+        for descendant_node_field in node.descendant_schema_nodes():
+
+            if prefix:
+                child_prefix = f"{prefix}.{descendant_node_field.ref}"
             else:
-                d[field.short_name] = field.data
+                child_prefix = descendant_node_field.ref
 
-        assert prefix_parts[-1] not in pointer, "Coding assumption to not override existing"
+            # fusion nodes = user interface + specification
+            descendant = descendant_node_field.schema_node_cls
+            fusion_descendant = self.fusion_cls_map[descendant.__name__]
 
-        if len(d) > 0:
-            pointer[prefix_parts[-1]] = d
+            results.extend(self._collection(fusion_descendant, prefix=child_prefix))
+        return results
 
-    return r
+    def as_native(self):
+        """
+        Transform fields in forms into Python native data structure (i.e. dict, list, str etc.).
+
+        Forms have a prefix like 'interest-details.ldc-owner-details.person'. Data from this form
+        should be in dictionary position-
+        payload['interest-details']['ldc-owner-details']['person']
+
+        @param forms: (list of FlaskForm)
+        @return: (dict)
+        """
+
+        # Tidied into `flask_wtf` - forms from a POST will be populated
+
+        r = {}
+        for form in self.collection():
+
+            # Remove hyphen added by WTForms
+            prefix_full = form._prefix.removesuffix("-")
+            prefix_parts = prefix_full.split(".")
+
+            # walk through dictionary to find position for this form's data
+            pointer = r
+            for prefix_sub in prefix_parts[:-1]:
+
+                if prefix_sub not in pointer:
+                    # defaultdict might confuse this?
+                    pointer[prefix_sub] = {}
+                pointer = pointer[prefix_sub]
+
+            # can't just use form.data as Repeated fields need to be lists
+            d = {}
+            for field in form:
+
+                # CSRF token is a transport concern, not part of the schema payload
+                if field.type == "CSRFTokenField":
+                    continue
+
+                assert field.short_name not in d, "Coding assumption to not override existing"
+
+                # SchemaRepeatedField is marked up into this attribute
+                render_kw = getattr(field, "render_kw", {})
+                is_repeated = render_kw and render_kw.get("data-repeated", "false") == "true"
+
+                if is_repeated:
+                    d[field.short_name] = [field.data]
+                else:
+                    d[field.short_name] = field.data
+
+            assert prefix_parts[-1] not in pointer, "Coding assumption to not override existing"
+
+            if len(d) > 0:
+                pointer[prefix_parts[-1]] = d
+
+        return r

@@ -3,7 +3,7 @@ import json
 from flask import Blueprint, Response, render_template, request
 
 from schema.planning_application import fusion_cls_map, planning_application_roots_mapping
-from web_viewer.forms import forms_extract, schema_auto_form
+from web_viewer.forms import FormTree
 
 main_blueprint = Blueprint("main", __name__)
 
@@ -17,38 +17,22 @@ def index():
 @main_blueprint.route("/application/<application_ref>", methods=["GET", "POST"])
 def application(application_ref):
 
-    def collect_forms(node, prefix=None):
-        if prefix is None:
-            prefix = ""
-
-        form = schema_auto_form(node)(prefix=prefix)
-        results = [form]
-
-        for descendant_node_field in node.descendant_schema_nodes():
-
-            if prefix:
-                child_prefix = f"{prefix}.{descendant_node_field.ref}"
-            else:
-                child_prefix = descendant_node_field.ref
-
-            # fusion nodes = user interface + specification
-            descendant = descendant_node_field.schema_node_cls
-            fusion_descendant = fusion_cls_map[descendant.__name__]
-
-            results.extend(collect_forms(fusion_descendant, prefix=child_prefix))
-        return results
-
     root_schema_class = planning_application_roots_mapping[application_ref]
-    forms = collect_forms(root_schema_class)
+
+    form_tree = FormTree(root_node=root_schema_class, fusion_cls_map=fusion_cls_map)
+
+    # Set the planning application type. The options around this are hidden in the web forms
+    # because this demo app lists them on the front page and builds forms based on that initial
+    # decision. It's a list because the specification support multiple application types within
+    # a single payload.
+    form_tree.load({"submission-details": {"application_types": [application_ref]}})
+    forms = form_tree.collection()
 
     if request.method == "POST":
 
-        # TODO - forms aren't being validated
-        # e.g.
-        # for form in forms:
-        #     print(form._prefix, str(form), form.validate_on_submit())
-
-        payload = forms_extract(forms)
+        # build dictionaries in schema layout. Empty strings, no Nones and no concept
+        # of required or optional fields. That's done by the schema.
+        payload = form_tree.as_native()
 
         # node = root_schema_class()
         # try:
