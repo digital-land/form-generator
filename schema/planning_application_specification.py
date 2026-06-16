@@ -5,8 +5,10 @@ from schema import SchemaValidationException
 from schema.fields import (
     BooleanField,
     EnumField,
+    DynamicEnumField,
     EnumOption,
     RepeatedField,
+    SelectFilter,
     SchemaNodeField,
     StringField,
 )
@@ -2210,7 +2212,7 @@ class ResidentialUnitSummary(SchemaNode):
     _display = "Residential unit summary"
     _description = "Breakdown of residential unit counts by tenure and housing type, with optional unit breakdowns "
 
-    tenure_type = EnumField(
+    tenure_type = DynamicEnumField(
         ref="tenure-type",
         display="Tenure type",
         description="Category of housing tenure",
@@ -2312,8 +2314,44 @@ class ResidentialUnitSummary(SchemaNode):
                 description="London Affordable Rent product.",
             ),
         ],
+        select_filter=[
+            SelectFilter(
+                node="submission-details.specification-profile",
+                select_values=["mhclg-core"],
+                key_values=[
+                    "market-housing",
+                    "social-rented",
+                    "intermediate-housing",
+                    "key-worker-housing",
+                    "affordable-rent",
+                    "home-ownership",
+                    "starter-homes",
+                    "custom-build",
+                ],
+            ),
+            SelectFilter(
+                node="submission-details.specification-profile",
+                select_values=["gla"],
+                key_values=[
+                    "market-for-sale",
+                    "market-for-rent",
+                    "custom-build",
+                    "shared-equity",
+                    "affordable-rent-not-lar-bm",
+                    "discount-market-sale",
+                    "discount-market-rent",
+                    "social-rent",
+                    "intermediate-other",
+                    "discount-market-llr",
+                    "london-living-rent",
+                    "london-shared-ownership",
+                    "london-affordable-rent",
+                    "starter-homes",
+                ],
+            ),
+        ],
     )
-    housing_type = EnumField(
+    housing_type = DynamicEnumField(
         ref="housing-type",
         display="Housing type",
         description="Type of housing",
@@ -2381,6 +2419,40 @@ class ResidentialUnitSummary(SchemaNode):
                 key="communal-space",
                 label="Communal Space",
                 description="Communal space associated with residential use.",
+            ),
+        ],
+        select_filter=[
+            SelectFilter(
+                node="submission-details.specification-profile",
+                select_values=["mhclg-core"],
+                key_values=[
+                    "houses",
+                    "flats-maisonettes",
+                    "sheltered-housing",
+                    "bedsit-studio",
+                    "cluster-flats",
+                    "other",
+                    "live-work-units",
+                    "unknown",
+                ],
+            ),
+            SelectFilter(
+                node="submission-details.specification-profile",
+                select_values=["gla"],
+                key_values=[
+                    "terraced-home",
+                    "house-or-bungalow",
+                    "semi-detached-home",
+                    "flat-apartment-maisonette",
+                    "bedsit-studio",
+                    "cluster-flats",
+                    "other",
+                    "live-work-units",
+                    "co-living-unit",
+                    "hmo",
+                    "student-accommodation",
+                    "communal-space",
+                ],
             ),
         ],
     )
@@ -5298,7 +5370,7 @@ class ParkingSpace(SchemaNode):
     _display = "Parking space"
     _description = "Information about parking spaces by vehicle type, including existing and proposed counts with net change calculations "
 
-    parking_space_type = EnumField(
+    parking_space_type = DynamicEnumField(
         ref="parking-space-type",
         display="Parking space type",
         description="Type of parking space or vehicle type",
@@ -5348,6 +5420,36 @@ class ParkingSpace(SchemaNode):
                 key="other",
                 label="Other",
                 description="Other parking types not covered by the defined categories.",
+            ),
+        ],
+        select_filter=[
+            SelectFilter(
+                node="submission-details.specification-profile",
+                select_values=["mhclg-core"],
+                key_values=[
+                    "car-space",
+                    "light-goods-vehicle-space",
+                    "motorcycle-space",
+                    "disability-space",
+                    "cycle-space",
+                    "other",
+                ],
+            ),
+            SelectFilter(
+                node="submission-details.specification-profile",
+                select_values=["gla"],
+                key_values=[
+                    "car-space",
+                    "light-goods-vehicle-space",
+                    "motorcycle-space",
+                    "disability-space",
+                    "cycle-space",
+                    "blue-badge-space",
+                    "bus",
+                    "car-club",
+                    "resi-off-street",
+                    "other",
+                ],
             ),
         ],
     )
