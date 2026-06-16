@@ -3,6 +3,7 @@ import unittest
 from reportlab.platypus import KeepTogether, Paragraph, Table
 
 from pdf_builder.generate_application import GenerateApplication
+from schema.planning_application import fusion_cls_map
 from tests.sample_schema_nodes import ContactDetail
 
 
@@ -14,7 +15,11 @@ class TestPdfBuilder(unittest.TestCase):
         @return: list of reportlab class used to build PDFs
         """
         # constructor doesn't touch the filesystem or schema mapping - safe without rendering
-        gen = GenerateApplication(output_filepath="unused.pdf", application_ref="X")
+        gen = GenerateApplication(
+            output_filepath="unused.pdf",
+            application_ref="X",
+            schema_node_map=fusion_cls_map,
+        )
         flowables = gen._node_flowables(schema_node_cls)
         return flowables
 
@@ -42,7 +47,6 @@ class TestPdfBuilder(unittest.TestCase):
         tables = [c for c in block._content if isinstance(c, Table)]
         self.assertEqual(1, len(tables), "a string field should produce a single write box")
 
-    @unittest.skip("Fusion cls looses parent class name")
     def test_nested_node_rendered_as_section(self):
         """
         `fax` is a plain node field, `phones` is a RepeatedField wrapping a node - both render
@@ -52,8 +56,8 @@ class TestPdfBuilder(unittest.TestCase):
         flowables = self.flowables(ContactDetail)
         headers = [(f.text, f.style.name) for f in flowables if isinstance(f, Paragraph)]
 
-        self.assertIn(("FaxNumber", "section"), headers)
-        self.assertIn(("PhoneNumber", "section"), headers)
+        self.assertIn(("FaxNumber_FusionCls", "section"), headers)
+        self.assertIn(("PhoneNumber_FusionCls", "section"), headers)
 
     def test_nested_node_field_rendered_as_field_block(self):
         """

@@ -11,7 +11,6 @@ from reportlab.platypus import (
     TableStyle,
 )
 
-from schema.planning_application import planning_application_roots_mapping
 from schema.fields import (
     AbstractSchemaField,
     BooleanField,
@@ -34,21 +33,27 @@ class GenerateApplication:
     # radius used to slightly round the corners of boxes and checkboxes
     BOX_CORNER_RADIUS = 0.1 * cm
 
-    def __init__(self, output_filepath, application_ref, page_size=A4):
+    def __init__(self, output_filepath, application_ref, schema_node_map):
         """
         @param output_filepath: (str) - where to write the PDF
         @param application_ref: (str) - ref from schema
+        @param schema_node_map: (dict) - class_name -> subclass of :class:`SchemaNode`
         @param page_size: (tuple) - reportlab page size
         """
         self.output_filepath = output_filepath
         self.application_ref = application_ref
-        self.page_size = page_size
-        self.page_width = page_size[0]
-        self.page_height = page_size[1]
+        self.page_size = A4
+        self.page_width = self.page_size[0]
+        self.page_height = self.page_size[1]
         self.left_margin = 2 * cm
         self.right_margin = 2 * cm
         self.content_width = self.page_width - self.left_margin - self.right_margin
         self.styles = self._build_styles()
+        self.schema_node_map = schema_node_map
+        self._specification_profile = None
+
+        # alt lookup for schema nodes
+        self.schema_node_ref_map = {n._ref: n for n in self.schema_node_map.values()}
 
     def _build_styles(self):
         """
@@ -213,6 +218,7 @@ class GenerateApplication:
             elements.append(Paragraph(description, desc_style))
 
         for attr_name, attr_value in schema_node_class.schema_fields().items():
+
             if attr_name.startswith("_") or not isinstance(attr_value, AbstractSchemaField):
                 continue
 
@@ -236,10 +242,39 @@ class GenerateApplication:
         canvas.drawCentredString(self.page_width / 2.0, 1 * cm, f"Page {doc.page}")
         canvas.restoreState()
 
+    def set_specification_profile(self, profile_label):
+        """
+        Main field for changing behaviour of nodes and fields
+        """
+        assert profile_label in ["gla", "mhclg-core"]
+        self._specification_profile = profile_label
+
+    def schema_tree_fixture(self):
+        """
+        Data to load into schema node tree.
+
+        Nodes and fields can read the tree and change their values.
+
+        @return: dict
+        """
+        fixture = {
+            "submission-details": {
+                "application_types": [self.application_ref],
+                "specification-profile": "gla",
+            }
+        }
+
+        if self._specification_profile:
+            fixture["submission-details"]["specification-profile"] = self._specification_profile
+
+        return fixture
+
     def go(self):
         """
         Build the PDF.
         """
+        schema_node_cls = self.schema_node_ref_map[self.application_ref]
+
         doc = SimpleDocTemplate(
             self.output_filepath,
             pagesize=self.page_size,
@@ -247,16 +282,28 @@ class GenerateApplication:
             rightMargin=self.right_margin,
             topMargin=2 * cm,
             bottomMargin=2 * cm,
-            title=f"Planning application: {self.application_ref}",
+            title=f"Planning application: {schema_node_cls._display}",
         )
 
-        schema_node_class = planning_application_roots_mapping[self.application_ref]
-        elements = self._node_flowables(schema_node_class)
+        schema_node = schema_node_cls()
+        schema_node.load_payload(self.schema_tree_fixture())
+
+        elements = self._node_flowables(schema_node)
 
         doc.build(elements, onFirstPage=self._on_page, onLaterPages=self._on_page)
 
 
 if __name__ == "__main__":
 
-    app_pdf = GenerateApplication(output_filepath="hello_application.pdf", application_ref="hh")
+    from schema.planning_application import fusion_cls_map
+
+    app_pdf = GenerateApplication(
+        output_filepath="hello_application.pdf",
+        application_ref="outline-all",
+        schema_node_map=fusion_cls_map,
+    )
+    # app_pdf.set_specification_profile(profile_label="gla")
+    app_pdf.set_specification_profile(profile_label="mhclg-core")
+
     app_pdf.go()
+    print("All done!")

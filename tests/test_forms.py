@@ -62,7 +62,6 @@ class TestForms(WebTestCase):
 
         self.assertIn(expected, html)
 
-    @unittest.skip("TBC is prefixes are needed internally")
     def test_prefix_load(self):
         payload = {"person-a": {"email": "a@me.com", "fax-number": {"number": "123456789"}}}
 
@@ -70,11 +69,11 @@ class TestForms(WebTestCase):
             "person-a-": [("email", "a@me.com")],
             "person-a.fax-number-": [("number", "123456789")],
         }
-        ftree = FormTree(root_node=None, fusion_cls_map=None)
+        ftree = FormTree(root_node=None)
         ftree.load(payload)
 
         # note - order doesn't actually matter.
-        self.assertEqual(expected, ftree.loaded_values)
+        self.assertEqual(expected, ftree._loaded_as_prefixed())
 
     def test_enum_filter(self):
         """
