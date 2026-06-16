@@ -4,19 +4,34 @@
 <h1 class="mb-4">Planning application types</h1>
 
 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-  {% for app_ref, node_class in application_types.items() %}
+  {% for node_class in application_types %}
+  {% set app_ref = node_class._ref %}
+  {% set has_gla_version = node_class in gla_planning_app_roots %}
   <div class="col">
     <div class="card h-100">
       <div class="card-body">
-        <h5 class="card-title d-flex justify-content-between align-items-start">
-          {{ node_class._display or app_ref }}
-          <a href="{{ url_for('main.application', application_ref=app_ref) }}" class="ms-2">
-            <img src="{{ url_for('static', filename='icons/arrow-right-circle.svg') }}" width="20" height="20" alt="Open">
-          </a>
-        </h5>
+        <h5 class="card-title">{{ node_class._display or app_ref }}</h5>
         {% if node_class._description %}
         <p class="card-text text-muted small">{{ node_class._description }}</p>
         {% endif %}
+      </div>
+      <div class="card-footer bg-transparent">
+        <div class="d-flex align-items-center mb-2">
+          {%if has_gla_version %}
+          <a class="btn btn-sm btn-outline-primary"
+             href="{{ url_for('main.application', application_ref=app_ref, profile='gla') }}">GLA</a>
+          {%endif%}
+          <a class="card-action-link ms-auto" href="{{ url_for('main.application', application_ref=app_ref) }}">
+            <img src="{{ url_for('static', filename='icons/pencil-square.svg') }}" width="18" height="18" alt="" class="me-2">Web form</a>
+        </div>
+        <div class="d-flex align-items-center">
+          {%if has_gla_version %}
+          <a class="btn btn-sm btn-outline-primary"
+             href="{{ url_for('main.application_pdf', application_ref=app_ref, profile='gla') }}">GLA</a>
+          {%endif%}
+          <a class="card-action-link ms-auto" href="{{ url_for('main.application_pdf', application_ref=app_ref) }}">
+            <img src="{{ url_for('static', filename='icons/file-earmark-pdf.svg') }}" width="18" height="18" alt="" class="me-2">PDF</a>
+        </div>
       </div>
     </div>
   </div>

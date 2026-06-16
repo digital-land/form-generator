@@ -33,6 +33,12 @@ class TestWebPlanning(WebTestCase):
         msg = "In _specification it's 'Person obj' , in _ui it's 'A Person'"
         self.assertEqual("A Person", form._display, msg)
 
+    def test_application_pdf(self):
+        response = self.client.get("/application/full/pdf")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual("application/pdf", response.mimetype)
+        self.assertGreater(len(response.data), 1000)
+
     def test_application_post_returns_json_document(self):
         response = self.client.post("/application/outline-all", data={})
         self.assertEqual(response.status_code, 200)

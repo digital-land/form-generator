@@ -1,6 +1,7 @@
 import unittest
 
 from schema import SchemaValidationException
+from schema.planning_application import gla_planning_app_roots
 from schema.planning_application_specification import PreAppAdvice
 
 
@@ -32,6 +33,14 @@ class TestSchemaPlanning(unittest.TestCase):
             node.load_payload(payload)
 
         self.assertEqual(expected, ctx.exception.reasons)
+
+    def test_gla_planning_app_roots_includes_full(self):
+        """
+        'full' application depends on the GLA specification profile so should be one of the
+        GLA planning application roots.
+        """
+        refs = [root._ref for root in gla_planning_app_roots]
+        self.assertIn("full", refs)
 
     @unittest.skip("TODO")
     def test_applies_if_application_type(self):
