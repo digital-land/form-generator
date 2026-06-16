@@ -1,5 +1,4 @@
 from collections import defaultdict
-import inspect
 
 from flask_wtf import FlaskForm
 from wtforms import BooleanField as WTFBooleanField

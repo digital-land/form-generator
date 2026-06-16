@@ -51,15 +51,20 @@ def schema_fusion(schema_node_classes, user_interface_classes):
         ui_cls = ui_index.get(spec_cls_name)
         if ui_cls:
             # this spec class is paired with a UI class
-            class _FusionCls(ui_cls, spec_cls):
-                pass
-
+            # e.g.
+            # class _FusionCls(ui_cls, spec_cls):
+            #     pass
+            ui_cls_selected = ui_cls
         else:
             # just use abstract class as a UI class hasn't been defined
-            class _FusionCls(UserInterfaceOverride, spec_cls):
-                pass
+            # e.g.
+            # class _FusionCls(UserInterfaceOverride, spec_cls):
+            #     pass
+            ui_cls_selected = UserInterfaceOverride
 
-        r[spec_cls_name] = _FusionCls
+        fusion_cls = type(f"{spec_cls_name}_FusionCls", (ui_cls_selected, spec_cls), {})
+
+        r[spec_cls_name] = fusion_cls
         ui_used.add(spec_cls_name)
 
     unused_ui_cls = set(ui_index.keys()) - ui_used
@@ -71,8 +76,9 @@ def schema_fusion(schema_node_classes, user_interface_classes):
         for child in fusion_cls.descendant_schema_nodes():
             # replace descendants with Fusion descendants
             # TODO - this is wrong as it's mutating a class from elsewhere
+            #      - It's only going to be noticed if _specification classes are used alongside
+            #        of _fusion classes
             child.schema_node_cls = r[child.schema_node_cls.__name__]
-            # print(child.schema_node_cls.__name__)
 
     return r
 
