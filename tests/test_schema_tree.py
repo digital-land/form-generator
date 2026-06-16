@@ -2,11 +2,18 @@ import unittest
 
 from schema import SchemaValidationException
 from schema.fields import (
+    EnumOption,
     RepeatedField,
     SchemaNodeField,
     StringField,
 )
-from tests.sample_schema_nodes import ContactDetail, PhoneNumber, Partnership, FaxNumber
+from tests.sample_schema_nodes import (
+    ContactDetail,
+    ContactPreferences,
+    PhoneNumber,
+    Partnership,
+    FaxNumber,
+)
 
 
 class TestSchemaTree(unittest.TestCase):
@@ -57,7 +64,7 @@ class TestSchemaTree(unittest.TestCase):
     def test_schema_fields(self):
 
         fields = ContactDetail.schema_fields()
-        expected = {"email", "fax", "phones"}
+        expected = {"email", "fax", "phones", "contact_pref"}
         self.assertEqual(expected, set(fields))
 
     def test_sub_level_access(self):
@@ -105,3 +112,20 @@ class TestSchemaTree(unittest.TestCase):
         fax_b = root_node._root_node["person-b"]["fax-number"]
         self.assertIsInstance(fax_b, FaxNumber, "Even without data it should resolve to a node")
         self.assertIsNone(fax_b.number, "Data hasn't been loaded")
+
+    def test_custom_enum_field_repr(self):
+
+        f = ContactPreferences(
+            ref="contact-pref",
+            display="Contact preference",
+            select_options=[
+                EnumOption(key="email", label="Email", description="Email"),
+            ],
+        )
+
+        expected = (
+            'ContactPreferences(ref="contact-pref", display="Contact preference",'
+            " select_options=[EnumOption(key='email', label='Email', description='Email')])"
+        )
+        actual = repr(f)
+        self.assertEqual(expected, actual)

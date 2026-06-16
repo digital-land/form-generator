@@ -13,9 +13,11 @@ from builder.planning_app_data_spec import (
 from schema import valid_class_name, valid_field_name, tidy_string
 from schema.fields import (
     BooleanField,
+    DynamicEnumField,
     EnumField,
     EnumOption,
     RepeatedField,
+    SelectFilter,
     SchemaNodeField,
     StringField,
 )
@@ -257,10 +259,10 @@ def build_enum_field(planning_spec, field_info, codelist_ref):
     @param field_info: (dict) - kwargs for EnumField
     @param codelist_ref: (str)
 
-    @return: EnumField or None if not possible
+    @return: EnumField or DynamicEnumField or None if not possible
         - not possible if data isn't available
     """
-
+    # select options are common to both types of enum
     select_options = []
     for r in planning_spec.codelist_data(codelist_ref):
         e = EnumOption(
@@ -274,7 +276,44 @@ def build_enum_field(planning_spec, field_info, codelist_ref):
         # no data , not possible to build enum, warning/exception handled elsewhere
         return None
 
-    schema_field = EnumField(select_options=select_options, **field_info)
+    codelist = planning_spec.codelist[codelist_ref]
+    usage_key = codelist.ref
+    if codelist.usage:
+        # enum field adjusts which options are available based on other values in tree
+
+        # to become generic later
+        filters = {
+            "specification-profile": {
+                "mhclg-core": [],
+                "gla": [],
+            }
+        }
+        for r in planning_spec.codelist_usage(codelist_ref):
+            key_value = r[usage_key]
+            profile_name = r["specification-profile"]
+            filters["specification-profile"][profile_name].append(key_value)
+
+        encoded_filters = []
+        for profile_name, key_values in filters["specification-profile"].items():
+
+            # option to specify which enum values are active
+            f = SelectFilter(
+                node="submission-details.specification-profile",
+                select_values=[profile_name],
+                key_values=key_values,
+            )
+            encoded_filters.append(f)
+
+        schema_field = DynamicEnumField(
+            select_options=select_options,
+            select_filter=encoded_filters,
+            **field_info,
+        )
+
+    else:
+        # standard enum field
+        schema_field = EnumField(select_options=select_options, **field_info)
+
     return schema_field
 
 

@@ -35,8 +35,9 @@ class AbstractSchemaField:
 
         if self._descriptor_name not in instance.__dict__:
             # empty node - this avoids key errors when finding a value within the tree that isn't
-            # set.
-            self.__set__(instance, None)
+            # set. This value isn't passed to :meth:`valid_update`
+            self._parent_node = instance
+            instance.__dict__[self._descriptor_name] = self.empty_value()
 
         return instance.__dict__.get(self._descriptor_name)
 
@@ -60,6 +61,14 @@ class AbstractSchemaField:
         @raise SchemaValidationException
         """
         return
+
+    def empty_value(self):
+        """
+        Value to use when creating a new blank field.
+
+        Subclasses to override this.
+        """
+        return None
 
     def prepare_value(self, value):
         """
@@ -141,21 +150,116 @@ class EnumField(AbstractSchemaField):
             select_options (list of `EnumOption`)
         """
 
-        self.select_options = kwargs.pop("select_options", None)
+        self._select_options = kwargs.pop("select_options", None)
         super().__init__(**kwargs)
 
     def _subclass_construction_params(self):
 
-        kw_pairs = []
         vt = []
-        for vx in self.select_options:
+        for vx in self._select_options:
             assert isinstance(vx, EnumOption)
             vt.append(repr(vx))
 
         vtt = ", ".join(vt)
-        kw_pairs.append(f"select_options=[{vtt}]")
+        kw_pairs = [f"select_options=[{vtt}]"]
 
         return kw_pairs
+
+    @property
+    def select_options(self):
+        """
+        Hook method that can be overridden by subclasses as an easy way to filter available
+        select options.
+
+        Typically a subclass could consider other parts of the shema node tree in order to
+        change available options.
+
+        @return (list of `EnumOption`)
+        """
+        return self._select_options
+
+
+# SelectFilter
+# - schema node location, dotted notation of ref, not class attribute
+# - values this should contain
+# - EnumOption keys that are active if values union with schema node values have items
+# e.g.
+# ("submission.specification_profile", ["core"], ["a", "b"]),
+SelectFilter = namedtuple("SelectFilter", ("node", "select_values", "key_values"))
+
+
+class DynamicEnumField(EnumField):
+    """
+    Values in fields within the tree (that this field sits in) can be used to change the options
+    available.
+    """
+
+    def __init__(self, **kwargs):
+        """
+        Additional args-
+            select_filter (list of `SelectFilter`)
+        """
+
+        self.select_filter = kwargs.pop("select_filter", None)
+        super().__init__(**kwargs)
+
+    def _subclass_construction_params(self):
+
+        kw_pairs = super()._subclass_construction_params()
+
+        vt = []
+        for vx in self.select_filter:
+            assert isinstance(vx, SelectFilter)
+            vt.append(repr(vx))
+
+        vtt = ", ".join(vt)
+        kw_pairs.append(f"select_filter=[{vtt}]")
+
+        return kw_pairs
+
+    @property
+    def select_options(self):
+        """
+        Only return contact preferences that have been given a value in the current node.
+
+        @see :meth:`EnumField.select_options`
+        """
+        # default behaviour is to return all options. This will happen when a SchemaNode class
+        # (as opposed object) is built into a form.
+        if self._parent_node is None:
+            return self._select_options
+
+        selected_keys = set()
+        for s_filter in self.select_filter:
+
+            if "[" in s_filter.node:
+                msg = "TODO: list indicies not yet supported."
+                raise NotImplementedError(msg)
+
+            # traverse to that bit of the schema tree
+            sub_tree = self._parent_node._root_node
+            node_ref_parts = s_filter.node.split(".")
+            for node_ref in node_ref_parts[:-1]:
+                sub_tree = sub_tree[node_ref]
+
+            node_value = sub_tree[node_ref_parts[-1]]
+
+            if isinstance(node_value, list):
+                raise NotImplementedError("TODO: just needs checking; intersection already used")
+
+            # intersection
+            overlap = set([node_value]) & set(s_filter.select_values)
+            if len(overlap) > 0:
+                # node values have something in common with target values so include keys
+                selected_keys |= set(s_filter.key_values)
+
+        sub_set = []
+        for option in self._select_options:
+
+            if option.key in selected_keys:
+                sub_set.append(option)
+
+        return sub_set
 
 
 class SchemaNodeField(AbstractSchemaField):
@@ -195,20 +299,21 @@ class SchemaNodeField(AbstractSchemaField):
         if proposed_value is not None and not isinstance(proposed_value, dict):
             raise SchemaValidationException([f"Field '{self.ref}' expects an object"])
 
+    def empty_value(self):
+        node = self.schema_node_cls()
+
+        # relay field's parent to new node
+        node._parent_node = self._parent_node
+        return node
+
     def prepare_value(self, value):
         """
         Load dictionary of values into child node.
 
-        @param value: (dict or None) - None means empty node, don't load payload
+        @param value: (dict)
         """
-        node = self.schema_node_cls()
-
-        if value:
-            node.load_payload(value)
-
-        # relay field's parent to new node
-        node._parent_node = self._parent_node
-
+        node = self.empty_value()
+        node.load_payload(value)
         return node
 
 
@@ -234,6 +339,16 @@ class RepeatedField(AbstractSchemaField):
     def _subclass_construction_params(self):
         r = repr(self.schema_field)
         return [f"schema_field={r}"]
+
+    def empty_value(self):
+
+        child_node = self.schema_field.empty_value()
+
+        # child_node could be another node/field or just a value.
+        if hasattr(child_node, "_parent_node"):
+            child_node._parent_node = self._parent_node
+
+        return [child_node]
 
     def prepare_value(self, value):
         """

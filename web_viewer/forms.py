@@ -1,4 +1,5 @@
 from collections import defaultdict
+import inspect
 
 from flask_wtf import FlaskForm
 from wtforms import BooleanField as WTFBooleanField
@@ -22,6 +23,9 @@ def _map_schema_field(schema_field, label, render_kw=None):
     @return: (WTForms field) or None when the field describes descendant nodes (handled
         separately as their own form card)
     """
+    # Note there is slightly different behaviour if schema_field is on a form which
+    # is an instance vs. form that is a class
+
     if isinstance(schema_field, SchemaSchemaNodeField):
         # this field describes descendants - ignore it
         return None
@@ -46,11 +50,14 @@ def _map_schema_field(schema_field, label, render_kw=None):
 
 def schema_auto_form(schema_node_class):
     """
-    Build a single form from a single `SchemaNode`.
+    Build a single form from a single `SchemaNode` class.
 
-    @param schema_node_class: (SchemaNode)
+    At this stage, no data values.
+
+    @param schema_node: (`SchemaNode` class)
     @return: (FlaskForm)
     """
+
     form_fields = {}
     for attr_name, attr_value in schema_node_class.schema_fields().items():
 
@@ -58,6 +65,7 @@ def schema_auto_form(schema_node_class):
             # multiple values allowed - render the wrapped field once and flag it so the
             # template can offer a '+' control. Repeating is not implemented yet.
             inner = attr_value.schema_field
+
             label = attr_value.display or inner.display or attr_name
             wt_field = _map_schema_field(inner, label, render_kw={"data-repeated": "true"})
         else:
@@ -80,35 +88,30 @@ class FormTree:
     This class is builds forms and manipulates the data within them.
     """
 
-    def __init__(self, root_node, fusion_cls_map):
+    def __init__(self, root_node):
         """
         @param root_node: (SchemaNode)
-        @param fusion_cls_map: (dict) class_name (str) -> FusionClass
-                Fusion classes are the specification SchemaNodes with optional user interface
-                overrides.
         """
         self.root_node = root_node
 
-        # Implementation note - `FormTree` deals with the user interface so should be using the
-        # fusion versions. IMO this lookup table is a separate concern. A fusion tree should be
-        # built and just that should be passed.
-        self.fusion_cls_map = fusion_cls_map
-
-        self.loaded_values = defaultdict(list)
+        self.loaded_values = {}
 
     def load(self, payload):
         """
-        Setup field values in a form within the collection using a nested dictionary.
+        Setup field values in a form using a schema payload.
 
-        The dictionary doesn't need to be a complete representation of the schema tree, just
-        a snippet it fine.
-
-        @param payload: (dict) in the same format as :meth:`FormTree.as_native`
+        @param payload: (dict) @see :meth:`SchemaNode.load_payload`
         """
+        if len(self.loaded_values) > 0:
+            raise NotImplementedError("Doesn't support overlaying, might support new payload TBC")
 
-        # build a 'prefix' strings in the same format as used by WTForms
-        # these prefixes are used as an index to find a form in a collection in order
-        # lookup will contain list of tuples (str, str, mixed) - (prefix, field_name, value)
+        self.loaded_values = payload
+
+    def _loaded_as_prefixed(self):
+        #
+        # # build a 'prefix' strings in the same format as used by WTForms
+        # # these prefixes are used as an index to find a form in a collection in order
+        # # lookup will contain list of tuples (str, str, mixed) - (prefix, field_name, value)
         lookup = []
 
         def walk(node, path):
@@ -125,10 +128,12 @@ class FormTree:
                     # scalar leaf - WTForms prefixes carry a trailing hyphen
                     lookup.append((f"{path}-", key, value))
 
-        walk(payload, "")
+        walk(self.loaded_values, "")
 
+        lookup_d = defaultdict(list)
         for prefix, field_name, value in lookup:
-            self.loaded_values[prefix].append((field_name, value))
+            lookup_d[prefix].append((field_name, value))
+        return lookup_d
 
     def collection(self):
         """
@@ -136,12 +141,26 @@ class FormTree:
 
         @return: list of `FlaskForm` in order of tree traversal
         """
-        collection = self._collection(self.root_node)
 
+        root_node = self.root_node()
+
+        if self.loaded_values:
+            root_node.load_payload(self.loaded_values)
+
+        collection = self._collection(node=root_node)
+
+        lookup_d = self._loaded_as_prefixed()
         for form in collection:
 
+            # print(form._prefix)
+
             # set values given to :meth:`load`
-            for key, value in self.loaded_values.get(form._prefix, []):
+            for key, value in lookup_d.get(form._prefix, []):
+
+                if "-" in key:
+                    # TODO form attr should come from whatever created the form field
+                    key = key.replace("-", "_")
+
                 form_field = getattr(form, key)
                 form_field.data = value
 
@@ -154,21 +173,25 @@ class FormTree:
         if prefix is None:
             prefix = ""
 
-        form = schema_auto_form(node)(prefix=prefix)
+        form = schema_auto_form(node.__class__)(prefix=prefix)
         results = [form]
 
-        for descendant_node_field in node.descendant_schema_nodes():
+        for node_field, node_value in node.descendant_nodes():
+
+            node_ref = node_field.ref
+            if node_ref is None and isinstance(node_field, SchemaRepeatedField):
+                node_ref = node_value._ref
 
             if prefix:
-                child_prefix = f"{prefix}.{descendant_node_field.ref}"
+                child_prefix = f"{prefix}.{node_ref}"
             else:
-                child_prefix = descendant_node_field.ref
+                child_prefix = node_ref
 
             # fusion nodes = user interface + specification
-            descendant = descendant_node_field.schema_node_cls
-            fusion_descendant = self.fusion_cls_map[descendant.__name__]
+            # descendant_cls = descendant_node_field.schema_node_cls
+            # descendant = getattr(node, descendant_node_field)
+            results.extend(self._collection(node_value, prefix=child_prefix))
 
-            results.extend(self._collection(fusion_descendant, prefix=child_prefix))
         return results
 
     def as_native(self):
@@ -194,7 +217,7 @@ class FormTree:
 
             # walk through dictionary to find position for this form's data
             pointer = r
-            for prefix_sub in prefix_parts[:-1]:
+            for prefix_sub in prefix_parts:
 
                 if prefix_sub not in pointer:
                     # defaultdict might confuse this?
@@ -220,9 +243,8 @@ class FormTree:
                 else:
                     d[field.short_name] = field.data
 
-            assert prefix_parts[-1] not in pointer, "Coding assumption to not override existing"
-
             if len(d) > 0:
-                pointer[prefix_parts[-1]] = d
+                for k, v in d.items():
+                    pointer[k] = v
 
         return r

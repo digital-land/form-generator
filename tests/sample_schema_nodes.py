@@ -10,7 +10,14 @@ this project.
 """
 
 from schema import SchemaValidationException
-from schema.fields import BooleanField, RepeatedField, SchemaNodeField, StringField
+from schema.fields import (
+    BooleanField,
+    EnumField,
+    EnumOption,
+    RepeatedField,
+    SchemaNodeField,
+    StringField,
+)
 
 from schema.node import SchemaNode
 
@@ -49,6 +56,31 @@ class FaxNumber(SchemaNode):
             raise SchemaValidationException(reasons)
 
 
+class ContactPreferences(EnumField):
+    @property
+    def select_options(self):
+        """
+        Only return contact preferences that have been given a value in the current node.
+
+        @see :meth:`EnumField.select_options`
+        """
+
+        # extract values from node that are needed for decisions on select options
+        node_values = {
+            "fax": self._parent_node["fax-number"]["number"],
+            "email": self._parent_node["email"],
+            "phone": self._parent_node["phones"][0]["number"],
+        }
+
+        sub_set = []
+        for option in self._select_options:
+
+            if node_values.get(option.key) is not None:
+                sub_set.append(option)
+
+        return sub_set
+
+
 class ContactDetail(SchemaNode):
     _ref = "contact-details"
 
@@ -58,6 +90,16 @@ class ContactDetail(SchemaNode):
     phones = RepeatedField(
         ref="phones",
         schema_field=SchemaNodeField(ref="phone", schema_node_cls=PhoneNumber),
+    )
+
+    contact_pref = ContactPreferences(
+        ref="contact-pref",
+        display="Contact preference",
+        select_options=[
+            EnumOption(key="email", label="Email", description="Email"),
+            EnumOption(key="fax", label="Fax", description="Fax"),
+            EnumOption(key="phone", label="Phone", description="Phone"),
+        ],
     )
 
 

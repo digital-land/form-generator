@@ -2,7 +2,7 @@ import json
 
 from flask import Blueprint, Response, render_template, request
 
-from schema.planning_application import fusion_cls_map, planning_application_roots_mapping
+from schema.planning_application import planning_application_roots_mapping
 from web_viewer.forms import FormTree
 
 main_blueprint = Blueprint("main", __name__)
@@ -19,13 +19,22 @@ def application(application_ref):
 
     root_schema_class = planning_application_roots_mapping[application_ref]
 
-    form_tree = FormTree(root_node=root_schema_class, fusion_cls_map=fusion_cls_map)
+    form_tree = FormTree(root_node=root_schema_class)
 
     # Set the planning application type. The options around this are hidden in the web forms
     # because this demo app lists them on the front page and builds forms based on that initial
     # decision. It's a list because the specification support multiple application types within
     # a single payload.
-    form_tree.load({"submission-details": {"application_types": [application_ref]}})
+    empty_app_fixture = {
+        "submission-details": {
+            "application_types": [application_ref],
+            "specification-profile": "gla",  # "mhclg-core",
+        },
+        "agent-contact": {"agent-reference": "hello agent"},  # test
+    }
+
+    form_tree.load(empty_app_fixture)
+
     forms = form_tree.collection()
 
     if request.method == "POST":
