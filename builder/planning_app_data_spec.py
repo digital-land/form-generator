@@ -348,6 +348,26 @@ class PlanningAppDataSpec:
                 csv_r = csv.DictReader(f)
                 yield from csv_r
 
+    def codelist_usage(self, codelist_ref):
+        """
+        Usage data determines which codelist items are active.
+
+        Generator yield (dict) for each row in CSV referenced by codelist's usage definition
+        @param codelist_ref: (str)
+        """
+        codelist = self.codelist[codelist_ref]
+
+        # remove overlap between repo relative path and path in codelist definition
+        path_prefix = "data/"
+        msg = f"Can't process codelist source : {codelist.usage}"
+        assert codelist.usage.startswith(path_prefix), msg
+
+        csv_path = self.spec_data / codelist.usage[len(path_prefix) :]
+        with open(csv_path) as f:
+
+            csv_r = csv.DictReader(f)
+            yield from csv_r
+
 
 class PlanningAppDataResolved(PlanningAppDataSpec):
     """

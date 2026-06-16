@@ -67,36 +67,34 @@ def schema_fusion(schema_node_classes, user_interface_classes):
         cls_names = ", ".join(unused_ui_cls)
         raise ValueError(f"Un-matched UI classes: {cls_names}")
 
+    for spec_cls_name, fusion_cls in r.items():
+        for child in fusion_cls.descendant_schema_nodes():
+            # replace descendants with Fusion descendants
+            # TODO - this is wrong as it's mutating a class from elsewhere
+            child.schema_node_cls = r[child.schema_node_cls.__name__]
+            # print(child.schema_node_cls.__name__)
+
     return r
 
 
-def planning_application_root_classes(fusion_classes, schema_node_classes):
+def planning_application_root_classes(fusion_classes):
     """
-    Find all :class:`SchemaNode` subclasses that are not descendants of any other and return the
-    corresponding fusion classes.
+    Find all :class:`SchemaNode` (of subclasses of) nodes that are not descendants of any other.
 
     @param fusion_classes: (dict) class_name (str) : FusionClass
-    @param schema_node_classes (list of subclasses of :class:`SchemaNode`)
-
 
     @param param:
     @return: list of classes
     """
 
     referenced = set()
-    for cls in schema_node_classes:
-
-        if issubclass(cls, UserInterfaceOverride):
-            continue
+    for cls in fusion_classes.values():
 
         for schema_node_field in cls.descendant_schema_nodes():
-            assert not issubclass(schema_node_field.schema_node_cls, UserInterfaceOverride)
             referenced.add(schema_node_field.schema_node_cls)
 
-    root_spec_cls = [cls for cls in schema_node_classes if cls not in referenced]
-
-    fusion_mapped = [fusion_classes[spec_cls.__name__] for spec_cls in root_spec_cls]
-    return fusion_mapped
+    root_spec_cls = [cls for cls in fusion_classes.values() if cls not in referenced]
+    return root_spec_cls
 
 
 # Build multiple inheritance classes dynamically, make map of these globally available
@@ -110,9 +108,7 @@ for spec_cls_name, fusion_cls in fusion_cls_map.items():
 
 # list of roots are loaded here so all the processing is done on startup not for each request.
 # roots are expected to be planning application nodes
-planning_application_roots = planning_application_root_classes(
-    fusion_cls_map, all_schema_node_classes
-)
+planning_application_roots = planning_application_root_classes(fusion_cls_map)
 
 # convenience ref -> schema map
 planning_application_roots_mapping = {

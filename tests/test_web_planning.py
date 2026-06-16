@@ -1,3 +1,6 @@
+from flask import render_template_string
+
+from schema.planning_application import SubmissionDetails
 from tests.base import WebTestCase
 from web_viewer.forms import schema_auto_form
 
@@ -37,3 +40,18 @@ class TestWebPlanning(WebTestCase):
 
         # data not checked
         self.assertTrue(response.is_json)
+
+    def test_submission_details(self):
+        """
+        The specification allows many application types in a single payload. For demo web viewer
+        simplify to one so don't show the big enum just set application's reference when in web
+        view.
+        """
+        form = schema_auto_form(SubmissionDetails)()
+
+        html = render_template_string(
+            '{% from "main/macros.html" import render_form_card %}{{ render_form_card(form) }}',
+            form=form,
+        )
+
+        self.assertNotIn("District Council", html)

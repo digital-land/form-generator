@@ -16,6 +16,9 @@ class SchemaNode:
         # is subclass of :class:`SchemaNode`
         self._parent_node = None
 
+        # build empty tree - TBC if this should be during construction or on demand.
+        self.shake_tree()
+
     @classmethod
     def schema_fields(cls):
         """
@@ -62,6 +65,24 @@ class SchemaNode:
 
         return descendants
 
+    def descendant_nodes(self):
+        """
+        Instance version of descendant_schema_nodes
+        """
+        cls = self.__class__
+        descendants = []
+        for attr_name, attr_field in cls.schema_fields().items():
+            if isinstance(attr_field, SchemaNodeField):
+                v = getattr(self, attr_name)
+                descendants.append((attr_field, v))
+            elif isinstance(attr_field, RepeatedField) and isinstance(
+                attr_field.schema_field, SchemaNodeField
+            ):
+                for v in getattr(self, attr_name):
+                    descendants.append((attr_field, v))
+
+        return descendants
+
     def load_payload(self, payload):
         """
         Recursive resolve
@@ -91,6 +112,31 @@ class SchemaNode:
 
         if len(failure_reasons) > 0:
             raise SchemaValidationException(failure_reasons)
+
+    def shake_tree(self):
+        """
+        Walk the node tree touching every field via :func:`getattr`.
+
+        Fields are descriptors who only see the instance they belong to when
+        :meth:`AbstractSchemaField.__get__` or `__set__` is called. Walking all nodes lazily
+        creates empty values, wires up `_parent_node` and instantiates descendant nodes.
+
+        The tree needs to be in place if fields or nodes access other nodes in order to perform
+        conditional validation.
+
+        @return: None
+        """
+        for attr_name in self.schema_fields().keys():
+            value = getattr(self, attr_name)
+            # print(attr_name, value, attr_cls)
+
+            if isinstance(value, SchemaNode):
+                value.shake_tree()
+            elif isinstance(value, list):
+                # `RepeatedField` holds a list, possibly of nodes
+                for item in value:
+                    if isinstance(item, SchemaNode):
+                        item.shake_tree()
 
     def valid_node(self):
         """
