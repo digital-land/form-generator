@@ -10,6 +10,12 @@ process.
 Multiple (as opposed to single) inheritance makes it easier to organise each lineage.
 """
 
+from schema.fields import (
+    AbstractSchemaField,
+    DynamicEnumField,
+    RepeatedField,
+    SchemaNodeField,
+)
 from schema.planning_application_specification import all_schema_node_classes
 from schema.planning_application_ui import all_user_interface_classes, UserInterfaceOverride
 
@@ -103,6 +109,91 @@ def planning_application_root_classes(fusion_classes):
     return root_spec_cls
 
 
+def filter_dynamic_enums(schema_node_classes, select_value):
+    """
+    Find schema nodes that filter an enum field on a given specification value.
+
+    A node qualifies if any of its fields is a :class:`DynamicEnumField` carrying a
+    :class:`SelectFilter` whose `select_values` includes `select_value`.
+
+    @param schema_node_classes: (iterable of `SchemaNode` subclasses)
+    @param select_value: (str) - e.g. "gla"
+    @return: (list of `SchemaNode` subclasses) preserving the input order.
+    """
+    matches = []
+
+    for schema_node_class in schema_node_classes:
+
+        for attr_name, attr_value in schema_node_class.schema_fields().items():
+
+            if attr_name.startswith("_") or not isinstance(attr_value, AbstractSchemaField):
+                continue
+
+            # unwrap a repeated field to get at the underlying field
+            field = attr_value.schema_field if isinstance(attr_value, RepeatedField) else attr_value
+
+            if not isinstance(field, DynamicEnumField) or not field.select_filter:
+                continue
+
+            if any(select_value in s_filter.select_values for s_filter in field.select_filter):
+                matches.append(schema_node_class)
+                break
+
+    return matches
+
+
+def _descendant_node_classes(schema_node_class, seen=None):
+    """
+    Walk a schema node's subtree and collect every descendant node class.
+
+    @param schema_node_class: (SchemaNode subclass)
+    @param seen: (set) - classes already visited, guards against cycles
+    @return: (list of SchemaNode subclasses) - descendants, excluding the node itself
+    """
+    if seen is None:
+        seen = set()
+
+    descendants = []
+
+    for attr_name, attr_value in schema_node_class.schema_fields().items():
+
+        if attr_name.startswith("_") or not isinstance(attr_value, AbstractSchemaField):
+            continue
+
+        # unwrap a repeated field to get at the underlying field
+        field = attr_value.schema_field if isinstance(attr_value, RepeatedField) else attr_value
+
+        if not isinstance(field, SchemaNodeField) or field.schema_node_cls in seen:
+            continue
+
+        child = field.schema_node_cls
+        seen.add(child)
+        descendants.append(child)
+        descendants.extend(_descendant_node_classes(child, seen))
+
+    return descendants
+
+
+def schema_nodes_with_descendant(schema_node_classes, descendant_classes):
+    """
+    Find schema nodes whose subtree contains one of the target node classes.
+
+    @param schema_node_classes: (iterable of SchemaNode subclasses) - nodes to test
+    @param descendant_classes: (iterable of SchemaNode subclasses) - nodes to look for
+    @return: (list of SchemaNode subclasses) from the first argument, preserving its order,
+        which have a descendant node in `descendant_classes`.
+    """
+    targets = set(descendant_classes)
+
+    matches = []
+    for schema_node_class in schema_node_classes:
+        descendants = _descendant_node_classes(schema_node_class)
+        if any(descendant in targets for descendant in descendants):
+            matches.append(schema_node_class)
+
+    return matches
+
+
 # Build multiple inheritance classes dynamically, make map of these globally available
 fusion_cls_map = schema_fusion(all_schema_node_classes, all_user_interface_classes)
 
@@ -120,3 +211,13 @@ planning_application_roots = planning_application_root_classes(fusion_cls_map)
 planning_application_roots_mapping = {
     fusion_node._ref: fusion_node for fusion_node in planning_application_roots
 }
+
+
+# schema nodes which depend on GLA option in submission-details.specification-profile
+gla_nodes = filter_dynamic_enums(fusion_cls_map.values(), "gla")
+
+
+# Root nodes (aka applications) which need to know about submission-details.specification-profile == 'gla'
+gla_planning_app_roots = schema_nodes_with_descendant(
+    schema_node_classes=planning_application_roots, descendant_classes=gla_nodes
+)
