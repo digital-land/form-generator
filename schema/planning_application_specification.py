@@ -3398,6 +3398,11 @@ class SubmissionDetails(SchemaNode):
                 label="GLA",
                 description="The Greater London Authority profile used where GLA-specific requirements apply.",
             ),
+            EnumOption(
+                key="national-public-view",
+                label="National public view",
+                description="The national public view publication profile.",
+            ),
         ],
     )
     planning_authority = EnumField(
@@ -6252,6 +6257,21 @@ class InterestDetails(SchemaNode):
         "Names and contact details for all parties with an interest in the proposed develpoment."
     )
 
+    applicant_interest_type = EnumField(
+        ref="applicant-interest-type",
+        display="Applicant interest type",
+        description="The applicant’s relationship to the land, property or building",
+        select_options=[
+            EnumOption(key="owner", label="Owner", description=""),
+            EnumOption(key="lessee", label="Lessee", description=""),
+            EnumOption(key="occupier", label="Occupier", description=""),
+            EnumOption(
+                key="none",
+                label="None",
+                description="Applicant has no direct interest in the property",
+            ),
+        ],
+    )
     owner_details = RepeatedField(
         schema_field=SchemaNodeField(
             ref="owner-details",
@@ -9121,7 +9141,7 @@ class SiteOwnership(SchemaNode):
     applicant_interest = StringField(
         ref="applicant-interest",
         display="Applicant interest",
-        description="Description of the applicant's interest in the land",
+        description="Details of the applicant's interest in the land",
     )
     applicant_interest_adjoining_land = StringField(
         ref="applicant-interest-adjoining-land",
@@ -12112,10 +12132,20 @@ class LdcInterest(SchemaNode):
     _display = "LDC Interest"
     _description = "Who had a say in whether the proposal should go ahead"
 
-    applicant_interest = StringField(
-        ref="applicant-interest",
-        display="Applicant interest",
-        description="Applicant's interest in the listed building",
+    applicant_interest_type = EnumField(
+        ref="applicant-interest-type",
+        display="Applicant interest type",
+        description="The applicant’s relationship to the land, property or building",
+        select_options=[
+            EnumOption(key="owner", label="Owner", description=""),
+            EnumOption(key="lessee", label="Lessee", description=""),
+            EnumOption(key="occupier", label="Occupier", description=""),
+            EnumOption(
+                key="none",
+                label="None",
+                description="Applicant has no direct interest in the property",
+            ),
+        ],
     )
     owner_details = RepeatedField(
         schema_field=SchemaNodeField(
