@@ -36,6 +36,14 @@ class TestBuildSchema(unittest.TestCase):
                 "SiteDetails field describing a descendant",
             ),
             ("schema_node_cls=SiteLocation", "Link to child class"),
+            (
+                'if self["contact-type"] in ["agent", "friend"] and not self["other-contact"]:',
+                "Expected in GroundsLdc.valid_node",
+            ),
+            (
+                'if self["first-name"].__len__() == 0 and not self["fullname"]:',
+                "Expected in Person.valid_node - full name needed if first-name (str) is empty.",
+            ),
         ]
         for expected, msg in expected_snippets:
             self.assertIn(expected, py_out, msg)

@@ -43,8 +43,15 @@ class SchemaNode:
         """
         r = {}
         for attr_name, f in cls.schema_fields().items():
-            # when ref isn't set
-            ref = f.ref or attr_name
+
+            ref = f.ref
+
+            if ref is None and isinstance(f, RepeatedField):
+                ref = f.schema_field.ref
+
+            if ref is None:
+                ref = attr_name
+
             r[ref] = (attr_name, f)
         return r
 

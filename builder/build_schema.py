@@ -1,9 +1,10 @@
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from functools import cached_property
 import warnings
 
 from jinja2 import Environment, FileSystemLoader
 
+from builder import safe_literal
 from builder.planning_app_data_spec import (
     ComponentResolved,
     Field,
@@ -76,6 +77,193 @@ def walk_resolved_schema(schema_items):
         yield spec_item
 
 
+# Structured encoding of 'required-if' type rules from the specification.
+# in pseudo-code, read this as ...
+#
+# if value_of(switch_field) == switch_value and not value_of(subject_field):
+#     .. validation fails
+#
+# 'switch_method_call' is an optional method on switch_field
+#
+# @see builder/form_templates/schema_tree_class.py.j2 for how this is used
+ContraintRule = namedtuple(
+    "ContraintRule",
+    ("switch_field", "switch_value", "subject_field", "operand", "switch_method_call"),
+    defaults=("",),
+)
+
+
+# Operand rule logic
+class RulesOpLogic:
+    # python boolean operator used to join the contained rules in generated code
+    op = None
+
+    def __init__(self, rule_message, *rules):
+        self.rule_message = rule_message
+        self.rules = rules
+
+
+class RuleDisjunction(RulesOpLogic):
+    "OR"
+
+    op = "or"
+
+
+class RuleConjunction(RulesOpLogic):
+    "AND"
+
+    op = "and"
+
+
+def build_rules(field_x):
+    """
+    Informal structure whilst code is taking shape to specify arguments
+    for template to build validation rules based on field values elsewhere
+    in the schema node tree.
+
+    @param field_x: obj with 'required*' attribs
+
+    @return list of tuple rules.
+    """
+    field_rules = []
+
+    if field_x.required_if:
+        # Used to build SchemaNode.valid_node method in template
+
+        if not isinstance(field_x.required_if, list):
+            if SHOW_WARNINGS:
+                msg = f"Can't build rule for {field_x.ref} - required_if isn't a list"
+                warnings.warn(msg)
+
+            return []
+
+        for rule in field_x.required_if:
+            # if bool rule
+
+            if "value" in rule:
+                # 'if' rule
+                v = safe_literal(rule["value"])
+
+                r = ContraintRule(
+                    switch_field=rule["field"],
+                    switch_value=v,
+                    subject_field=field_x.ref,
+                    operand="==",
+                )
+                field_rules.append(r)
+
+            elif "in" in rule:
+                # member of list
+                members = [safe_literal(v) for v in rule["in"]]
+                m = ", ".join(members)
+                v = f"[{m}]"
+                r = ContraintRule(
+                    switch_field=rule["field"],
+                    switch_value=v,
+                    subject_field=field_x.ref,
+                    operand="in",
+                )
+                field_rules.append(r)
+
+            elif "operator" in rule:
+
+                if rule["operator"] in {"empty", "not_empty"}:
+
+                    if rule["operator"] == "not_empty":
+                        op_empty = ">"
+                    else:
+                        op_empty = "=="
+
+                    # empty list or string
+                    r = ContraintRule(
+                        switch_field=rule["field"],
+                        switch_method_call=".__len__()",
+                        switch_value=0,
+                        subject_field=field_x.ref,
+                        operand=op_empty,
+                    )
+
+                    field_rules.append(r)
+
+                else:
+                    if SHOW_WARNINGS:
+                        o = rule["operator"]
+                        msg = f"Can't build rule for {field_x.ref} - unknown operator {o}"
+                        warnings.warn(msg)
+                    continue
+
+            elif "any" in rule or "all" in rule:
+
+                logical_op = "any" if "any" in rule else "all"
+
+                equality_rules = []
+
+                if not isinstance(rule[logical_op], list):
+                    if SHOW_WARNINGS:
+                        msg = f"Can't build rule for {field_x.ref} - '{logical_op}' field isn't a list"
+                        warnings.warn(msg)
+
+                    # this continue would skip any other rules built for this field but I think
+                    # that's OK as this is malformed
+                    continue
+
+                for field_eq in rule[logical_op]:
+
+                    if "field" in field_eq:
+
+                        if "value" in field_eq:
+                            # this 'any' rule is for a field level equality
+                            v = safe_literal(field_eq["value"])
+                            r = ContraintRule(
+                                switch_field=field_eq["field"],
+                                switch_value=v,
+                                subject_field=None,
+                                operand="==",
+                            )
+                            equality_rules.append(r)
+
+                        elif "contains" in field_eq:
+
+                            v = safe_literal(field_eq["contains"])
+                            v_members = f"[{v}]"
+                            r = ContraintRule(
+                                switch_field=field_eq["field"],
+                                switch_value=v_members,
+                                subject_field=field_x.ref,
+                                operand="in",
+                            )
+                            equality_rules.append(r)
+
+                        elif SHOW_WARNINGS:
+                            msg = f"'any' rule without 'container' or 'value' for {field_x.ref}"
+                            warnings.warn(msg)
+
+                    elif SHOW_WARNINGS:
+                        msg = f"Can't build rule for {field_x.ref} - unknown 'any' rule"
+                        warnings.warn(msg)
+
+                if len(equality_rules) > 0:
+                    msg_fields = ", ".join(set([r.switch_field for r in equality_rules]))
+
+                    if logical_op == "any":
+                        msg = f"One or more matches required in field(s): {msg_fields}"
+                        r_or = RuleDisjunction(msg, *equality_rules)
+                    elif logical_op == "all":
+                        msg = f"All fields need to match for field(s): {msg_fields}"
+                        r_or = RuleConjunction(msg, *equality_rules)
+                    else:
+                        raise ValueError("Unknown logical operation when building rules.")
+
+                    field_rules.append(r_or)
+
+            else:
+                if SHOW_WARNINGS:
+                    warnings.warn(f"Can't build rule for {field_x.ref}")
+                continue
+
+    return field_rules
+
+
 def render_python(project_root, planning_spec):
     """
     @param project_root: (str)
@@ -146,22 +334,8 @@ def render_python(project_root, planning_spec):
 
             elif isinstance(field_x, Field):
 
-                if field_x.required_if:
-                    # Used to build SchemaNode.valid_node method in template
-                    for rule in field_x.required_if:
-                        # if bool rule
-
-                        if "value" not in rule:
-                            if SHOW_WARNINGS:
-                                warnings.warn(f"Missing comparison value for rule in {field_x.ref}")
-                            continue
-
-                        # TODO - should render python safe values - this is enough for trusted spec.
-                        v = rule["value"]
-                        if isinstance(v, str):
-                            v = f'"{v}"'
-
-                        validation_simplified.append((rule["field"], v, field_x.ref))
+                field_rules = build_rules(field_x)
+                validation_simplified.extend(field_rules)
 
                 if field_x.datatype == "string":
                     schema_field = StringField(**field_info)
@@ -195,6 +369,11 @@ def render_python(project_root, planning_spec):
                 schema_field = RepeatedField(schema_field=schema_field)
 
             fields_simplified.append((field_name, schema_field))
+
+            # module + component rules
+            if field_entry.origin != field_entry.target:
+                field_rules = build_rules(field_entry.origin)
+                validation_simplified.extend(field_rules)
 
         # schema_base_item is ComponentResolved or Module or Application
         # just vanity - I don't want the namespace in the class name unless it does overlap

@@ -342,13 +342,17 @@ class RepeatedField(AbstractSchemaField):
 
     def empty_value(self):
 
-        child_node = self.schema_field.empty_value()
+        # old behaviour held commented out for now
+        # child_node = self.schema_field.empty_value()
+        #
+        # # child_node could be another node/field or just a value.
+        # if hasattr(child_node, "_parent_node"):
+        #     child_node._parent_node = self._parent_node
+        #
+        # return [child_node]
 
-        # child_node could be another node/field or just a value.
-        if hasattr(child_node, "_parent_node"):
-            child_node._parent_node = self._parent_node
-
-        return [child_node]
+        # empty repeated field is an empty list
+        return []
 
     def prepare_value(self, value):
         """

@@ -69,7 +69,11 @@ class ContactPreferences(EnumField):
         node_values = {
             "fax": self._parent_node["fax-number"]["number"],
             "email": self._parent_node["email"],
-            "phone": self._parent_node["phones"][0]["number"],
+            "phone": (
+                self._parent_node["phones"][0]["number"]
+                if len(self._parent_node["phones"]) > 0
+                else None
+            ),
         }
 
         sub_set = []
