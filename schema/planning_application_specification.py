@@ -77,15 +77,23 @@ class AgentContact(SchemaNode):
         super().valid_node()
         reasons = []
 
-        if self["agent-details.agent.reference"].__len__() > 0 and not self["agent-reference"]:
-            reasons.append(
-                "agent-reference is needed for current value in 'agent-details.agent.reference'"
-            )
+        if (
+            self._root_node.by_ref("agent-details.agent.reference") is not None
+            and not self["agent-reference"]
+        ) and (
+            self._root_node.by_ref("agent-details.agent.reference").__len__() > 0
+            and not self["agent-reference"]
+        ):
+            reasons.append("Field validation problem for: agent-details.agent.reference")
 
-        if self["agent-details.agent.reference"].__len__() > 0 and not self["contact-details"]:
-            reasons.append(
-                "contact-details is needed for current value in 'agent-details.agent.reference'"
-            )
+        if (
+            self._root_node.by_ref("agent-details.agent.reference") is not None
+            and not self["contact-details"]
+        ) and (
+            self._root_node.by_ref("agent-details.agent.reference").__len__() > 0
+            and not self["contact-details"]
+        ):
+            reasons.append("Field validation problem for: agent-details.agent.reference")
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -770,7 +778,7 @@ class ExistingUse(SchemaNode):
             or (self["proposed-use-contamination-risk"] == True)
         ):
             reasons.append(
-                "One or more matches required in field(s): is-contaminated-land, is-suspected-contaminated-land, proposed-use-contamination-risk"
+                "One or more matches required in field(s): is-suspected-contaminated-land, proposed-use-contamination-risk, is-contaminated-land"
             )
 
         if reasons:
@@ -1105,8 +1113,10 @@ class HoursOfOperation(SchemaNode):
         if self["hours-not-known"] == True and not self["operational-times"]:
             reasons.append("operational-times is needed for current value in 'hours-not-known'")
 
-        if self["operational-times"].__len__() == 0 and not self["hours-not-known"]:
-            reasons.append("hours-not-known is needed for current value in 'operational-times'")
+        if (self["operational-times"] is not None and not self["hours-not-known"]) and (
+            self["operational-times"].__len__() == 0 and not self["hours-not-known"]
+        ):
+            reasons.append("Field validation problem for: operational-times")
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -8656,10 +8666,10 @@ class SiteInfo(SchemaNode):
         super().valid_node()
         reasons = []
 
-        if self["known-constraints"].__len__() > 0 and not self["supporting-documents"]:
-            reasons.append(
-                "supporting-documents is needed for current value in 'known-constraints'"
-            )
+        if (self["known-constraints"] is not None and not self["supporting-documents"]) and (
+            self["known-constraints"].__len__() > 0 and not self["supporting-documents"]
+        ):
+            reasons.append("Field validation problem for: known-constraints")
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -9363,8 +9373,10 @@ class OilGasOwnershipNotices(SchemaNode):
         super().valid_node()
         reasons = []
 
-        if self["invalid-posted-notices"].__len__() > 0 and not self["steps-taken"]:
-            reasons.append("steps-taken is needed for current value in 'invalid-posted-notices'")
+        if (self["invalid-posted-notices"] is not None and not self["steps-taken"]) and (
+            self["invalid-posted-notices"].__len__() > 0 and not self["steps-taken"]
+        ):
+            reasons.append("Field validation problem for: invalid-posted-notices")
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -10702,7 +10714,7 @@ class InterestInLand(SchemaNode):
 
         if (self["applicant-owns-land"] == False) and (self["permission-obtained"] == False):
             reasons.append(
-                "All fields need to match for field(s): permission-obtained, applicant-owns-land"
+                "All fields need to match for field(s): applicant-owns-land, permission-obtained"
             )
 
         if reasons:

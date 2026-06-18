@@ -96,19 +96,15 @@ class SchemaNode:
         @return None
         @raise :class:`SchemaValidationException` is payload doesn't conform to schema
         """
-        field_map = self.schema_refs()
         failure_reasons = []
         for k, v in payload.items():
 
-            if k not in field_map:
-                failure_reasons.append(f"Unknown field: '{k}'")
-                continue
-
-            # class attrib doesn't always match k
-            node_att, _ = field_map.get(k)
-
             try:
-                setattr(self, node_att, v)
+                # `__setitem__` resolves the key to a field and routes through the descriptor so
+                # the value is validated
+                self[k] = v
+            except KeyError:
+                failure_reasons.append(f"Unknown field: '{k}'")
             except SchemaValidationException as e:
                 # descendant fields validate their own values; aggregate their reasons
                 failure_reasons.extend(e.reasons)
@@ -119,6 +115,30 @@ class SchemaNode:
 
         if len(failure_reasons) > 0:
             raise SchemaValidationException(failure_reasons)
+
+    def as_native(self):
+        """
+        Serialise this node and its descendants into native Python data structures (dict, list and
+        scalars), keyed by schema ref.
+
+        The inverse of :meth:`load_payload`; the structure mirrors the schema tree rather than the
+        form layout, so this reflects what the schema actually holds.
+
+        @return: (dict)
+        """
+
+        def native(value):
+            if isinstance(value, SchemaNode):
+                return value.as_native()
+            if isinstance(value, list):
+                return [native(item) for item in value]
+            return value
+
+        payload = {}
+        for ref, (attr_name, _field) in self.schema_refs().items():
+            payload[ref] = native(getattr(self, attr_name))
+
+        return payload
 
     def shake_tree(self):
         """
@@ -183,6 +203,51 @@ class SchemaNode:
                 return getattr(self, attr_name)
 
         raise KeyError(f"Field '{key}' not found in '{self.__class__.__name__}'")
+
+    def __setitem__(self, key, value):
+        """
+        Dictionary like assignment of a field value by its schema 'ref'.
+
+        The mirror of :meth:`__getitem__`. The class attribute name (e.g. 'agent_reference') is
+        also accepted as a key alongside the ref (e.g. 'agent-reference') so payloads built from
+        web forms - whose field names are the Python attributes - resolve without translation.
+
+        Assignment goes through the field descriptor so the value is validated.
+
+        @raise KeyError if no field matches the key.
+        @raise SchemaValidationException if the field or node rejects the value.
+        """
+        for attr_name, field in self.schema_fields().items():
+
+            # A `RepeatedField` can carry its ref on the wrapped field.
+            ref = field.ref
+            if ref is None and isinstance(field, RepeatedField):
+                ref = field.schema_field.ref
+
+            if ref is None:
+                # class variable the `Field` is assigned to always exists
+                ref = attr_name
+
+            if key in [ref, attr_name]:
+                setattr(self, attr_name, value)
+                return
+
+        raise KeyError(f"Field '{key}' not found in '{self.__class__.__name__}'")
+
+    def by_ref(self, path):
+        """
+        Resolve a dotted path of schema refs starting from this node and return the value at the
+        end of it.
+
+        e.g. node.by_ref("agent-details.agent.reference")
+
+        @return: the value (node, list or scalar) the path points at
+        @raise KeyError if any part of the path doesn't match a field
+        """
+        node_pointer = self
+        for part in path.split("."):
+            node_pointer = node_pointer[part]
+        return node_pointer
 
     @property
     def _root_node(self):

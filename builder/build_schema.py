@@ -175,15 +175,24 @@ def build_rules(field_x):
                         op_empty = "=="
 
                     # empty list or string
-                    r = ContraintRule(
+                    # using conjunction so the field's value works with len(), e.g. string or list
+
+                    r_none = ContraintRule(
+                        switch_field=rule["field"],
+                        switch_value="None",
+                        subject_field=field_x.ref,
+                        operand="is not",
+                    )
+                    r_len = ContraintRule(
                         switch_field=rule["field"],
                         switch_method_call=".__len__()",
                         switch_value=0,
                         subject_field=field_x.ref,
                         operand=op_empty,
                     )
-
-                    field_rules.append(r)
+                    msg = f"Field validation problem for: {rule['field']}"
+                    r_op = RuleConjunction(msg, r_none, r_len)
+                    field_rules.append(r_op)
 
                 else:
                     if SHOW_WARNINGS:
@@ -247,14 +256,14 @@ def build_rules(field_x):
 
                     if logical_op == "any":
                         msg = f"One or more matches required in field(s): {msg_fields}"
-                        r_or = RuleDisjunction(msg, *equality_rules)
+                        r_op = RuleDisjunction(msg, *equality_rules)
                     elif logical_op == "all":
                         msg = f"All fields need to match for field(s): {msg_fields}"
-                        r_or = RuleConjunction(msg, *equality_rules)
+                        r_op = RuleConjunction(msg, *equality_rules)
                     else:
                         raise ValueError("Unknown logical operation when building rules.")
 
-                    field_rules.append(r_or)
+                    field_rules.append(r_op)
 
             else:
                 if SHOW_WARNINGS:

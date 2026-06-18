@@ -1,8 +1,9 @@
 import json
 from io import BytesIO
 
-from flask import Blueprint, Response, render_template, request, send_file
+from flask import Blueprint, render_template, request, send_file
 
+from schema import SchemaValidationException
 from pdf_builder.generate_application import GenerateApplication
 from schema.planning_application import (
     fusion_cls_map,
@@ -72,22 +73,24 @@ def application(application_ref):
 
         # build dictionaries in schema layout. Empty strings, no Nones and no concept
         # of required or optional fields. That's done by the schema.
-        payload = form_tree.as_native()
+        form_payload = form_tree.as_native()
 
-        # node = root_schema_class()
-        # try:
-        #     node.load_payload(payload)
-        # except SchemaValidationException as e:
-        #     return Response(
-        #         json.dumps({"errors": e.reasons}, indent=2, ensure_ascii=False),
-        #         status=400,
-        #         mimetype="application/json",
-        #     )
-        #
-        # document = node_to_document(node)
-        return Response(
-            json.dumps(payload, indent=2, ensure_ascii=False),
-            mimetype="application/json",
+        # load the form data into the schema and validate it; reasons is empty when valid
+        reasons = []
+        node = root_schema_class()
+        try:
+            node.load_payload(form_payload)
+        except SchemaValidationException as e:
+            reasons = e.reasons
+
+        # the displayed payload comes from the schema node, not the raw form data
+        payload = json.dumps(node.as_native(), indent=2, ensure_ascii=False)
+
+        return render_template(
+            "main/view_payload.html",
+            application_ref=application_ref,
+            payload=payload,
+            reasons=reasons,
         )
 
     return render_template("main/application.html", application_ref=application_ref, forms=forms)

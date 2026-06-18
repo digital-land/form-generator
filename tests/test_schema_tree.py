@@ -129,3 +129,17 @@ class TestSchemaTree(unittest.TestCase):
         )
         actual = repr(f)
         self.assertEqual(expected, actual)
+
+    def test_by_ref(self):
+        """
+        SchemaNode().by_ref("some.path")
+        """
+        payload = {
+            "person-a": {"email": "me@somewhere.co.uk", "fax-number": {"number": "0123"}},
+            "person-b": {"email": "you@somewhere.co.uk", "fax-number": {"number": "4567"}},
+        }
+        node = Partnership()
+        node.load_payload(payload)
+
+        actual = node.by_ref("person-a.fax-number.number")
+        self.assertEqual("0123", actual)

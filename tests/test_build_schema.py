@@ -41,7 +41,10 @@ class TestBuildSchema(unittest.TestCase):
                 "Expected in GroundsLdc.valid_node",
             ),
             (
-                'if self["first-name"].__len__() == 0 and not self["fullname"]:',
+                (
+                    'if ((self["first-name"] is not None and not self["fullname"]) and '
+                    '(self["first-name"].__len__() == 0 and not self["fullname"])):'
+                ),
                 "Expected in Person.valid_node - full name needed if first-name (str) is empty.",
             ),
         ]

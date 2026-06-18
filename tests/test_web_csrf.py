@@ -36,4 +36,4 @@ class TestWebPlanningCsrf(WebTestCase):
 
         response = self.client.post("/application/outline-all", data={"csrf_token": token})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual("application/json", response.mimetype)
+        self.assertEqual("text/html", response.mimetype)
