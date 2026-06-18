@@ -320,22 +320,6 @@ def render_python(project_root, planning_spec):
             # field_x is a Field or Component
             field_x = field_entry.target
 
-            # o = getattr(field_entry.origin, "required", None)
-            # t = getattr(field_entry.target, "required", None)
-            # if o == True and t == False:
-            #     pass
-            # if o == False and t == True:
-            #     pass
-            #
-            # print(
-            #     o,
-            #     t,
-            #     field_entry.origin.ref,
-            #     type(field_entry.origin),
-            #     field_entry.target.ref,
-            #     type(field_entry.target),
-            # )
-
             field_name = valid_field_name(field_entry.origin.ref)
             if field_name in ["_ref", "_display", "_description"]:
                 raise ValueError("Reserved word for schema classes found as field name.")
