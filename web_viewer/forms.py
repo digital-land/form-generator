@@ -212,7 +212,10 @@ class FormTree:
 
             # Remove hyphen added by WTForms
             prefix_full = form._prefix.removesuffix("-")
-            prefix_parts = prefix_full.split(".")
+
+            # the root form has an empty prefix; splitting "" yields [""] which would create a
+            # spurious empty-string key in the payload, so treat it as no prefix parts
+            prefix_parts = prefix_full.split(".") if prefix_full else []
 
             # walk through dictionary to find position for this form's data
             pointer = r

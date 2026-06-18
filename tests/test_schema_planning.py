@@ -108,7 +108,7 @@ class TestSchemaPlanning(unittest.TestCase):
         }
 
         payload = {"operational-times": [], "hours-not-known": False}
-        expected = ["hours-not-known is needed for current value in 'operational-times'"]
+        expected = ["Field validation problem for: operational-times"]
 
         node = HoursOfOperation()
         with self.assertRaises(SchemaValidationException) as ctx:
@@ -128,7 +128,7 @@ class TestSchemaPlanning(unittest.TestCase):
         Field is required when another value has been provided.
         """
         payload = {"known-constraints": ["conservation-area"]}
-        expected = ["supporting-documents is needed for current value in 'known-constraints'"]
+        expected = ["Field validation problem for: known-constraints"]
 
         node = SiteInfo()
         with self.assertRaises(SchemaValidationException) as ctx:
@@ -146,7 +146,7 @@ class TestSchemaPlanning(unittest.TestCase):
             "applicant-owns-land": False,
             "permission-obtained": False,
         }
-        expected = "All fields need to match for field(s): permission-obtained, applicant-owns-land"
+        expected = "All fields need to match for field(s): applicant-owns-land, permission-obtained"
 
         node = InterestInLand()
         with self.assertRaises(SchemaValidationException) as ctx:

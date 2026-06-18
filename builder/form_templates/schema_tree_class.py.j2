@@ -1,4 +1,4 @@
-{% macro validation_term(r) -%}self["{{r.switch_field}}"]{{r.switch_method_call}} {{r.operand}} {{r.switch_value}}{%if r.subject_field %} and not self["{{r.subject_field}}"]{%endif%}{%- endmacro -%}
+{% macro validation_term(r) -%}{%if '.' in r.switch_field%}{% set value_for = 'self._root_node.by_ref("' + r.switch_field + '")' %}{%else%}{% set value_for = 'self["' + r.switch_field + '"]'%}{%endif%}{{value_for}}{{r.switch_method_call}} {{r.operand}} {{r.switch_value}}{%if r.subject_field %} and not self["{{r.subject_field}}"]{%endif%}{%- endmacro -%}
 
 
 {% if document_header %}

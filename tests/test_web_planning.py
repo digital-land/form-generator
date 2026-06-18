@@ -39,13 +39,17 @@ class TestWebPlanning(WebTestCase):
         self.assertEqual("application/pdf", response.mimetype)
         self.assertGreater(len(response.data), 1000)
 
-    def test_application_post_returns_json_document(self):
+    def test_application_post_returns_payload_page(self):
         response = self.client.post("/application/outline-all", data={})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual("application/json", response.mimetype)
+        self.assertEqual("text/html", response.mimetype)
 
-        # data not checked
-        self.assertTrue(response.is_json)
+        for expected, msg in [
+            ("View payload", "Page heading"),
+            ("<textarea", "Payload text area"),
+            ("Validation", "Validation results area"),
+        ]:
+            self.assertIn(expected, response.text, msg)
 
     def test_submission_details(self):
         """

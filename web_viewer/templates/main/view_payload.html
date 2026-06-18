@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ application_ref }} payload{% endblock %}
+{% block content %}
+
+<div class="d-flex align-items-center gap-2 mb-4">
+  <a href="{{ url_for('main.application', application_ref=application_ref) }}" class="text-muted text-decoration-none">&larr; Back to form</a>
+</div>
+
+<h3 class="mb-4">View payload</h3>
+
+<div class="card mb-4">
+  <div class="card-header">
+    <h5 class="mb-0">Validation</h5>
+  </div>
+  <div class="card-body">
+    {% if reasons %}
+    <ul class="list-unstyled mb-0">
+      {% for reason in reasons %}
+      <li class="mb-2">
+        <span class="text-danger fw-bold me-2">&#10007;</span>{{ reason }}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="mb-0">
+      <span class="text-success fw-bold me-2">&#10003;</span>The payload is valid.
+    </p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="mb-4">
+  <label for="payload" class="form-label fw-semibold">Payload</label>
+  <textarea id="payload" class="form-control font-monospace" rows="24" readonly>{{ payload }}</textarea>
+</div>
+
+{% endblock %}
