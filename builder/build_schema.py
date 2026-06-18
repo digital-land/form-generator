@@ -252,7 +252,10 @@ def build_rules(field_x):
                         warnings.warn(msg)
 
                 if len(equality_rules) > 0:
-                    msg_fields = ", ".join(set([r.switch_field for r in equality_rules]))
+                    deduped_fields = list(set([r.switch_field for r in equality_rules]))
+                    # deterministic order for tests
+                    deduped_fields.sort()
+                    msg_fields = ", ".join(deduped_fields)
 
                     if logical_op == "any":
                         msg = f"One or more matches required in field(s): {msg_fields}"
@@ -315,8 +318,23 @@ def render_python(project_root, planning_spec):
         for field_entry in getattr(schema_base_item, "field_entries", []):
 
             # field_x is a Field or Component
-
             field_x = field_entry.target
+
+            # o = getattr(field_entry.origin, "required", None)
+            # t = getattr(field_entry.target, "required", None)
+            # if o == True and t == False:
+            #     pass
+            # if o == False and t == True:
+            #     pass
+            #
+            # print(
+            #     o,
+            #     t,
+            #     field_entry.origin.ref,
+            #     type(field_entry.origin),
+            #     field_entry.target.ref,
+            #     type(field_entry.target),
+            # )
 
             field_name = valid_field_name(field_entry.origin.ref)
             if field_name in ["_ref", "_display", "_description"]:
@@ -376,6 +394,10 @@ def render_python(project_root, planning_spec):
 
                 # wrap field built above
                 schema_field = RepeatedField(schema_field=schema_field)
+
+            # Add field level required field constraint to any field
+            if getattr(field_entry.origin, "required", False) == True:
+                schema_field.required = True
 
             fields_simplified.append((field_name, schema_field))
 

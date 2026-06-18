@@ -4,7 +4,7 @@ from . import SchemaValidationException, tidy_string
 
 
 class AbstractSchemaField:
-    def __init__(self, ref=None, display=None, description=None):
+    def __init__(self, ref=None, display=None, description=None, required=False):
         """
         @param ref: (str) - name from specification/schema
         @param display: (str) - name of field suitable for user interface and display to user
@@ -13,6 +13,7 @@ class AbstractSchemaField:
         self.ref = ref
         self.display = display
         self.description = description
+        self.required = required
 
         # used by nodes to find values from other parts of the tree. Field also needs this as
         # :class:`SchemaNodeField` creates nodes. Slightly breaking open closed principal.
@@ -60,6 +61,8 @@ class AbstractSchemaField:
          or
         @raise SchemaValidationException
         """
+        if self.required and proposed_value is None:
+            raise SchemaValidationException([f"Field '{self.ref}' is required"])
         return
 
     def empty_value(self):
@@ -99,6 +102,9 @@ class AbstractSchemaField:
         if self.description is not None:
             r.append(f'description="{tidy_string(self.description)}"')
 
+        if self.required == True:
+            r.append("required=True")
+
         return r
 
     def __repr__(self) -> str:
@@ -133,6 +139,13 @@ class StringField(AbstractSchemaField):
             # default not needed
             return []
         return [f"max_length={self.max_length}"]
+
+    def valid_update(self, proposed_value):
+        super().valid_update(proposed_value)
+        if self.required and proposed_value == "":
+            raise SchemaValidationException([f"Field '{self.ref}' is required"])
+
+        return
 
 
 class BooleanField(AbstractSchemaField):
