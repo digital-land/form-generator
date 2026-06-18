@@ -73,6 +73,23 @@ class AgentContact(SchemaNode):
         schema_node_cls=ContactDetails,
     )
 
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if self["agent-details.agent.reference"].__len__() > 0 and not self["agent-reference"]:
+            reasons.append(
+                "agent-reference is needed for current value in 'agent-details.agent.reference'"
+            )
+
+        if self["agent-details.agent.reference"].__len__() > 0 and not self["contact-details"]:
+            reasons.append(
+                "contact-details is needed for current value in 'agent-details.agent.reference'"
+            )
+
+        if reasons:
+            raise SchemaValidationException(reasons)
+
 
 class Person(SchemaNode):
     _ref = "person"
@@ -340,9 +357,14 @@ class BngDetails(SchemaNode):
         super().valid_node()
         reasons = []
 
+        if self["habitat-loss-after-2020"] == True and not self["habitat-loss-details"]:
+            reasons.append(
+                "habitat-loss-details is needed for current value in 'habitat-loss-after-2020'"
+            )
+
         if self["irreplaceable-habitats"] == True and not self["irreplaceable-habitats-details"]:
             reasons.append(
-                "irreplaceable-habitats-details is needed when irreplaceable-habitats is true"
+                "irreplaceable-habitats-details is needed for current value in 'irreplaceable-habitats'"
             )
 
         if reasons:
@@ -380,6 +402,21 @@ class Bng(SchemaNode):
         description="Comprehensive details about biodiversity net gain assessment including pre-development value, habitat loss information, and supporting documentation",
         schema_node_cls=BngDetails,
     )
+
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if self["bng-condition-applies"] == False and not self["bng-condition-exemption-reasons"]:
+            reasons.append(
+                "bng-condition-exemption-reasons is needed for current value in 'bng-condition-applies'"
+            )
+
+        if self["bng-condition-applies"] == True and not self["bng-details"]:
+            reasons.append("bng-details is needed for current value in 'bng-condition-applies'")
+
+        if reasons:
+            raise SchemaValidationException(reasons)
 
 
 class Checklist(SchemaNode):
@@ -422,10 +459,10 @@ class ConflictOfInterest(SchemaNode):
         reasons = []
 
         if self["conflict-to-declare"] == True and not self["person-reference"]:
-            reasons.append("person-reference is needed when conflict-to-declare is true")
+            reasons.append("person-reference is needed for current value in 'conflict-to-declare'")
 
         if self["conflict-to-declare"] == True and not self["conflict-details"]:
-            reasons.append("conflict-details is needed when conflict-to-declare is true")
+            reasons.append("conflict-details is needed for current value in 'conflict-to-declare'")
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -661,10 +698,10 @@ class ExistingUseDetail(SchemaNode):
         reasons = []
 
         if self["use"] == "sui" and not self["use-details"]:
-            reasons.append("use-details is needed when use is true")
+            reasons.append("use-details is needed for current value in 'use'")
 
         if self["use"] == "other" and not self["use-details"]:
-            reasons.append("use-details is needed when use is true")
+            reasons.append("use-details is needed for current value in 'use'")
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -722,10 +759,19 @@ class ExistingUse(SchemaNode):
         reasons = []
 
         if self["site-vacant"] == True and not self["last-use-details"]:
-            reasons.append("last-use-details is needed when site-vacant is true")
+            reasons.append("last-use-details is needed for current value in 'site-vacant'")
 
         if self["site-vacant"] == True and not self["last-use-end-date"]:
-            reasons.append("last-use-end-date is needed when site-vacant is true")
+            reasons.append("last-use-end-date is needed for current value in 'site-vacant'")
+
+        if (
+            (self["is-contaminated-land"] == True)
+            or (self["is-suspected-contaminated-land"] == True)
+            or (self["proposed-use-contamination-risk"] == True)
+        ):
+            reasons.append(
+                "One or more matches required in field(s): is-contaminated-land, is-suspected-contaminated-land, proposed-use-contamination-risk"
+            )
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -813,7 +859,7 @@ class FloodRiskAssessment(SchemaNode):
         reasons = []
 
         if self["flood-risk-area"] == True and not self["flood-risk-assessment"]:
-            reasons.append("flood-risk-assessment is needed when flood-risk-area is true")
+            reasons.append("flood-risk-assessment is needed for current value in 'flood-risk-area'")
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -861,6 +907,16 @@ class OperationalTimes(SchemaNode):
             schema_node_cls=TimeRange,
         )
     )
+
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if self["closed"] == False and not self["time-ranges"]:
+            reasons.append("time-ranges is needed for current value in 'closed'")
+
+        if reasons:
+            raise SchemaValidationException(reasons)
 
 
 class HoursOfOperation(SchemaNode):
@@ -1044,7 +1100,13 @@ class HoursOfOperation(SchemaNode):
         reasons = []
 
         if self["use"] == "other" and not self["use-other"]:
-            reasons.append("use-other is needed when use is true")
+            reasons.append("use-other is needed for current value in 'use'")
+
+        if self["hours-not-known"] == True and not self["operational-times"]:
+            reasons.append("operational-times is needed for current value in 'hours-not-known'")
+
+        if self["operational-times"].__len__() == 0 and not self["hours-not-known"]:
+            reasons.append("hours-not-known is needed for current value in 'operational-times'")
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -1257,6 +1319,18 @@ class FloorspaceDetails(SchemaNode):
         description="Net additional gross internal floorspace, in sqm",
     )
 
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if (self["use"] in ["sui"] and not self["specified-use"]) or (
+            self["use"] in ["other"] and not self["specified-use"]
+        ):
+            reasons.append("One or more matches required in field(s): use")
+
+        if reasons:
+            raise SchemaValidationException(reasons)
+
 
 class FloorspaceDetailsOutline(SchemaNode):
     _ref = "floorspace-details-outline"
@@ -1458,11 +1532,13 @@ class FloorspaceDetailsOutline(SchemaNode):
         reasons = []
 
         if self["is-floorspace-lost-known"] == True and not self["floorspace-lost"]:
-            reasons.append("floorspace-lost is needed when is-floorspace-lost-known is true")
+            reasons.append(
+                "floorspace-lost is needed for current value in 'is-floorspace-lost-known'"
+            )
 
         if self["is-total-gross-proposed-known"] == True and not self["total-gross-proposed"]:
             reasons.append(
-                "total-gross-proposed is needed when is-total-gross-proposed-known is true"
+                "total-gross-proposed is needed for current value in 'is-total-gross-proposed-known'"
             )
 
         if reasons:
@@ -1525,7 +1601,7 @@ class RoomDetails(SchemaNode):
         reasons = []
 
         if self["use-class-accommodation"] == "other" and not self["use-other"]:
-            reasons.append("use-other is needed when use-class-accommodation is true")
+            reasons.append("use-other is needed for current value in 'use-class-accommodation'")
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -1597,16 +1673,16 @@ class RoomDetailsOutline(SchemaNode):
         reasons = []
 
         if self["use-class-accommodation"] == "other" and not self["use-other"]:
-            reasons.append("use-other is needed when use-class-accommodation is true")
+            reasons.append("use-other is needed for current value in 'use-class-accommodation'")
 
         if self["is-existing-rooms-lost-known"] == True and not self["existing-rooms-lost"]:
             reasons.append(
-                "existing-rooms-lost is needed when is-existing-rooms-lost-known is true"
+                "existing-rooms-lost is needed for current value in 'is-existing-rooms-lost-known'"
             )
 
         if self["is-total-rooms-proposed-known"] == True and not self["total-rooms-proposed"]:
             reasons.append(
-                "total-rooms-proposed is needed when is-total-rooms-proposed-known is true"
+                "total-rooms-proposed is needed for current value in 'is-total-rooms-proposed-known'"
             )
 
         if reasons:
@@ -1669,6 +1745,26 @@ class NonResFloorspace(SchemaNode):
             schema_node_cls=RoomDetailsOutline,
         )
     )
+
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if self["non-residential-change"] == True and not self["floorspace-details"]:
+            reasons.append(
+                "floorspace-details is needed for current value in 'non-residential-change'"
+            )
+
+        if (
+            self["non-residential-change-outline"] == True
+            and not self["floorspace-details-outline"]
+        ):
+            reasons.append(
+                "floorspace-details-outline is needed for current value in 'non-residential-change-outline'"
+            )
+
+        if reasons:
+            raise SchemaValidationException(reasons)
 
 
 class NotifiedPerson(SchemaNode):
@@ -1793,6 +1889,27 @@ class OwnershipCerts(SchemaNode):
         description="The date the declaration was made",
     )
 
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if (
+            self["ownership-cert-option"] in ["certificate-c", "certificate-d"]
+            and not self["steps-taken"]
+        ):
+            reasons.append("steps-taken is needed for current value in 'ownership-cert-option'")
+
+        if (
+            self["ownership-cert-option"] in ["certificate-c", "certificate-d"]
+            and not self["newspaper-notices"]
+        ):
+            reasons.append(
+                "newspaper-notices is needed for current value in 'ownership-cert-option'"
+            )
+
+        if reasons:
+            raise SchemaValidationException(reasons)
+
 
 class PreAppAdvice(SchemaNode):
     _ref = "pre-app-advice"
@@ -1830,16 +1947,16 @@ class PreAppAdvice(SchemaNode):
         reasons = []
 
         if self["advice-sought"] == True and not self["officer-name"]:
-            reasons.append("officer-name is needed when advice-sought is true")
+            reasons.append("officer-name is needed for current value in 'advice-sought'")
 
         if self["advice-sought"] == True and not self["reference"]:
-            reasons.append("reference is needed when advice-sought is true")
+            reasons.append("reference is needed for current value in 'advice-sought'")
 
         if self["advice-sought"] == True and not self["advice-date"]:
-            reasons.append("advice-date is needed when advice-sought is true")
+            reasons.append("advice-date is needed for current value in 'advice-sought'")
 
         if self["advice-sought"] == True and not self["advice-summary"]:
-            reasons.append("advice-summary is needed when advice-sought is true")
+            reasons.append("advice-summary is needed for current value in 'advice-sought'")
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -2143,10 +2260,14 @@ class ProposalDetails(SchemaNode):
         reasons = []
 
         if self["proposal-started"] == True and not self["proposal-started-date"]:
-            reasons.append("proposal-started-date is needed when proposal-started is true")
+            reasons.append(
+                "proposal-started-date is needed for current value in 'proposal-started'"
+            )
 
         if self["proposal-completed"] == True and not self["proposal-completed-date"]:
-            reasons.append("proposal-completed-date is needed when proposal-completed is true")
+            reasons.append(
+                "proposal-completed-date is needed for current value in 'proposal-completed'"
+            )
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -2178,7 +2299,7 @@ class BedroomCount(SchemaNode):
         reasons = []
 
         if self["no-bedrooms-unknown"] == False and not self["no-of-bedrooms"]:
-            reasons.append("no-of-bedrooms is needed when no-bedrooms-unknown is true")
+            reasons.append("no-of-bedrooms is needed for current value in 'no-bedrooms-unknown'")
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -2205,6 +2326,16 @@ class UnitQuantities(SchemaNode):
     total_units = StringField(
         ref="total-units", display="Total units", description="Total number of units"
     )
+
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if self["units-unknown"] == False:
+            reasons.append("One or more matches required in field(s): units-unknown")
+
+        if reasons:
+            raise SchemaValidationException(reasons)
 
 
 class ResidentialUnitSummary(SchemaNode):
@@ -2508,6 +2639,18 @@ class ResUnits(SchemaNode):
         ref="net-change", display="Net change", description="Calculated net change in units"
     )
 
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if self["will-residential-units-change"] == True and not self["residential-unit-summary"]:
+            reasons.append(
+                "residential-unit-summary is needed for current value in 'will-residential-units-change'"
+            )
+
+        if reasons:
+            raise SchemaValidationException(reasons)
+
 
 class SiteArea(SchemaNode):
     _ref = "site-area"
@@ -2651,6 +2794,19 @@ class SiteVisit(SchemaNode):
         description="Details of specifically named contact for site visits",
         schema_node_cls=OtherContact,
     )
+
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if self["contact-type"] in ["applicant", "agent"] and not self["contact-reference"]:
+            reasons.append("contact-reference is needed for current value in 'contact-type'")
+
+        if self["contact-type"] == "other" and not self["other-contact"]:
+            reasons.append("other-contact is needed for current value in 'contact-type'")
+
+        if reasons:
+            raise SchemaValidationException(reasons)
 
 
 class File(SchemaNode):
@@ -5105,7 +5261,7 @@ class FoulSewage(SchemaNode):
 
         if self["has-new-disposal-arrangements"] == True and not self["foul-sewage-disposal-types"]:
             reasons.append(
-                "foul-sewage-disposal-types is needed when has-new-disposal-arrangements is true"
+                "foul-sewage-disposal-types is needed for current value in 'has-new-disposal-arrangements'"
             )
 
         if reasons:
@@ -5151,7 +5307,7 @@ class HazardousSubstance(SchemaNode):
 
         if self["hazardous-substance-type"] == "other" and not self["hazardous-substance-other"]:
             reasons.append(
-                "hazardous-substance-other is needed when hazardous-substance-type is true"
+                "hazardous-substance-other is needed for current value in 'hazardous-substance-type'"
             )
 
         if reasons:
@@ -5202,9 +5358,14 @@ class HazSubstances(SchemaNode):
         super().valid_node()
         reasons = []
 
+        if self["involves-hazardous-substances"] == "yes" and not self["substance-types"]:
+            reasons.append(
+                "substance-types is needed for current value in 'involves-hazardous-substances'"
+            )
+
         if self["hazardous-sub-consent-req"] == True and not self["hazardous-sub-consent-details"]:
             reasons.append(
-                "hazardous-sub-consent-details is needed when hazardous-sub-consent-req is true"
+                "hazardous-sub-consent-details is needed for current value in 'hazardous-sub-consent-req'"
             )
 
         if reasons:
@@ -5301,6 +5462,26 @@ class Materials(SchemaNode):
         )
     )
 
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if self["proposal-material-details"] == True and not self["building-elements"]:
+            reasons.append(
+                "building-elements is needed for current value in 'proposal-material-details'"
+            )
+
+        if (
+            self["providing-additional-material-information"] == True
+            and not self["supporting-documents"]
+        ):
+            reasons.append(
+                "supporting-documents is needed for current value in 'providing-additional-material-information'"
+            )
+
+        if reasons:
+            raise SchemaValidationException(reasons)
+
 
 class TradeEffluent(SchemaNode):
     _ref = "trade-effluent"
@@ -5323,7 +5504,7 @@ class TradeEffluent(SchemaNode):
         reasons = []
 
         if self["is-disposal-required"] == True and not self["description"]:
-            reasons.append("description is needed when is-disposal-required is true")
+            reasons.append("description is needed for current value in 'is-disposal-required'")
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -5368,6 +5549,21 @@ class TreesHedges(SchemaNode):
         description="Details of document showing location of trees and hedges to be removed or pruned",
         schema_node_cls=SupportingDocument,
     )
+
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if self["has-falling-trees-risk"] == True and not self["falling-trees-document"]:
+            reasons.append(
+                "falling-trees-document is needed for current value in 'has-falling-trees-risk'"
+            )
+
+        if self["tree-removal"] == True and not self["tree-removal-plan"]:
+            reasons.append("tree-removal-plan is needed for current value in 'tree-removal'")
+
+        if reasons:
+            raise SchemaValidationException(reasons)
 
 
 class ParkingSpace(SchemaNode):
@@ -5489,7 +5685,7 @@ class ParkingSpace(SchemaNode):
         reasons = []
 
         if self["parking-space-type"] == "other" and not self["vehicle-type-other"]:
-            reasons.append("vehicle-type-other is needed when parking-space-type is true")
+            reasons.append("vehicle-type-other is needed for current value in 'parking-space-type'")
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -5572,7 +5768,7 @@ class WasteStorageCollection(SchemaNode):
 
         if self["needs-waste-storage-area"] == True and not self["waste-storage-area-details"]:
             reasons.append(
-                "waste-storage-area-details is needed when needs-waste-storage-area is true"
+                "waste-storage-area-details is needed for current value in 'needs-waste-storage-area'"
             )
 
         if (
@@ -5580,7 +5776,7 @@ class WasteStorageCollection(SchemaNode):
             and not self["separate-recycling-arrangements-details"]
         ):
             reasons.append(
-                "separate-recycling-arrangements-details is needed when separate-recycling-arrangements is true"
+                "separate-recycling-arrangements-details is needed for current value in 'separate-recycling-arrangements'"
             )
 
         if reasons:
@@ -5803,7 +5999,7 @@ class CommunityConsultation(SchemaNode):
         reasons = []
 
         if self["have-consulted"] == True and not self["description"]:
-            reasons.append("description is needed when have-consulted is true")
+            reasons.append("description is needed for current value in 'have-consulted'")
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -5863,27 +6059,35 @@ class Demolition(SchemaNode):
         reasons = []
 
         if self["is-proposing-demolition"] == True and not self["is-total-demolition"]:
-            reasons.append("is-total-demolition is needed when is-proposing-demolition is true")
+            reasons.append(
+                "is-total-demolition is needed for current value in 'is-proposing-demolition'"
+            )
 
         if (
             self["is-proposing-demolition"] == True
             and not self["is-demolishing-building-in-curtilage"]
         ):
             reasons.append(
-                "is-demolishing-building-in-curtilage is needed when is-proposing-demolition is true"
+                "is-demolishing-building-in-curtilage is needed for current value in 'is-proposing-demolition'"
             )
 
         if self["is-proposing-demolition"] == True and not self["is-partial-demolition"]:
-            reasons.append("is-partial-demolition is needed when is-proposing-demolition is true")
+            reasons.append(
+                "is-partial-demolition is needed for current value in 'is-proposing-demolition'"
+            )
 
         if self["is-partial-demolition"] == True and not self["listed-building-volume"]:
-            reasons.append("listed-building-volume is needed when is-partial-demolition is true")
+            reasons.append(
+                "listed-building-volume is needed for current value in 'is-partial-demolition'"
+            )
 
         if self["is-partial-demolition"] == True and not self["demolition-volume"]:
-            reasons.append("demolition-volume is needed when is-partial-demolition is true")
+            reasons.append(
+                "demolition-volume is needed for current value in 'is-partial-demolition'"
+            )
 
         if self["is-partial-demolition"] == True and not self["part-built-date"]:
-            reasons.append("part-built-date is needed when is-partial-demolition is true")
+            reasons.append("part-built-date is needed for current value in 'is-partial-demolition'")
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -5919,7 +6123,9 @@ class ImmunityFromListing(SchemaNode):
         reasons = []
 
         if self["cert-of-immunity-sought"] == True and not self["application-result"]:
-            reasons.append("application-result is needed when cert-of-immunity-sought is true")
+            reasons.append(
+                "application-result is needed for current value in 'cert-of-immunity-sought'"
+            )
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -5980,7 +6186,12 @@ class LbAlter(SchemaNode):
         reasons = []
 
         if self["proposal-alter-lb"] == True and not self["proposal-alter-lb-types"]:
-            reasons.append("proposal-alter-lb-types is needed when proposal-alter-lb is true")
+            reasons.append(
+                "proposal-alter-lb-types is needed for current value in 'proposal-alter-lb'"
+            )
+
+        if self["proposal-alter-lb"] == True and not self["document-reference"]:
+            reasons.append("document-reference is needed for current value in 'proposal-alter-lb'")
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -6043,6 +6254,18 @@ class RelatedApplications(SchemaNode):
             schema_node_cls=RelatedApplicationDetails,
         )
     )
+
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if self["has-related-applications"] == True and not self["related-applications"]:
+            reasons.append(
+                "related-applications is needed for current value in 'has-related-applications'"
+            )
+
+        if reasons:
+            raise SchemaValidationException(reasons)
 
 
 class Lbc(SchemaNode):
@@ -6288,6 +6511,19 @@ class InterestDetails(SchemaNode):
             schema_node_cls=LdcInterestedPerson,
         )
     )
+
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if (self["applicant-interest"] == "lessee") or (self["applicant-interest"] == "occupier"):
+            reasons.append("One or more matches required in field(s): applicant-interest")
+
+        if self["applicant-interest"] == "none" and not self["interested-persons"]:
+            reasons.append("interested-persons is needed for current value in 'applicant-interest'")
+
+        if reasons:
+            raise SchemaValidationException(reasons)
 
 
 class LdcProposedWorkLb(SchemaNode):
@@ -6633,7 +6869,7 @@ class ProposalDetailsLdc(SchemaNode):
             and not self["proposal-building-operations-description"]
         ):
             reasons.append(
-                "proposal-building-operations-description is needed when proposal-incl-building-operations is true"
+                "proposal-building-operations-description is needed for current value in 'proposal-incl-building-operations'"
             )
 
         if (
@@ -6641,7 +6877,7 @@ class ProposalDetailsLdc(SchemaNode):
             and not self["proposal-change-of-use-description"]
         ):
             reasons.append(
-                "proposal-change-of-use-description is needed when proposal-incl-change-of-use is true"
+                "proposal-change-of-use-description is needed for current value in 'proposal-incl-change-of-use'"
             )
 
         if (
@@ -6649,7 +6885,7 @@ class ProposalDetailsLdc(SchemaNode):
             and not self["proposal-existing-use-description"]
         ):
             reasons.append(
-                "proposal-existing-use-description is needed when proposal-incl-change-of-use is true"
+                "proposal-existing-use-description is needed for current value in 'proposal-incl-change-of-use'"
             )
 
         if (
@@ -6657,7 +6893,7 @@ class ProposalDetailsLdc(SchemaNode):
             and not self["proposal-existing-use-stop-date"]
         ):
             reasons.append(
-                "proposal-existing-use-stop-date is needed when proposal-incl-change-of-use is true"
+                "proposal-existing-use-stop-date is needed for current value in 'proposal-incl-change-of-use'"
             )
 
         if reasons:
@@ -6847,10 +7083,10 @@ class GroundsExistingUse(SchemaNode):
         reasons = []
 
         if self["use"] == "sui" and not self["specified-use"]:
-            reasons.append("specified-use is needed when use is true")
+            reasons.append("specified-use is needed for current value in 'use'")
 
         if self["use"] == "other" and not self["specified-use"]:
-            reasons.append("specified-use is needed when use is true")
+            reasons.append("specified-use is needed for current value in 'use'")
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -7035,6 +7271,16 @@ class GroundsProposedUse(SchemaNode):
         description="Details of temporary use including duration and specific arrangements",
     )
     reason = StringField(ref="reason", display="Reason", description="A textual reason")
+
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if (self["use"] == "sui") or (self["use"] == "other"):
+            reasons.append("One or more matches required in field(s): use")
+
+        if reasons:
+            raise SchemaValidationException(reasons)
 
 
 class LdcProspectiveUse(SchemaNode):
@@ -7527,6 +7773,16 @@ class TreesOwnership(SchemaNode):
         )
     )
 
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if self["is-applicant-owner"] == False and not self["owner"]:
+            reasons.append("owner is needed for current value in 'is-applicant-owner'")
+
+        if reasons:
+            raise SchemaValidationException(reasons)
+
 
 class ConsentUnderTpo(SchemaNode):
     _ref = "consent-under-tpo"
@@ -7953,12 +8209,12 @@ class EligibilityProposal(SchemaNode):
 
         if self["is-dwelling-detached"] == False and not self["extension-on-attached-dwelling"]:
             reasons.append(
-                "extension-on-attached-dwelling is needed when is-dwelling-detached is true"
+                "extension-on-attached-dwelling is needed for current value in 'is-dwelling-detached'"
             )
 
         if self["is-dwelling-detached"] == False and not self["extension-below-terrace-roof"]:
             reasons.append(
-                "extension-below-terrace-roof is needed when is-dwelling-detached is true"
+                "extension-below-terrace-roof is needed for current value in 'is-dwelling-detached'"
             )
 
         if reasons:
@@ -8313,10 +8569,10 @@ class Use(SchemaNode):
         reasons = []
 
         if self["use"] == "sui" and not self["specified-use"]:
-            reasons.append("specified-use is needed when use is true")
+            reasons.append("specified-use is needed for current value in 'use'")
 
         if self["use"] == "other" and not self["specified-use"]:
-            reasons.append("specified-use is needed when use is true")
+            reasons.append("specified-use is needed for current value in 'use'")
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -8395,6 +8651,18 @@ class SiteInfo(SchemaNode):
             schema_node_cls=SupportingDocument,
         )
     )
+
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if self["known-constraints"].__len__() > 0 and not self["supporting-documents"]:
+            reasons.append(
+                "supporting-documents is needed for current value in 'known-constraints'"
+            )
+
+        if reasons:
+            raise SchemaValidationException(reasons)
 
 
 class Pip(SchemaNode):
@@ -8543,11 +8811,13 @@ class DescYourProposal(SchemaNode):
         reasons = []
 
         if self["has-development-started"] == True and not self["development-start-date"]:
-            reasons.append("development-start-date is needed when has-development-started is true")
+            reasons.append(
+                "development-start-date is needed for current value in 'has-development-started'"
+            )
 
         if self["has-development-completed"] == True and not self["development-completed-date"]:
             reasons.append(
-                "development-completed-date is needed when has-development-completed is true"
+                "development-completed-date is needed for current value in 'has-development-completed'"
             )
 
         if reasons:
@@ -8668,7 +8938,9 @@ class Parking(SchemaNode):
         reasons = []
 
         if self["is-existing-parking-affected"] == True and not self["description"]:
-            reasons.append("description is needed when is-existing-parking-affected is true")
+            reasons.append(
+                "description is needed for current value in 'is-existing-parking-affected'"
+            )
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -9087,6 +9359,16 @@ class OilGasOwnershipNotices(SchemaNode):
         description="The date the declaration was made",
     )
 
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if self["invalid-posted-notices"].__len__() > 0 and not self["steps-taken"]:
+            reasons.append("steps-taken is needed for current value in 'invalid-posted-notices'")
+
+        if reasons:
+            raise SchemaValidationException(reasons)
+
 
 class PlansDrawingsSupportingMaterials(SchemaNode):
     _ref = "plans-drawings-supporting-materials"
@@ -9229,7 +9511,9 @@ class RelatedPermissionDetails(SchemaNode):
         reasons = []
 
         if self["oilgas-permission-type"] == "variation-condition" and not self["condition-number"]:
-            reasons.append("condition-number is needed when oilgas-permission-type is true")
+            reasons.append(
+                "condition-number is needed for current value in 'oilgas-permission-type'"
+            )
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -9717,8 +10001,24 @@ class OilgasPermissionType(SchemaNode):
         super().valid_node()
         reasons = []
 
+        if (
+            self["oilgas-permission-types"]
+            in [
+                "renewal-unimplemented",
+                "renewal-temporary",
+                "extension-existing-site",
+                "variation-condition",
+                "romp-review",
+                "minerals-development",
+            ]
+            and not self["related-permissions"]
+        ):
+            reasons.append(
+                "related-permissions is needed for current value in 'oilgas-permission-types'"
+            )
+
         if self["will-consolidate-permissions"] == True and not self["details"]:
-            reasons.append("details is needed when will-consolidate-permissions is true")
+            reasons.append("details is needed for current value in 'will-consolidate-permissions'")
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -9815,7 +10115,7 @@ class DevType(SchemaNode):
             and not self["environmental-statement-reference"]
         ):
             reasons.append(
-                "environmental-statement-reference is needed when environmental-statement is true"
+                "environmental-statement-reference is needed for current value in 'environmental-statement'"
             )
 
         if reasons:
@@ -9843,7 +10143,9 @@ class VolAgreement(SchemaNode):
         reasons = []
 
         if self["draft-agreement-included"] == True and not self["agreement-summary"]:
-            reasons.append("agreement-summary is needed when draft-agreement-included is true")
+            reasons.append(
+                "agreement-summary is needed for current value in 'draft-agreement-included'"
+            )
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -10069,6 +10371,18 @@ class Eligibility(SchemaNode):
         )
     )
 
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if self["ownership-notification"] == True and not self["notified-persons"]:
+            reasons.append(
+                "notified-persons is needed for current value in 'ownership-notification'"
+            )
+
+        if reasons:
+            raise SchemaValidationException(reasons)
+
 
 class ReplacementDocument(SchemaNode):
     _ref = "replacement-document"
@@ -10117,6 +10431,18 @@ class NmAmendmentDetails(SchemaNode):
         display="Reason",
         description="Reason why applicant wants to make the amendment",
     )
+
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if self["is-substituting-document"] == True and not self["replacement-documents"]:
+            reasons.append(
+                "replacement-documents is needed for current value in 'is-substituting-document'"
+            )
+
+        if reasons:
+            raise SchemaValidationException(reasons)
 
 
 class NonMaterialAmendment(SchemaNode):
@@ -10251,7 +10577,15 @@ class AdvertLocation(SchemaNode):
         reasons = []
 
         if self["is-advert-in-place"] == True and not self["advert-placed-date"]:
-            reasons.append("advert-placed-date is needed when is-advert-in-place is true")
+            reasons.append("advert-placed-date is needed for current value in 'is-advert-in-place'")
+
+        if self["is-advert-in-place"] == True and not self["document-reference"]:
+            reasons.append("document-reference is needed for current value in 'is-advert-in-place'")
+
+        if self["is-replacement-advert"] == True and not self["document-reference"]:
+            reasons.append(
+                "document-reference is needed for current value in 'is-replacement-advert'"
+            )
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -10309,7 +10643,7 @@ class AdvertisementProposalType(SchemaNode):
 
         if self["advertisement-type"] == "other" and not self["advertisement-other-description"]:
             reasons.append(
-                "advertisement-other-description is needed when advertisement-type is true"
+                "advertisement-other-description is needed for current value in 'advertisement-type'"
             )
 
         if reasons:
@@ -10362,7 +10696,14 @@ class InterestInLand(SchemaNode):
         reasons = []
 
         if self["applicant-owns-land"] == False and not self["permission-obtained"]:
-            reasons.append("permission-obtained is needed when applicant-owns-land is true")
+            reasons.append(
+                "permission-obtained is needed for current value in 'applicant-owns-land'"
+            )
+
+        if (self["applicant-owns-land"] == False) and (self["permission-obtained"] == False):
+            reasons.append(
+                "All fields need to match for field(s): permission-obtained, applicant-owns-land"
+            )
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -10453,13 +10794,13 @@ class Advertisement(SchemaNode):
         reasons = []
 
         if self["illuminated"] == True and not self["illumination-method"]:
-            reasons.append("illumination-method is needed when illuminated is true")
+            reasons.append("illumination-method is needed for current value in 'illuminated'")
 
         if self["illuminated"] == True and not self["illuminance-level"]:
-            reasons.append("illuminance-level is needed when illuminated is true")
+            reasons.append("illuminance-level is needed for current value in 'illuminated'")
 
         if self["illuminated"] == True and not self["illumination-type"]:
-            reasons.append("illumination-type is needed when illuminated is true")
+            reasons.append("illumination-type is needed for current value in 'illuminated'")
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -11020,7 +11361,9 @@ class EligibilityExtension(SchemaNode):
         reasons = []
 
         if self["is-within-site-constraints"] == True and not self["site-constraints"]:
-            reasons.append("site-constraints is needed when is-within-site-constraints is true")
+            reasons.append(
+                "site-constraints is needed for current value in 'is-within-site-constraints'"
+            )
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -11140,7 +11483,9 @@ class PartDischarge(SchemaNode):
         reasons = []
 
         if self["is-discharging-part"] == True and not self["discharging-part-details"]:
-            reasons.append("discharging-part-details is needed when is-discharging-part is true")
+            reasons.append(
+                "discharging-part-details is needed for current value in 'is-discharging-part'"
+            )
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -11255,6 +11600,16 @@ class TreesLocation(SchemaNode):
             schema_node_cls=SiteLocation,
         )
     )
+
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if self["is-site-different"] == True and not self["site-locations"]:
+            reasons.append("site-locations is needed for current value in 'is-site-different'")
+
+        if reasons:
+            raise SchemaValidationException(reasons)
 
 
 class NoticeTreesInConArea(SchemaNode):
@@ -11544,6 +11899,21 @@ class UseWorksActivity(SchemaNode):
         description="A specified use if no applicable use class is available",
     )
 
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if (self["ldc-need"] in ["existing-use"] and not self["use"]) or (
+            self["ldc-need"] in ["breach-con-existing-use"] and not self["use"]
+        ):
+            reasons.append("One or more matches required in field(s): ldc-need")
+
+        if (self["use"] == "sui") or (self["use"] == "other"):
+            reasons.append("One or more matches required in field(s): use")
+
+        if reasons:
+            raise SchemaValidationException(reasons)
+
 
 class SupportingApplications(SchemaNode):
     _ref = "supporting-applications"
@@ -11692,12 +12062,12 @@ class InfoSupportLdc(SchemaNode):
 
         if self["has-existing-use-interrupted"] == True and not self["interruption-details"]:
             reasons.append(
-                "interruption-details is needed when has-existing-use-interrupted is true"
+                "interruption-details is needed for current value in 'has-existing-use-interrupted'"
             )
 
         if self["has-existing-use-changed"] == True and not self["existing-use-change-details"]:
             reasons.append(
-                "existing-use-change-details is needed when has-existing-use-changed is true"
+                "existing-use-change-details is needed for current value in 'has-existing-use-changed'"
             )
 
         if reasons:
@@ -11898,13 +12268,15 @@ class AgriForestDevElig(SchemaNode):
         reasons = []
 
         if self["is-necessary-for-agri"] == True and not self["details"]:
-            reasons.append("details is needed when is-necessary-for-agri is true")
+            reasons.append("details is needed for current value in 'is-necessary-for-agri'")
 
         if self["is-designed-agri"] == True and not self["design-details"]:
-            reasons.append("design-details is needed when is-designed-agri is true")
+            reasons.append("design-details is needed for current value in 'is-designed-agri'")
 
         if self["affects-heritage"] == True and not self["heritage-nature-impact-details"]:
-            reasons.append("heritage-nature-impact-details is needed when affects-heritage is true")
+            reasons.append(
+                "heritage-nature-impact-details is needed for current value in 'affects-heritage'"
+            )
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -12040,13 +12412,19 @@ class ProposedBuilding(SchemaNode):
         reasons = []
 
         if self["has-agri-building-2-yrs"] == True and not self["agri-building-area"]:
-            reasons.append("agri-building-area is needed when has-agri-building-2-yrs is true")
+            reasons.append(
+                "agri-building-area is needed for current value in 'has-agri-building-2-yrs'"
+            )
 
         if self["has-agri-building-2-yrs"] == True and not self["agri-building-distance"]:
-            reasons.append("agri-building-distance is needed when has-agri-building-2-yrs is true")
+            reasons.append(
+                "agri-building-distance is needed for current value in 'has-agri-building-2-yrs'"
+            )
 
         if self["house-livestock"] == True and not self["livestock-building-400m"]:
-            reasons.append("livestock-building-400m is needed when house-livestock is true")
+            reasons.append(
+                "livestock-building-400m is needed for current value in 'house-livestock'"
+            )
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -12163,6 +12541,19 @@ class LdcInterest(SchemaNode):
             schema_node_cls=LdcInterestedPerson,
         )
     )
+
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if self["applicant-interest"] in ["lessee", "occupier"] and not self["owner-details"]:
+            reasons.append("owner-details is needed for current value in 'applicant-interest'")
+
+        if self["applicant-interest"] == "none" and not self["interested-persons"]:
+            reasons.append("interested-persons is needed for current value in 'applicant-interest'")
+
+        if reasons:
+            raise SchemaValidationException(reasons)
 
 
 class WasteManagementOutline(SchemaNode):
@@ -12331,16 +12722,20 @@ class WasteManagementOutline(SchemaNode):
         reasons = []
 
         if self["is-total-capacity-known"] == True and not self["total-capacity"]:
-            reasons.append("total-capacity is needed when is-total-capacity-known is true")
+            reasons.append(
+                "total-capacity is needed for current value in 'is-total-capacity-known'"
+            )
 
         if self["is-total-capacity-known"] == True and not self["unit-type"]:
-            reasons.append("unit-type is needed when is-total-capacity-known is true")
+            reasons.append("unit-type is needed for current value in 'is-total-capacity-known'")
 
         if self["is-annual-throughput-known"] == True and not self["annual-throughput"]:
-            reasons.append("annual-throughput is needed when is-annual-throughput-known is true")
+            reasons.append(
+                "annual-throughput is needed for current value in 'is-annual-throughput-known'"
+            )
 
         if self["is-annual-throughput-known"] == True and not self["unit-type"]:
-            reasons.append("unit-type is needed when is-annual-throughput-known is true")
+            reasons.append("unit-type is needed for current value in 'is-annual-throughput-known'")
 
         if reasons:
             raise SchemaValidationException(reasons)

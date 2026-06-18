@@ -62,7 +62,6 @@ def application(application_ref):
             "application_types": [application_ref],
             "specification-profile": profile,
         },
-        "agent-contact": {"agent-reference": "hello agent"},  # test
     }
 
     form_tree.load(empty_app_fixture)
