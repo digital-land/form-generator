@@ -26,9 +26,9 @@ from schema.fields import (
 SHOW_WARNINGS = False
 
 
-class FormBuilder:
+class TemplatedBuilder:
     """
-    Render WTForm class from a template.
+    Render Jinja2 template.
     """
 
     def __init__(self, project_root):
@@ -284,8 +284,8 @@ def render_python(project_root, planning_spec):
     @return: (str) Python code - see package level README.md for details on how to use this.
     """
 
-    form_builder = FormBuilder(project_root=project_root)
-    py_output = form_builder.build(dict(document_header=True), "schema_tree_class.py.j2")
+    render = TemplatedBuilder(project_root=project_root)
+    py_output = render.build(dict(document_header=True), "schema_tree_class.py.j2")
 
     # assumption - refs are primary keys
     segment_register = defaultdict(dict)
@@ -315,6 +315,7 @@ def render_python(project_root, planning_spec):
 
         fields_simplified = []
         validation_simplified = []
+        out_of_scope_rules = []  # tuple (str, str) (subject_field, py_representation_of_set)
         for field_entry in getattr(schema_base_item, "field_entries", []):
 
             # field_x is a Field or Component
@@ -390,6 +391,18 @@ def render_python(project_root, planning_spec):
                 field_rules = build_rules(field_entry.origin)
                 validation_simplified.extend(field_rules)
 
+            applies_if = getattr(field_entry.origin, "applies_if")
+            if applies_if:
+                # very rigid expected format. Will raise KeyError if not as expected
+                app_type_field = "application-type"
+                app_types = [f"{safe_literal(a)}" for a in applies_if[app_type_field]["in"]]
+                v = ", ".join(app_types)
+                v_as_set = "{" + v + "}"
+
+                # tuple (str, str) (subject_field, py_representation_of_set)
+                scope_rule = (field_entry.origin.ref, v_as_set)
+                out_of_scope_rules.append(scope_rule)
+
         # schema_base_item is ComponentResolved or Module or Application
         # just vanity - I don't want the namespace in the class name unless it does overlap
         class_name = valid_class_name(schema_base_item.ref)
@@ -437,10 +450,11 @@ def render_python(project_root, planning_spec):
             "description": tidy_string(schema_base_item.description),
             "schema_fields": fields_simplified,
             "validation_rules": validation_simplified,
+            "out_of_scope_rules": out_of_scope_rules,
         }
-        py_output += form_builder.build(template_context, "schema_tree_class.py.j2")
+        py_output += render.build(template_context, "schema_tree_class.py.j2")
 
-    py_output += form_builder.build(dict(document_footer=True), "schema_tree_class.py.j2")
+    py_output += render.build(dict(document_footer=True), "schema_tree_class.py.j2")
 
     return py_output
 

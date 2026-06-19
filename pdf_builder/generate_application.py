@@ -15,6 +15,7 @@ from schema.fields import (
     AbstractSchemaField,
     BooleanField,
     EnumField,
+    HiddenStringField,
     RepeatedField,
     SchemaNodeField,
 )
@@ -224,6 +225,10 @@ class GenerateApplication:
 
             repeated = isinstance(attr_value, RepeatedField)
             inner = attr_value.schema_field if repeated else attr_value
+
+            if isinstance(inner, HiddenStringField):
+                # hidden values are not shown to the user
+                continue
 
             if isinstance(inner, SchemaNodeField):
                 elements.extend(self._node_flowables(inner.schema_node_cls, field=inner))

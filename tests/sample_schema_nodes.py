@@ -121,3 +121,18 @@ class Partnership(SchemaNode):
         r = self._root_node
         if r["person-a"].email and r["person-a"].email == r["person-b"].email:
             raise SchemaValidationException(["Duplicate email addresses"])
+
+
+class Animal(SchemaNode):
+    _ref = "animal"
+    keeper = SchemaNodeField(ref="keeper", schema_node_cls=ContactDetail)
+    name = StringField(ref="animal-name")
+    where = RepeatedField(schema_field=StringField(ref="location"))
+
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        if self.keeper.email == "bob@thezoo.com":
+            # everyone knows where Bob keeps his animals so field shouldn't be available
+            return de_scoped.union({"location"})
+        return de_scoped

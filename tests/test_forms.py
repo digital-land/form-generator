@@ -2,9 +2,8 @@ from flask import render_template_string
 
 from schema.planning_application import schema_fusion
 from tests.base import WebTestCase
-from tests.sample_schema_nodes import ContactDetail, FaxNumber, Partnership, PhoneNumber
+from tests.sample_schema_nodes import Animal, FaxNumber, ContactDetail, Partnership, PhoneNumber
 from web_viewer.forms import schema_auto_form, FormTree
-import unittest
 
 
 class TestForms(WebTestCase):
@@ -30,15 +29,25 @@ class TestForms(WebTestCase):
         self.assertIsNone(form.email.render_kw)
 
     def test_load_value(self):
-        """ """
-
+        """
+        Data values appear in the form.
+        """
         # No UI overrides
+        #
+        # ticket scheduled to fix this a work arount
+        # ------------------
         spec_classes = [ContactDetail, FaxNumber, Partnership, PhoneNumber]
         fusion_cls_map = schema_fusion(spec_classes, [])
         fusion_contact_details_cls = fusion_cls_map["Partnership"]
 
         form_tree = FormTree(root_node=fusion_contact_details_cls)
+        # ------------------
 
+        # this instead
+
+        # form_tree = FormTree(root_node=Partnership)
+
+        # ------------------
         # this should be in the same format as :meth:`FormTree.as_native`
         forced_value = {"person-a": {"fax-number": {"number": "123456789"}}}
         form_tree.load(forced_value)
@@ -106,3 +115,23 @@ class TestForms(WebTestCase):
         expected = '<input id="contact_pref-0" name="contact_pref" type="radio" value="email">'
         msg = "Node has email address so this should be in preferences enum field"
         self.assertIn(expected, actual, msg)
+
+    def test_repeated_values(self):
+        """
+        RepeatedField of a StringField renders button in HTML.
+        """
+        form_tree = FormTree(root_node=Animal)
+        forms = form_tree.collection()
+
+        template = (
+            '{% from "main/macros.html" import render_form_card %}'
+            "{% for form in forms %}{{ render_form_card(form) }}{% endfor %}"
+        )
+
+        html = render_template_string(
+            template,
+            forms=forms,
+        )
+
+        expected = 'title="Add another" onclick='
+        self.assertIn(expected, html)

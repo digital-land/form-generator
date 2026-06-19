@@ -50,4 +50,18 @@ class {{ class_name }}(SchemaNode):
             raise SchemaValidationException(reasons)
     {% endif %}
 
+    {% if out_of_scope_rules %}
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        {%for subject_field, app_type_set_repr in out_of_scope_rules %}
+        if app_types.isdisjoint({{app_type_set_repr}}):
+            de_scoped.add("{{subject_field}}")
+        {%endfor%}
+
+        return de_scoped
+    {% endif %}
+
 {% endif %}

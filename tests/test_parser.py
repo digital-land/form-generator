@@ -28,7 +28,7 @@ class TestSchemaTreeParser(unittest.TestCase):
         parser = SchemaTreeParser(schema_node_cls=PhoneNumber)
         with self.assertRaises(SchemaValidationException) as ctx:
             parser.load_json('{"colour": "red", "number": "07700000000"}')
-        self.assertEqual(["Unknown field: 'colour'"], ctx.exception.reasons)
+        self.assertEqual(["Field 'colour' not found in 'phonenumber'"], ctx.exception.reasons)
 
     def test_set_non_abstract_schema_field(self):
         """
@@ -37,7 +37,7 @@ class TestSchemaTreeParser(unittest.TestCase):
         parser = SchemaTreeParser(schema_node_cls=PhoneNumber)
         with self.assertRaises(SchemaValidationException) as ctx:
             parser.load_json('{"_ref": "naughty attempt to modify non-field variable"}')
-        self.assertEqual(["Unknown field: '_ref'"], ctx.exception.reasons)
+        self.assertEqual(["Field '_ref' not found in 'phonenumber'"], ctx.exception.reasons)
 
     def test_simple_descendant(self):
         parser = SchemaTreeParser(schema_node_cls=ContactDetail)

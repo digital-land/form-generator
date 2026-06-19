@@ -8,6 +8,7 @@ from schema.fields import (
     StringField,
 )
 from tests.sample_schema_nodes import (
+    Animal,
     ContactDetail,
     ContactPreferences,
     PhoneNumber,
@@ -59,7 +60,13 @@ class TestSchemaTree(unittest.TestCase):
             # PhoneNumber has no 'bad' field; both items should be reported
             ContactDetail().load_payload({"phones": [{"bad": "x"}, {"worse": "y"}]})
 
-        self.assertEqual(["Unknown field: 'bad'", "Unknown field: 'worse'"], ctx.exception.reasons)
+        self.assertEqual(
+            [
+                "Field 'bad' not found in 'phonenumber'",
+                "Field 'worse' not found in 'phonenumber'",
+            ],
+            ctx.exception.reasons,
+        )
 
     def test_schema_fields(self):
 
@@ -143,3 +150,26 @@ class TestSchemaTree(unittest.TestCase):
 
         actual = node.by_ref("person-a.fax-number.number")
         self.assertEqual("0123", actual)
+
+    def test_out_of_scope_fields(self):
+        """
+        Values in the tree determine which fields are usable (i.e. get/set)
+        """
+        payload = {
+            "keeper": {"email": "me@somewhere.co.uk"},
+            "animal-name": "Pangolin",
+            "location": ["Nocturnal animals"],
+        }
+        node = Animal()
+
+        # valid - no exception thrown
+        node.load_payload(payload)
+
+        # rule takes 'location' field out of scope when Bob's email is used.
+        payload["keeper"]["email"] = "bob@thezoo.com"
+
+        with self.assertRaises(SchemaValidationException) as ctx:
+            node.load_payload(payload)
+
+        expected = ["Field 'location' out of scope in 'animal'"]
+        self.assertEqual(expected, ctx.exception.reasons)
