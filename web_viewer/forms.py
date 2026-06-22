@@ -102,7 +102,9 @@ class FormTree:
 
     def load(self, payload):
         """
-        Setup field values in a form using a schema payload.
+        Set field values in a form using a schema payload.
+
+        Don't load user values from a `Form` like this. FlaskWtf does this with POSTs.
 
         @param payload: (dict) @see :meth:`SchemaNode.load_payload`
         """
@@ -129,8 +131,9 @@ class FormTree:
                         # this is likely to be a list
                         raise NotImplementedError("TODO - can't update repeated values")
 
-                    # scalar leaf - WTForms prefixes carry a trailing hyphen
-                    lookup.append((f"{path}-", key, value))
+                    # scalar leaf - WTForms prefixes carry a trailing hyphen when not empty str
+                    path_wtf = f"{path}-" if path != "" else path
+                    lookup.append((path_wtf, key, value))
 
         walk(self.loaded_values, "")
 
@@ -148,15 +151,16 @@ class FormTree:
 
         root_node = self.root_node()
 
+        # Load data into SchemaNode - values needed here so nodes can read from the tree to make
+        # validation decisions.
         if self.loaded_values:
             root_node.load_payload(self.loaded_values)
 
         collection = self._collection(node_cls=root_node.__class__)
 
         lookup_d = self._loaded_as_prefixed()
+        prefix_scoreboard = set(lookup_d.keys())
         for form in collection:
-
-            # print(form._prefix)
 
             # set values given to :meth:`load`
             for key, value in lookup_d.get(form._prefix, []):
@@ -167,6 +171,15 @@ class FormTree:
 
                 form_field = getattr(form, key)
                 form_field.data = value
+                prefix_scoreboard.discard(form._prefix)
+
+        if prefix_scoreboard:
+
+            # if a prefix is used but the values within lookup_d aren't found a KeyError will be
+            # raised above. This check is to ensure all expected prefixes have entered the key
+            # check.
+            unused_prefixes = ", ".join(prefix_scoreboard)
+            raise ValueError(f"Unused prefixes '{unused_prefixes}'. Corresponding form not found.")
 
         return collection
 
@@ -259,7 +272,15 @@ class FormTree:
                 is_repeated = render_kw and render_kw.get("data-repeated", "false") == "true"
 
                 if is_repeated:
-                    d[field.short_name] = [field.data]
+                    # TODO - when web forms support user adding repeated elements this section can
+                    # be tidied and made more consistent. At present, fields come through as both
+                    # lists (within field.data) and as just a value. Use the form field's KW markup
+                    # and trust schema validation to catch errors here.
+                    if isinstance(field.data, list):
+                        d[field.short_name] = field.data
+                    else:
+                        d[field.short_name] = [field.data]
+
                 else:
                     d[field.short_name] = field.data
 

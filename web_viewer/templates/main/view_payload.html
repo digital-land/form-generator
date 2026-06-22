@@ -1,13 +1,24 @@
 {% extends "base.html" %}
-{% block title %}{{ application_ref }} payload{% endblock %}
+{% block title %}{%if application_ref %}{{ application_ref }} payload{%else%}Evaulate payload{%endif%}{% endblock %}
 {% block content %}
 
+{%if application_ref %}
 <div class="d-flex align-items-center gap-2 mb-4">
   <a href="{{ url_for('main.application', application_ref=application_ref) }}" class="text-muted text-decoration-none">&larr; Back to form</a>
 </div>
+{%endif%}
 
+{% if reasons is defined %}
 <h3 class="mb-4">View payload</h3>
+{% else %}
+<h3 class="mb-4">Evaluate payload</h3>
 
+<p>Paste a JSON payload here.</p>
+
+<p>Example payloads are available in the <a href="https://github.com/digital-land/planning-application-data-specification/tree/main/specification/example">planning-application-data-specification</a> github repo.</p>
+{% endif %}
+
+{% if reasons is defined %}
 <div class="card mb-4">
   <div class="card-header">
     <h5 class="mb-0">Validation</h5>
@@ -28,10 +39,18 @@
     {% endif %}
   </div>
 </div>
+{% endif %}
 
-<div class="mb-4">
-  <label for="payload" class="form-label fw-semibold">Payload</label>
-  <textarea id="payload" class="form-control font-monospace" rows="24" readonly>{{ payload }}</textarea>
-</div>
+<form method="post" action="{{ url_for('main.evaluate_payload') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="mb-4">
+    <label for="payload" class="form-label fw-semibold">Payload</label>
+    <textarea id="payload" name="payload" class="form-control font-monospace" rows="24">{{ payload }}</textarea>
+  </div>
+
+  <div class="mb-4">
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </div>
+</form>
 
 {% endblock %}
