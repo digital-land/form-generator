@@ -332,6 +332,16 @@ class SupportingDocument(SchemaNode):
         description="Additional details or information about an item",
     )
 
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if app_types.isdisjoint({"pip"}):
+            de_scoped.add("details")
+
+        return de_scoped
+
 
 class BngDetails(SchemaNode):
     _ref = "bng-details"
@@ -460,6 +470,31 @@ class Bng(SchemaNode):
         if reasons:
             raise SchemaValidationException(reasons)
 
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if app_types.isdisjoint({"hh"}):
+            de_scoped.add("bng-exempt")
+
+        if app_types.isdisjoint(
+            {"full", "technical-details-consent", "outline", "demolition-con-area"}
+        ):
+            de_scoped.add("bng-condition-applies")
+
+        if app_types.isdisjoint(
+            {"full", "technical-details-consent", "outline", "demolition-con-area"}
+        ):
+            de_scoped.add("bng-condition-exemption-reasons")
+
+        if app_types.isdisjoint(
+            {"full", "technical-details-consent", "outline", "demolition-con-area"}
+        ):
+            de_scoped.add("bng-details")
+
+        return de_scoped
+
 
 class Checklist(SchemaNode):
     _ref = "checklist"
@@ -510,6 +545,73 @@ class ConflictOfInterest(SchemaNode):
 
         if reasons:
             raise SchemaValidationException(reasons)
+
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if app_types.isdisjoint(
+            {
+                "hh",
+                "full",
+                "technical-details-consent",
+                "outline",
+                "reserved-matters",
+                "demolition-con-area",
+                "lbc",
+                "advertising",
+                "ldc",
+                "consent-under-tpo",
+                "non-material-amendment",
+                "pip",
+                "extraction-oil-gas",
+                "notice-trees-in-con-area",
+            }
+        ):
+            de_scoped.add("conflict-to-declare")
+
+        if app_types.isdisjoint(
+            {
+                "hh",
+                "full",
+                "technical-details-consent",
+                "outline",
+                "reserved-matters",
+                "demolition-con-area",
+                "lbc",
+                "advertising",
+                "ldc",
+                "consent-under-tpo",
+                "non-material-amendment",
+                "pip",
+                "extraction-oil-gas",
+                "notice-trees-in-con-area",
+            }
+        ):
+            de_scoped.add("person-reference")
+
+        if app_types.isdisjoint(
+            {
+                "hh",
+                "full",
+                "technical-details-consent",
+                "outline",
+                "reserved-matters",
+                "demolition-con-area",
+                "lbc",
+                "advertising",
+                "ldc",
+                "consent-under-tpo",
+                "non-material-amendment",
+                "pip",
+                "extraction-oil-gas",
+                "notice-trees-in-con-area",
+            }
+        ):
+            de_scoped.add("conflict-details")
+
+        return de_scoped
 
 
 class Declaration(SchemaNode):
@@ -1213,6 +1315,21 @@ class HrsOperation(SchemaNode):
         description="Any additional information (such as hours of use of other machinery within the site-generators, pumps, etc)",
     )
 
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if app_types.isdisjoint(
+            {"full", "technical-details-consent", "outline", "extraction-oil-gas"}
+        ):
+            de_scoped.add("hours-of-operation")
+
+        if app_types.isdisjoint({"extraction-oil-gas"}):
+            de_scoped.add("additional-information")
+
+        return de_scoped
+
 
 class FloorspaceDetails(SchemaNode):
     _ref = "floorspace-details"
@@ -1862,6 +1979,31 @@ class NonResFloorspace(SchemaNode):
         if reasons:
             raise SchemaValidationException(reasons)
 
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if app_types.isdisjoint({"full", "technical-details-consent"}):
+            de_scoped.add("non-residential-change")
+
+        if app_types.isdisjoint({"outline"}):
+            de_scoped.add("non-residential-change-outline")
+
+        if app_types.isdisjoint({"full", "technical-details-consent"}):
+            de_scoped.add("floorspace-details")
+
+        if app_types.isdisjoint({"outline"}):
+            de_scoped.add("floorspace-details-outline")
+
+        if app_types.isdisjoint({"full", "technical-details-consent"}):
+            de_scoped.add("room-details")
+
+        if app_types.isdisjoint({"outline"}):
+            de_scoped.add("room-details-outline")
+
+        return de_scoped
+
 
 class NotifiedPerson(SchemaNode):
     _ref = "notified-person"
@@ -2012,6 +2154,26 @@ class OwnershipCerts(SchemaNode):
 
         if reasons:
             raise SchemaValidationException(reasons)
+
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if app_types.isdisjoint(
+            {"hh", "full", "technical-details-consent", "outline", "demolition-con-area", "s73"}
+        ):
+            de_scoped.add("agricultural-tenants")
+
+        if app_types.isdisjoint(
+            {"hh", "full", "technical-details-consent", "outline", "demolition-con-area", "s73"}
+        ):
+            de_scoped.add("owners-and-tenants")
+
+        if app_types.isdisjoint({"lbc"}):
+            de_scoped.add("lbc-owners")
+
+        return de_scoped
 
 
 class PreAppAdvice(SchemaNode):
@@ -2391,6 +2553,90 @@ class ProposalDetails(SchemaNode):
         if reasons:
             raise SchemaValidationException(reasons)
 
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if app_types.isdisjoint(
+            {
+                "advertising",
+                "demolition-con-area",
+                "full",
+                "hh",
+                "lbc",
+                "outline",
+                "technical-details-consent",
+            }
+        ):
+            de_scoped.add("description")
+
+        if app_types.isdisjoint({"outline", "reserved-matters"}):
+            de_scoped.add("reserved-matters")
+
+        if app_types.isdisjoint({"reserved-matters"}):
+            de_scoped.add("related-application")
+
+        if app_types.isdisjoint(
+            {
+                "advertising",
+                "demolition-con-area",
+                "full",
+                "hh",
+                "lbc",
+                "outline",
+                "technical-details-consent",
+            }
+        ):
+            de_scoped.add("proposal-started")
+
+        if app_types.isdisjoint(
+            {
+                "advertising",
+                "demolition-con-area",
+                "full",
+                "hh",
+                "lbc",
+                "outline",
+                "technical-details-consent",
+            }
+        ):
+            de_scoped.add("proposal-started-date")
+
+        if app_types.isdisjoint(
+            {
+                "advertising",
+                "demolition-con-area",
+                "full",
+                "hh",
+                "lbc",
+                "outline",
+                "technical-details-consent",
+            }
+        ):
+            de_scoped.add("proposal-completed")
+
+        if app_types.isdisjoint(
+            {
+                "advertising",
+                "demolition-con-area",
+                "full",
+                "hh",
+                "lbc",
+                "outline",
+                "technical-details-consent",
+            }
+        ):
+            de_scoped.add("proposal-completed-date")
+
+        if app_types.isdisjoint({"technical-details-consent"}):
+            de_scoped.add("pip-reference")
+
+        if app_types.isdisjoint({"full", "technical-details-consent"}):
+            de_scoped.add("is-psi")
+
+        return de_scoped
+
 
 class BedroomCount(SchemaNode):
     _ref = "bedroom-count"
@@ -2460,6 +2706,18 @@ class UnitQuantities(SchemaNode):
 
         if reasons:
             raise SchemaValidationException(reasons)
+
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if app_types.isdisjoint(
+            {"full", "outline", "outline-all", "outline-some", "technical-details-consent"}
+        ):
+            de_scoped.add("units-unknown")
+
+        return de_scoped
 
 
 class ResidentialUnitSummary(SchemaNode):
@@ -5322,6 +5580,32 @@ class AccessRightsOfWay(SchemaNode):
         )
     )
 
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if app_types.isdisjoint({"full", "hh", "outline", "technical-details-consent"}):
+            de_scoped.add("change-right-of-way")
+
+        if app_types.isdisjoint(
+            {"full", "extraction-oil-gas", "outline", "technical-details-consent"}
+        ):
+            de_scoped.add("new-right-of-way")
+
+        if app_types.isdisjoint(
+            {"full", "extraction-oil-gas", "outline", "technical-details-consent"}
+        ):
+            de_scoped.add("new-public-road")
+
+        if app_types.isdisjoint({"extraction-oil-gas"}):
+            de_scoped.add("temp-right-of-way")
+
+        if app_types.isdisjoint({"extraction-oil-gas"}):
+            de_scoped.add("future-new-right-of-way")
+
+        return de_scoped
+
 
 class BioGeoArchCon(SchemaNode):
     _ref = "bio-geo-arch-con"
@@ -5368,6 +5652,16 @@ class BioGeoArchCon(SchemaNode):
             EnumOption(key="adjacent-to-site", label="On adjacent site", description=""),
         ],
     )
+
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if app_types.isdisjoint({"extraction-oil-gas"}):
+            de_scoped.add("archaeological-features-impact")
+
+        return de_scoped
 
 
 class FoulSewage(SchemaNode):
@@ -5444,6 +5738,22 @@ class FoulSewage(SchemaNode):
 
         if reasons:
             raise SchemaValidationException(reasons)
+
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if app_types.isdisjoint({"extraction-oil-gas"}):
+            de_scoped.add("produce-foul-sewage")
+
+        if app_types.isdisjoint({"full", "outline-some", "technical-details-consent"}):
+            de_scoped.add("connect-to-drainage-system")
+
+        if app_types.isdisjoint({"extraction-oil-gas"}):
+            de_scoped.add("connect-to-drainage-system-oil-gas")
+
+        return de_scoped
 
 
 class HazardousSubstance(SchemaNode):
@@ -5554,6 +5864,25 @@ class HazSubstances(SchemaNode):
 
         if reasons:
             raise SchemaValidationException(reasons)
+
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if app_types.isdisjoint({"full", "technical-details-consent", "outline"}):
+            de_scoped.add("involves-hazardous-substances")
+
+        if app_types.isdisjoint({"full", "technical-details-consent", "outline"}):
+            de_scoped.add("substance-types")
+
+        if app_types.isdisjoint({"extraction-oil-gas"}):
+            de_scoped.add("hazardous-sub-consent-req")
+
+        if app_types.isdisjoint({"extraction-oil-gas"}):
+            de_scoped.add("hazardous-sub-consent-details")
+
+        return de_scoped
 
 
 class BuildingElement(SchemaNode):
@@ -5757,6 +6086,35 @@ class TreesHedges(SchemaNode):
         if reasons:
             raise SchemaValidationException(reasons)
 
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if app_types.isdisjoint(
+            {"full", "technical-details-consent", "outline-some", "extraction-oil-gas"}
+        ):
+            de_scoped.add("trees-on-site")
+
+        if app_types.isdisjoint(
+            {"full", "technical-details-consent", "outline-some", "extraction-oil-gas"}
+        ):
+            de_scoped.add("trees-on-adj-land")
+
+        if app_types.isdisjoint({"hh"}):
+            de_scoped.add("has-falling-trees-risk")
+
+        if app_types.isdisjoint({"hh"}):
+            de_scoped.add("falling-trees-document")
+
+        if app_types.isdisjoint({"hh"}):
+            de_scoped.add("tree-removal")
+
+        if app_types.isdisjoint({"hh"}):
+            de_scoped.add("tree-removal-plan")
+
+        return de_scoped
+
 
 class ParkingSpace(SchemaNode):
     _ref = "parking-space"
@@ -5886,6 +6244,16 @@ class ParkingSpace(SchemaNode):
         if reasons:
             raise SchemaValidationException(reasons)
 
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if app_types.isdisjoint({"outline-some"}):
+            de_scoped.add("unknown-proposed")
+
+        return de_scoped
+
 
 class VehicleParking(SchemaNode):
     _ref = "vehicle-parking"
@@ -5982,6 +6350,25 @@ class WasteStorageCollection(SchemaNode):
 
         if reasons:
             raise SchemaValidationException(reasons)
+
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if app_types.isdisjoint({"full", "technical-details-consent"}):
+            de_scoped.add("needs-waste-storage-area")
+
+        if app_types.isdisjoint({"outline"}):
+            de_scoped.add("needs-waste-storage-area-outline")
+
+        if app_types.isdisjoint({"full", "technical-details-consent"}):
+            de_scoped.add("separate-recycling-arrangements")
+
+        if app_types.isdisjoint({"outline"}):
+            de_scoped.add("separate-recycling-arrangements-outline")
+
+        return de_scoped
 
 
 class TechnicalDetailsConsent(SchemaNode):
@@ -7919,6 +8306,19 @@ class TreeDetails(SchemaNode):
         description="Details of replanting arrangements if applicable",
     )
 
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if app_types.isdisjoint({"consent-under-tpo"}):
+            de_scoped.add("reason")
+
+        if app_types.isdisjoint({"consent-under-tpo"}):
+            de_scoped.add("replanting-description")
+
+        return de_scoped
+
 
 class TreeWorkDetails(SchemaNode):
     _ref = "tree-work-details"
@@ -7981,6 +8381,22 @@ class TreesAdditional(SchemaNode):
         ),
     )
 
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if app_types.isdisjoint({"consent-under-tpo"}):
+            de_scoped.add("condition-concerns")
+
+        if app_types.isdisjoint({"consent-under-tpo"}):
+            de_scoped.add("causing-subsidence")
+
+        if app_types.isdisjoint({"consent-under-tpo"}):
+            de_scoped.add("causing-structural-damage")
+
+        return de_scoped
+
 
 class Owner(SchemaNode):
     _ref = "owner"
@@ -8033,6 +8449,19 @@ class TreesOwnership(SchemaNode):
 
         if reasons:
             raise SchemaValidationException(reasons)
+
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if app_types.isdisjoint({"notice-trees-in-con-area", "consent-under-tpo"}):
+            de_scoped.add("is-applicant-owner")
+
+        if app_types.isdisjoint({"notice-trees-in-con-area", "consent-under-tpo"}):
+            de_scoped.add("owner")
+
+        return de_scoped
 
 
 class ConsentUnderTpo(SchemaNode):
@@ -9118,6 +9547,37 @@ class DescYourProposal(SchemaNode):
 
         if reasons:
             raise SchemaValidationException(reasons)
+
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if app_types.isdisjoint({"s73", "approval-condition", "non-material-amendment"}):
+            de_scoped.add("related-application")
+
+        if app_types.isdisjoint({"s73", "approval-condition"}):
+            de_scoped.add("condition-numbers")
+
+        if app_types.isdisjoint({"non-material-amendment"}):
+            de_scoped.add("original-application-type")
+
+        if app_types.isdisjoint({"non-material-amendment"}):
+            de_scoped.add("is-householder-development")
+
+        if app_types.isdisjoint({"s73", "approval-condition"}):
+            de_scoped.add("has-development-started")
+
+        if app_types.isdisjoint({"s73", "approval-condition"}):
+            de_scoped.add("development-start-date")
+
+        if app_types.isdisjoint({"s73", "approval-condition"}):
+            de_scoped.add("has-development-completed")
+
+        if app_types.isdisjoint({"s73", "approval-condition"}):
+            de_scoped.add("development-completed-date")
+
+        return de_scoped
 
 
 class S73(SchemaNode):
@@ -11833,6 +12293,16 @@ class DischargeCon(SchemaNode):
         description="Description or list of materials/details that are being submitted for approval",
         required=True,
     )
+
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if app_types.isdisjoint({"approval-condition"}):
+            de_scoped.add("description-list")
+
+        return de_scoped
 
 
 class PartDischarge(SchemaNode):
