@@ -52,6 +52,22 @@ The [web app](web_client) is a Flask app that can be used to navigate the planni
 [PDFs](pdf_builder) are also built with the *base schema classes*.
 
 
+## Deployment
+
+A Dockerfile builds the web_viewer into deployable container.
+
+The web_viewer uses the [schema/planning_application_specification.py](schema/planning_application_specification.py) included in this repo (i.e. it doesn't build from the external [schema specification github repo](https://github.com/digital-land/planning-application-data-specification/tree/main/specification).
+
+The web_viewer does include dynamic building of PDFs. 
+
+Build and run locally-
+
+```shell
+docker build -t forms-generator .
+docker run -p 2121:2121 forms-generator
+```
+
+
 ## Licence
 
 The software in this project is open source and covered by the [LICENSE](LICENSE) file.
