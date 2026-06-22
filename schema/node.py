@@ -72,24 +72,6 @@ class SchemaNode:
 
         return descendants
 
-    def descendant_nodes(self):
-        """
-        Instance version of descendant_schema_nodes
-        """
-        cls = self.__class__
-        descendants = []
-        for attr_name, attr_field in cls.schema_fields().items():
-            if isinstance(attr_field, SchemaNodeField):
-                v = getattr(self, attr_name)
-                descendants.append((attr_field, v))
-            elif isinstance(attr_field, RepeatedField) and isinstance(
-                attr_field.schema_field, SchemaNodeField
-            ):
-                for v in getattr(self, attr_name):
-                    descendants.append((attr_field, v))
-
-        return descendants
-
     def load_payload(self, payload):
         """
         Recursive resolve
@@ -103,8 +85,8 @@ class SchemaNode:
                 # `__setitem__` resolves the key to a field and routes through the descriptor so
                 # the value is validated
                 self[k] = v
-            except KeyError:
-                failure_reasons.append(f"Unknown field: '{k}'")
+            except KeyError as e:
+                failure_reasons.append(e.args[0])
             except SchemaValidationException as e:
                 # descendant fields validate their own values; aggregate their reasons
                 failure_reasons.extend(e.reasons)
@@ -187,22 +169,16 @@ class SchemaNode:
         node.phone and node['phone-number'] should be the same thing. The former is the class
         attribute, the latter is the field's 'ref'.
         """
-        # uses :meth:`schema_fields` so multiple inheritance safe
-        for attr_name, field in self.schema_fields().items():
+        refs = self.schema_refs()
+        if key in refs:
 
-            # A `RepeatedField` can carry its ref on the wrapped field.
-            ref = field.ref
-            if ref is None and isinstance(field, RepeatedField):
-                ref = field.schema_field.ref
+            if key in self.out_of_scope_fields:
+                raise KeyError(f"Field '{key}' out of scope in '{self._ref}'")
 
-            if ref is None:
-                # class variable the `Field` is assigned to always exists
-                ref = attr_name
+            attr_name, _ = refs[key]
+            return getattr(self, attr_name)
 
-            if ref == key:
-                return getattr(self, attr_name)
-
-        raise KeyError(f"Field '{key}' not found in '{self.__class__.__name__}'")
+        raise KeyError(f"Field '{key}' not found in '{self._ref}'")
 
     def __setitem__(self, key, value):
         """
@@ -217,22 +193,16 @@ class SchemaNode:
         @raise KeyError if no field matches the key.
         @raise SchemaValidationException if the field or node rejects the value.
         """
-        for attr_name, field in self.schema_fields().items():
+        for ref, (attr_name, _field) in self.schema_refs().items():
+            if key in (ref, attr_name):
 
-            # A `RepeatedField` can carry its ref on the wrapped field.
-            ref = field.ref
-            if ref is None and isinstance(field, RepeatedField):
-                ref = field.schema_field.ref
+                if key in self.out_of_scope_fields:
+                    raise KeyError(f"Field '{key}' out of scope in '{self._ref}'")
 
-            if ref is None:
-                # class variable the `Field` is assigned to always exists
-                ref = attr_name
-
-            if key in [ref, attr_name]:
                 setattr(self, attr_name, value)
                 return
 
-        raise KeyError(f"Field '{key}' not found in '{self.__class__.__name__}'")
+        raise KeyError(f"Field '{key}' not found in '{self._ref}'")
 
     def by_ref(self, path):
         """
@@ -272,6 +242,19 @@ class SchemaNode:
             node = node._parent_node
 
         return node
+
+    @property
+    def out_of_scope_fields(self):
+        """
+        Hook to be overridden by subclasses that use context to determine if a field can be used.
+
+        A field that is 'out of scope' can't be read or written to.
+
+        The context is typically the value of a field somewhere in the schema node tree.
+
+        @return: a set of str where str is a field's `ref`
+        """
+        return set()
 
 
 def sub_class_search(target_cls):

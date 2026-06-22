@@ -2,11 +2,13 @@ from collections import defaultdict
 
 from flask_wtf import FlaskForm
 from wtforms import BooleanField as WTFBooleanField
+from wtforms import HiddenField as WTFHiddenField
 from wtforms import RadioField as WTFRadioField
 from wtforms import StringField as WTFStringField
 
 from schema.fields import BooleanField as SchemaBooleanField
 from schema.fields import EnumField as SchemaEnumField
+from schema.fields import HiddenStringField as SchemaHiddenStringField
 from schema.fields import RepeatedField as SchemaRepeatedField
 from schema.fields import StringField as SchemaStringField
 from schema.fields import SchemaNodeField as SchemaSchemaNodeField
@@ -30,6 +32,9 @@ def _map_schema_field(schema_field, label, render_kw=None):
         return None
     elif isinstance(schema_field, SchemaBooleanField):
         return WTFBooleanField(label, render_kw=render_kw)
+    elif isinstance(schema_field, SchemaHiddenStringField):
+        # subclass of SchemaStringField - must be checked first
+        return WTFHiddenField(label, render_kw=render_kw)
     elif isinstance(schema_field, SchemaStringField):
         return WTFStringField(label, render_kw=render_kw)
     elif isinstance(schema_field, SchemaEnumField):
@@ -146,7 +151,7 @@ class FormTree:
         if self.loaded_values:
             root_node.load_payload(self.loaded_values)
 
-        collection = self._collection(node=root_node)
+        collection = self._collection(node_cls=root_node.__class__)
 
         lookup_d = self._loaded_as_prefixed()
         for form in collection:
@@ -165,21 +170,32 @@ class FormTree:
 
         return collection
 
-    def _collection(self, node, prefix=None):
+    def _collection(self, node_cls, prefix=None):
         """
-        Internal tree traverse to build forms.
+        Schema node tree traverse. Build a form from each schema node.
+
+        Note that the class defines the tree. An object of the class may not use all fields so
+        shouldn't be used to build forms. The data should be added after the tree has been built
+        from the class hierarchy.
+
+        @param node_cls: subclass os `SchemaNode`, not object
         """
         if prefix is None:
             prefix = ""
 
-        form = schema_auto_form(node.__class__)(prefix=prefix)
+        form = schema_auto_form(node_cls)(prefix=prefix)
         results = [form]
 
-        for node_field, node_value in node.descendant_nodes():
+        for schema_node_field_cls in node_cls.descendant_schema_nodes():
 
-            node_ref = node_field.ref
-            if node_ref is None and isinstance(node_field, SchemaRepeatedField):
-                node_ref = node_value._ref
+            node_ref = schema_node_field_cls.ref
+            if node_ref is None:
+                node_ref = schema_node_field_cls.schema_node_cls._ref
+
+            if node_ref is None:
+                #  and issubclass(desc_node_cls, SchemaRepeatedField):
+                # node_ref = desc_node_cls.._ref
+                raise NotImplementedError("TODO")
 
             if prefix:
                 child_prefix = f"{prefix}.{node_ref}"
@@ -189,7 +205,9 @@ class FormTree:
             # fusion nodes = user interface + specification
             # descendant_cls = descendant_node_field.schema_node_cls
             # descendant = getattr(node, descendant_node_field)
-            results.extend(self._collection(node_value, prefix=child_prefix))
+            results.extend(
+                self._collection(schema_node_field_cls.schema_node_cls, prefix=child_prefix)
+            )
 
         return results
 

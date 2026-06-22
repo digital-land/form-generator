@@ -60,7 +60,7 @@ def application(application_ref):
     # a single payload.
     empty_app_fixture = {
         "submission-details": {
-            "application_types": [application_ref],
+            "application-types": [application_ref],
             "specification-profile": profile,
         },
     }

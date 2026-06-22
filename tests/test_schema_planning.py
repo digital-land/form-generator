@@ -6,6 +6,7 @@ from schema.planning_application_specification import (
     FloorspaceDetails,
     HoursOfOperation,
     InterestInLand,
+    Lbc,
     PreAppAdvice,
     SiteInfo,
     SiteVisit,
@@ -49,14 +50,30 @@ class TestSchemaPlanning(unittest.TestCase):
         refs = [root._ref for root in gla_planning_app_roots]
         self.assertIn("full", refs)
 
-    @unittest.skip("TODO")
     def test_applies_if_application_type(self):
         """
         Applies for application type
         `applies-if` + `application-type` + `value` or `in`
         Field is in scope only for one or more application types.
         """
-        pass
+        payload = {
+            "submission-details": {"application-types": ["lbc"]},
+            "ownership_certs": {"lbc-owners": [{}]},
+        }
+
+        # listed building consent
+        node = Lbc()
+
+        # ownership_certs.lbc_owners is in scope when LBC application
+        node.load_payload(payload)
+
+        expected = "Field 'lbc-owners' out of scope in 'ownership-certs'"
+        msg = "ownership_certs.lbc_owners not in scope for full applications"
+        payload["submission-details"]["application-types"] = ["full"]
+        with self.assertRaises(SchemaValidationException) as ctx:
+            node.load_payload(payload)
+
+        self.assertIn(expected, ctx.exception.reasons, msg)
 
     def test_required_if_when_answer_in_list(self):
         """

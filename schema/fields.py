@@ -148,6 +148,14 @@ class StringField(AbstractSchemaField):
         return
 
 
+class HiddenStringField(StringField):
+    """
+    Mark a value as being invisible to user interface but does have a value
+    """
+
+    pass
+
+
 class BooleanField(AbstractSchemaField):
     pass
 

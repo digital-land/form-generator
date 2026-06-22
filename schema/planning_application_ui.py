@@ -8,9 +8,12 @@ See :func:`planning_application.schema_fusion` for how this works.
 TLDR; just give classes here the same name as _specification classes you'd like to override.
 """
 
-from schema.fields import StringField
+from schema.fields import HiddenStringField, RepeatedField
 
 from schema.node import sub_class_search
+
+# TODO - builder pattern would be better with fields so tiny selective over rides could be made to
+# fields otherwise taken from specification.
 
 
 class UserInterfaceOverride:
@@ -22,8 +25,8 @@ class Person(UserInterfaceOverride):
 
 
 class SubmissionDetails(UserInterfaceOverride):
-    application_types = StringField()
-    planning_authority = StringField()
+    application_types = RepeatedField(schema_field=HiddenStringField(ref="application-types"))
+    planning_authority = RepeatedField(schema_field=HiddenStringField(ref="specification-profile"))
 
 
 all_user_interface_classes = sub_class_search(UserInterfaceOverride)
