@@ -1736,6 +1736,11 @@ class FloorspaceDetailsOutline(SchemaNode):
         super().valid_node()
         reasons = []
 
+        if (self["use"] in ["sui"] and not self["specified-use"]) or (
+            self["use"] in ["other"] and not self["specified-use"]
+        ):
+            reasons.append("One or more matches required in field(s): use")
+
         if self["is-floorspace-lost-known"] == True and not self["floorspace-lost"]:
             reasons.append(
                 "floorspace-lost is needed for current value in 'is-floorspace-lost-known'"
@@ -5580,6 +5585,26 @@ class AccessRightsOfWay(SchemaNode):
         )
     )
 
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if (
+            (self["new-altered-vehicle"] == True)
+            or (self["new-altered-pedestrian"] == True)
+            or (self["change-right-of-way"] == True)
+            or (self["new-right-of-way"] == True)
+            or (self["new-public-road"] == True)
+            or (self["temp-right-of-way"] == True)
+            or (self["future-new-right-of-way"] == True)
+        ):
+            reasons.append(
+                "One or more matches required in field(s): change-right-of-way, future-new-right-of-way, new-altered-pedestrian, new-altered-vehicle, new-public-road, new-right-of-way, temp-right-of-way"
+            )
+
+        if reasons:
+            raise SchemaValidationException(reasons)
+
     @property
     def out_of_scope_fields(self):
         de_scoped = super().out_of_scope_fields
@@ -7124,11 +7149,15 @@ class InterestDetails(SchemaNode):
         super().valid_node()
         reasons = []
 
-        if (self["applicant-interest"] == "lessee") or (self["applicant-interest"] == "occupier"):
-            reasons.append("One or more matches required in field(s): applicant-interest")
+        if (self["applicant-interest-type"] == "lessee") or (
+            self["applicant-interest-type"] == "occupier"
+        ):
+            reasons.append("One or more matches required in field(s): applicant-interest-type")
 
-        if self["applicant-interest"] == "none" and not self["interested-persons"]:
-            reasons.append("interested-persons is needed for current value in 'applicant-interest'")
+        if self["applicant-interest-type"] == "none" and not self["interested-persons"]:
+            reasons.append(
+                "interested-persons is needed for current value in 'applicant-interest-type'"
+            )
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -13434,11 +13463,13 @@ class LdcInterest(SchemaNode):
         super().valid_node()
         reasons = []
 
-        if self["applicant-interest"] in ["lessee", "occupier"] and not self["owner-details"]:
-            reasons.append("owner-details is needed for current value in 'applicant-interest'")
+        if self["applicant-interest-type"] in ["lessee", "occupier"] and not self["owner-details"]:
+            reasons.append("owner-details is needed for current value in 'applicant-interest-type'")
 
-        if self["applicant-interest"] == "none" and not self["interested-persons"]:
-            reasons.append("interested-persons is needed for current value in 'applicant-interest'")
+        if self["applicant-interest-type"] == "none" and not self["interested-persons"]:
+            reasons.append(
+                "interested-persons is needed for current value in 'applicant-interest-type'"
+            )
 
         if reasons:
             raise SchemaValidationException(reasons)
