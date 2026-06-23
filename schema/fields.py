@@ -1,4 +1,5 @@
 from collections import namedtuple
+import copy
 
 from . import SchemaValidationException, tidy_string
 
@@ -47,8 +48,8 @@ class AbstractSchemaField:
 
         # raise exception if field isn't happy about the new value
         self.valid_update(value)
-
-        instance.__dict__[self._descriptor_name] = self.prepare_value(value)
+        current_value = instance.__dict__.get(self._descriptor_name)
+        instance.__dict__[self._descriptor_name] = self.prepare_value(value, current_value)
 
     def valid_update(self, proposed_value):
         """
@@ -73,7 +74,7 @@ class AbstractSchemaField:
         """
         return None
 
-    def prepare_value(self, value):
+    def prepare_value(self, value, current_value):
         """
         Coerce a user supplied value into the value stored on the node.
 
@@ -327,13 +328,16 @@ class SchemaNodeField(AbstractSchemaField):
         node._parent_node = self._parent_node
         return node
 
-    def prepare_value(self, value):
+    def prepare_value(self, value, current_value):
         """
         Load dictionary of values into child node.
 
         @param value: (dict)
         """
-        node = self.empty_value()
+        if current_value is None:
+            node = self.empty_value()
+        else:
+            node = current_value
         node.load_payload(value)
         return node
 
@@ -362,20 +366,10 @@ class RepeatedField(AbstractSchemaField):
         return [f"schema_field={r}"]
 
     def empty_value(self):
-
-        # old behaviour held commented out for now
-        # child_node = self.schema_field.empty_value()
-        #
-        # # child_node could be another node/field or just a value.
-        # if hasattr(child_node, "_parent_node"):
-        #     child_node._parent_node = self._parent_node
-        #
-        # return [child_node]
-
         # empty repeated field is an empty list
         return []
 
-    def prepare_value(self, value):
+    def prepare_value(self, value, _current_value):
         """
         Load a list of values, each conforming to `self.schema_field`.
         """
@@ -383,11 +377,12 @@ class RepeatedField(AbstractSchemaField):
             field_ref = self.ref or self.schema_field.ref
             raise SchemaValidationException([f"Field '{field_ref}' expects a list of values"])
 
-        loaded = []
+        # Existing list (if there is one in _current_value) is dropped
+        loaded = self.empty_value()
         failure_reasons = []
         for item in value:
             try:
-                loaded.append(self.schema_field.prepare_value(item))
+                loaded.append(self.schema_field.prepare_value(item, None))
             except SchemaValidationException as e:
                 failure_reasons.extend(e.reasons)
 

@@ -1,8 +1,15 @@
+import html
+import json
+import re
+from pathlib import Path
+
 from flask import render_template_string
 
 from schema.planning_application import SubmissionDetails
 from tests.base import WebTestCase
 from web_viewer.forms import schema_auto_form
+
+DATA_PATH = Path(__file__).parent / "data"
 
 
 class TestWebPlanning(WebTestCase):
@@ -50,6 +57,39 @@ class TestWebPlanning(WebTestCase):
             ("Validation", "Validation results area"),
         ]:
             self.assertIn(expected, response.text, msg)
+
+    def test_agent_reference_round_trips_into_payload(self):
+        """
+        POST an 'Agent reference' value, extract the JSON shown in the payload textarea
+        and confirm the value survived the round trip through the schema.
+        """
+        response = self.client.post(
+            "/application/outline-all",
+            data={"agent-contact-agent_reference": "AGENT-XYZ-123"},
+        )
+        self.assertEqual(response.status_code, 200)
+
+        match = re.search(r"<textarea[^>]*>(.*?)</textarea>", response.text, re.DOTALL)
+        self.assertIsNotNone(match, "Payload textarea not found")
+
+        # textarea contents are HTML-escaped (e.g. &#34;) so unescape before parsing
+        payload = json.loads(html.unescape(match.group(1)))
+
+        self.assertEqual(
+            "AGENT-XYZ-123",
+            payload["agent-contact"]["agent-reference"],
+        )
+
+    def test_evaluate_full_application_is_valid(self):
+        """
+        POST the full application payload to the evaluate view and confirm it reports valid.
+        """
+        payload = (DATA_PATH / "web_payloads" / "application_full.json").read_text()
+
+        response = self.client.post("/evaluate", data={"payload": payload})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("The payload is valid.", response.text)
 
     def test_submission_details(self):
         """
