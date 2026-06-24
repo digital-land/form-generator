@@ -12,10 +12,12 @@ this project.
 from schema import SchemaValidationException
 from schema.fields import (
     BooleanField,
+    DynamicEnumField,
     EnumField,
     EnumOption,
     RepeatedField,
     SchemaNodeField,
+    SelectFilter,
     StringField,
 )
 
@@ -126,8 +128,36 @@ class Partnership(SchemaNode):
 class Animal(SchemaNode):
     _ref = "animal"
     keeper = SchemaNodeField(ref="keeper", schema_node_cls=ContactDetail)
-    name = StringField(ref="animal-name")
+    animal_name = StringField(ref="animal-name")
     where = RepeatedField(schema_field=StringField(ref="location"))
+    classification = DynamicEnumField(
+        ref="classification",
+        display="Scientific Classification",
+        select_options=[
+            EnumOption(
+                key="reptilia",
+                label="Reptiles",
+                description="",
+            ),
+            EnumOption(
+                key="mammalia",
+                label="Mammals",
+                description="",
+            ),
+        ],
+        select_filter=[
+            SelectFilter(
+                node="keeper.email",
+                select_values=["bob@thezoo.com"],
+                key_values=["reptilia"],
+            ),
+            SelectFilter(
+                node="keeper.email",
+                select_values=["tim@thezoo.com"],
+                key_values=["mammalia"],
+            ),
+        ],
+    )
 
     @property
     def out_of_scope_fields(self):
@@ -136,3 +166,14 @@ class Animal(SchemaNode):
             # everyone knows where Bob keeps his animals so field shouldn't be available
             return de_scoped.union({"location"})
         return de_scoped
+
+    def valid_node(self):
+        "required field depends on boolean"
+        super().valid_node()
+
+        reasons = []
+        if self.keeper._parent_node is None:
+            reasons.append("Example child field node should have parent_node set")
+
+        if reasons:
+            raise SchemaValidationException(reasons)

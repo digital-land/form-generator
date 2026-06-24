@@ -322,10 +322,9 @@ class SchemaNodeField(AbstractSchemaField):
             raise SchemaValidationException([f"Field '{self.ref}' expects an object"])
 
     def empty_value(self):
-        node = self.schema_node_cls()
 
         # relay field's parent to new node
-        node._parent_node = self._parent_node
+        node = self.schema_node_cls(parent_node=self._parent_node)
         return node
 
     def prepare_value(self, value, current_value):
@@ -359,6 +358,10 @@ class RepeatedField(AbstractSchemaField):
         if self.schema_field is None:
             raise ValueError("schema_field is a required value")
 
+        if self.schema_field._parent_node is not None:
+            msg = "Coding error, child type can't have a parent before repeated constructor"
+            raise ValueError(msg)
+
         super().__init__(**kwargs)
 
     def _subclass_construction_params(self):
@@ -366,7 +369,14 @@ class RepeatedField(AbstractSchemaField):
         return [f"schema_field={r}"]
 
     def empty_value(self):
-        # empty repeated field is an empty list
+
+        # `empty_value` is called by descriptor's get, that's the first time the field instance
+        # sees the parent instance. Pass this on.
+        self.schema_field._parent_node = self._parent_node
+        self.schema_field.empty_value()
+
+        # empty repeated field is an empty list. This list is assigned by the __get__ of the
+        # descriptor to the parent instance. `self.schema_field`'s values will go in a list.
         return []
 
     def prepare_value(self, value, _current_value):
@@ -377,12 +387,21 @@ class RepeatedField(AbstractSchemaField):
             field_ref = self.ref or self.schema_field.ref
             raise SchemaValidationException([f"Field '{field_ref}' expects a list of values"])
 
+        # repeated fields are like flat branches, they all share a parent. They all use this
+        # single schema_field as values are stored (by the descriptor) on the parent object.
+        # The parent_node is probably already set.
+        self.schema_field._parent_node = self._parent_node
+
         # Existing list (if there is one in _current_value) is dropped
         loaded = self.empty_value()
         failure_reasons = []
         for item in value:
             try:
-                loaded.append(self.schema_field.prepare_value(item, None))
+
+                # value to store in parent's __dict__
+                field_val = self.schema_field.prepare_value(item, None)
+                loaded.append(field_val)
+
             except SchemaValidationException as e:
                 failure_reasons.extend(e.reasons)
 

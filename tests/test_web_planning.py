@@ -8,6 +8,7 @@ from flask import render_template_string
 from schema.planning_application import SubmissionDetails
 from tests.base import WebTestCase
 from web_viewer.forms import schema_auto_form
+import unittest
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -105,3 +106,15 @@ class TestWebPlanning(WebTestCase):
         )
 
         self.assertNotIn("District Council", html)
+
+    def test_local_variance(self):
+
+        gla_only_known_value = 'type="radio" value="student-accommodation"'
+
+        response = self.client.get("/application/outline-all?profile=mhclg-core")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(gla_only_known_value, response.text)
+
+        response = self.client.get("/application/outline-all?profile=gla")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(gla_only_known_value, response.text)

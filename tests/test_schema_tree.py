@@ -62,8 +62,8 @@ class TestSchemaTree(unittest.TestCase):
 
         self.assertEqual(
             [
-                "Field 'bad' not found in 'phonenumber'",
-                "Field 'worse' not found in 'phonenumber'",
+                "Field 'bad' not expected in 'phonenumber'",
+                "Field 'worse' not expected in 'phonenumber'",
             ],
             ctx.exception.reasons,
         )

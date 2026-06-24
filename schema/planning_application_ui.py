@@ -26,7 +26,8 @@ class Person(UserInterfaceOverride):
 
 class SubmissionDetails(UserInterfaceOverride):
     application_types = RepeatedField(schema_field=HiddenStringField(ref="application-types"))
-    planning_authority = RepeatedField(schema_field=HiddenStringField(ref="specification-profile"))
+    # this one should be an enum
+    planning_authority = HiddenStringField(ref="planning-authority")
 
 
 all_user_interface_classes = sub_class_search(UserInterfaceOverride)

@@ -8,6 +8,20 @@ from web_viewer.forms import schema_auto_form, FormTree
 
 class TestForms(WebTestCase):
 
+    def render_forms(self, forms):
+        """
+        Helper to render html for `forms`
+        """
+        template = (
+            '{% from "main/macros.html" import render_form_card %}'
+            "{% for form in forms %}{{ render_form_card(form) }}{% endfor %}"
+        )
+        html = render_template_string(
+            template,
+            forms=forms,
+        )
+        return html
+
     def test_repeated_node_field_is_skipped_without_error(self):
         # `phones` is a RepeatedField wrapping a node - it describes descendants, so it
         # shouldn't become a form field and shouldn't raise
@@ -54,16 +68,7 @@ class TestForms(WebTestCase):
 
         forms = form_tree.collection()
 
-        template = (
-            '{% from "main/macros.html" import render_form_card %}'
-            "{% for form in forms %}{{ render_form_card(form) }}{% endfor %}"
-        )
-
-        html = render_template_string(
-            template,
-            forms=forms,
-        )
-
+        html = self.render_forms(forms)
         expected = (
             '<input class="form-control" id="person-a.fax-number-number" '
             'name="person-a.fax-number-number" type="text" value="123456789">'
@@ -123,15 +128,32 @@ class TestForms(WebTestCase):
         form_tree = FormTree(root_node=Animal)
         forms = form_tree.collection()
 
-        template = (
-            '{% from "main/macros.html" import render_form_card %}'
-            "{% for form in forms %}{{ render_form_card(form) }}{% endfor %}"
-        )
-
-        html = render_template_string(
-            template,
-            forms=forms,
-        )
-
+        html = self.render_forms(forms)
         expected = 'title="Add another" onclick='
         self.assertIn(expected, html)
+
+    def test_dynamic_enums(self):
+        """
+        Dynamic enums must have access to loaded data
+        """
+        bob_expected = "reptilia"
+        bob_payload = {"keeper": {"email": "bob@thezoo.com"}, "animal-name": "Gila Monster"}
+
+        tim_expected = "mammalia"
+        tim_payload = {"keeper": {"email": "tim@thezoo.com"}, "animal-name": "Doormouse"}
+
+        form_tree = FormTree(root_node=Animal)
+        form_tree.load(bob_payload)
+        forms = form_tree.collection()
+        html = self.render_forms(forms)
+
+        self.assertIn(bob_expected, html)
+        self.assertNotIn(tim_expected, html)
+
+        form_tree = FormTree(root_node=Animal)
+        form_tree.load(tim_payload)
+        forms = form_tree.collection()
+        html = self.render_forms(forms)
+
+        self.assertNotIn(bob_expected, html)
+        self.assertIn(tim_expected, html)
