@@ -12,9 +12,9 @@ class SchemaNode:
     _display = None
     _description = None
 
-    def __init__(self):
+    def __init__(self, parent_node=None):
         # is subclass of :class:`SchemaNode`
-        self._parent_node = None
+        self._parent_node = parent_node
 
         # build empty tree - TBC if this should be during construction or on demand.
         self.shake_tree()
@@ -86,7 +86,13 @@ class SchemaNode:
                 # the value is validated
                 self[k] = v
             except KeyError as e:
-                failure_reasons.append(e.args[0])
+                # Reverse the onus so it makes sense for user
+                # e.g.
+                # Field 'modules' not found in 'submission-details'
+                # to
+                # Field 'modules' not expected in 'submission-details'
+                msg = e.args[0].replace(" not found in ", " not expected in ")
+                failure_reasons.append(msg)
             except SchemaValidationException as e:
                 # descendant fields validate their own values; aggregate their reasons
                 failure_reasons.extend(e.reasons)
@@ -137,15 +143,8 @@ class SchemaNode:
         """
         for attr_name in self.schema_fields().keys():
             value = getattr(self, attr_name)
-            # print(attr_name, value, attr_cls)
-
             if isinstance(value, SchemaNode):
                 value.shake_tree()
-            elif isinstance(value, list):
-                # `RepeatedField` holds a list, possibly of nodes
-                for item in value:
-                    if isinstance(item, SchemaNode):
-                        item.shake_tree()
 
     def valid_node(self):
         """
@@ -194,6 +193,7 @@ class SchemaNode:
         @raise SchemaValidationException if the field or node rejects the value.
         """
         for ref, (attr_name, _field) in self.schema_refs().items():
+
             if key in (ref, attr_name):
 
                 if key in self.out_of_scope_fields:

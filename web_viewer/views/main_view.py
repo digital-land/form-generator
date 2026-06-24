@@ -17,8 +17,19 @@ from web_viewer.forms import FormTree
 
 main_blueprint = Blueprint("main", __name__)
 
-# specification profiles supported by the schema
-SPECIFICATION_PROFILES = {o.key for o in SubmissionDetails.specification_profile.select_options}
+# specification profiles supported by the schema, mapping key to display label
+SPECIFICATION_PROFILES = {
+    o.key: o.label for o in SubmissionDetails.specification_profile.select_options
+}
+
+DEMO_SPECIFICATION_PROFILES = {}
+for k, v in SPECIFICATION_PROFILES.items():
+    if k == "gla":
+        DEMO_SPECIFICATION_PROFILES[k] = "Greater London Authority (GLA)"
+    else:
+        DEMO_SPECIFICATION_PROFILES[k] = v
+
+DEMO_SPECIFICATION_PROFILES["gmca"] = "Greater Manchester (GMCA)"
 
 
 def _validated_profile():
@@ -26,7 +37,10 @@ def _validated_profile():
     @return: (str) specification profile
     """
     profile = request.args.get("profile", "mhclg-core")
-    assert profile in SPECIFICATION_PROFILES
+    if profile not in SPECIFICATION_PROFILES:
+        abort(
+            404, description="Sorry, that option isn't actually available, it's just a placeholder"
+        )
     return profile
 
 
@@ -43,6 +57,7 @@ def index():
     page_vars = {
         "application_types": application_types,
         "gla_planning_app_roots": gla_planning_app_roots,
+        "specification_profiles": DEMO_SPECIFICATION_PROFILES,
     }
     return render_template("main/index.html", **page_vars)
 
