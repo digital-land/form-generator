@@ -47,6 +47,12 @@ def _validated_profile():
 @main_blueprint.route("/", methods=["GET"])
 def index():
 
+    return render_template("landing_page.html")
+
+
+@main_blueprint.route("/application", methods=["GET"])
+def application_index():
+
     application_types = sorted(
         planning_application_roots,
         key=lambda node_class: (node_class._display or node_class._ref).lower(),
