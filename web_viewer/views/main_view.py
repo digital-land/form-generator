@@ -91,13 +91,10 @@ def evaluate_payload():
             reasons = e.reasons
 
         if node:
-            schema_payload = node.as_native()
-            payload = json.dumps(schema_payload, indent=2, ensure_ascii=False)
-        else:
-            # re-display original payload
-            payload = serialised_payload
+            xx = node.as_native()
 
-        page_vars.update({"payload": payload, "reasons": reasons})
+        # return the user supplied payload. `node.as_native()` would give schema built version
+        page_vars.update({"payload": serialised_payload, "reasons": reasons})
 
     return render_template("main/view_payload.html", **page_vars)
 

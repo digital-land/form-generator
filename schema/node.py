@@ -78,12 +78,96 @@ class SchemaNode:
         @return None
         @raise :class:`SchemaValidationException` is payload doesn't conform to schema
         """
+
+        # TODO - there is an ambiguity here that needs a tidy - either ref of class attribute
+        # could be in the payload. Really it should be just ref. That way the payload is more
+        # closely aligned with the specification.
+
+        payload_keys_visited = set()
+        payload_fieldset = {}
+        schema_fieldset = {}  # fields not in payload
+        for ref, (attr_name, field) in self.schema_refs().items():
+
+            if ref in payload:
+                payload_keys_visited.add(ref)
+                v = payload[ref]
+                payload_fieldset[ref] = v
+
+            elif attr_name in payload:
+                payload_keys_visited.add(attr_name)
+                v = payload[attr_name]
+                payload_fieldset[attr_name] = v
+
+            else:
+                # .valid_update() for field not supplied in payload but is part of node
+                # print("scope: ", ref)
+                v = field.empty_value()
+                schema_fieldset[ref] = v
+
+        unused_payload_keys = set(payload.keys()) - payload_keys_visited
+        for k in unused_payload_keys:
+            payload_fieldset[k] = payload[k]
+
+        failure_reasons = []
+
+        try:
+            field_failures = self.set_payload(payload_fieldset)
+            failure_reasons.extend(field_failures)
+        except SchemaValidationException as e:
+            failure_reasons.extend(e.reasons)
+
+        # child nodes will be validated via the `SchemaNodeField` on their parent being
+        # called with :meth:`validate`
+        try:
+            self.valid_node()
+        except SchemaValidationException as e:
+            failure_reasons.extend(e.reasons)
+
+        traverse_failures = self.validate_traverse()
+        failure_reasons.extend(traverse_failures)
+
+        # for fieldset, check_scope in [(payload_fieldset, False), (schema_fieldset, True)]:
+        #     for k, v in fieldset.items():
+        #
+        #         if check_scope and k in self.out_of_scope_fields:
+        #             print("continue for ", k)
+        #             continue
+        #
+        #         try:
+        #             # `__setitem__` resolves the key to a field and routes through the descriptor
+        #             #  so the value is validated
+        #             self[k] = v
+        #         except KeyError as e:
+        #             # Reverse the onus so it makes sense for user
+        #             # e.g.
+        #             # Field 'modules' not found in 'submission-details'
+        #             # to
+        #             # Field 'modules' not expected in 'submission-details'
+        #             msg = e.args[0].replace(" not found in ", " not expected in ")
+        #             failure_reasons.append(msg)
+        #         except SchemaValidationException as e:
+        #             # descendant fields validate their own values; aggregate their reasons
+        #             failure_reasons.extend(e.reasons)
+
+        # at this point all recursive building is done, nodes and fields are populated so run
+        # node level checks
+
+        if len(failure_reasons) > 0:
+            raise SchemaValidationException(failure_reasons)
+
+    def set_payload(self, payload):
+        """
+        Assign values to nodes and fields.
+
+        @param payload: (dict)
+        @return: (list of str) - validation failure messages limited to missing keys only
+        """
         failure_reasons = []
         for k, v in payload.items():
 
             try:
-                # `__setitem__` resolves the key to a field and routes through the descriptor so
-                # the value is validated
+                # `__setitem__` resolves the key to a field and routes through the descriptor
+                #  so the value is validated
                 self[k] = v
             except KeyError as e:
                 # Reverse the onus so it makes sense for user
@@ -93,16 +177,57 @@ class SchemaNode:
                 # Field 'modules' not expected in 'submission-details'
                 msg = e.args[0].replace(" not found in ", " not expected in ")
                 failure_reasons.append(msg)
-            except SchemaValidationException as e:
-                # descendant fields validate their own values; aggregate their reasons
-                failure_reasons.extend(e.reasons)
 
-        # at this point all recursive building is done, nodes and fields are populated so run
-        # node level checks
-        self.valid_node()
+        return failure_reasons
 
-        if len(failure_reasons) > 0:
-            raise SchemaValidationException(failure_reasons)
+    def validate_traverse(self):
+        """
+        @return: list of str - reasons the tree isn't valid
+        """
+
+        def _validate(node):
+            """
+            @param node: (SchemaNode)
+            """
+
+            out_of_scope_fields = node.out_of_scope_fields
+
+            failure_reasons = []
+            for ref, (attr_name, field) in node.schema_refs().items():
+
+                # ref : str - ref given to `field`
+                # field : subclass of AbstractSchemaField
+                # attr_name : class property/attribute name
+
+                try:
+                    field.validate()
+                except SchemaValidationException as e:
+                    # descendant fields validate their own values; aggregate their reasons
+                    failure_reasons.extend(e.reasons)
+
+                if ref in out_of_scope_fields and not field._is_empty:
+                    failure_reasons.append(f"Field '{ref}' out of scope in '{node._ref}'")
+
+                    # don't worry about any other issues
+                    continue
+
+                if isinstance(field, SchemaNodeField):
+
+                    child_node = getattr(node, attr_name)
+                    traverse_reasons = _validate(child_node)
+                    failure_reasons.extend(traverse_reasons)
+
+                elif isinstance(field, RepeatedField) and isinstance(
+                    field.schema_field, SchemaNodeField
+                ):
+                    for child_node in getattr(node, attr_name):
+                        traverse_reasons = _validate(child_node)
+                        failure_reasons.extend(traverse_reasons)
+
+            return failure_reasons
+
+        failure_reasons = _validate(self)
+        return failure_reasons
 
     def as_native(self):
         """
@@ -141,10 +266,27 @@ class SchemaNode:
 
         @return: None
         """
-        for attr_name in self.schema_fields().keys():
-            value = getattr(self, attr_name)
-            if isinstance(value, SchemaNode):
-                value.shake_tree()
+
+        for attr_name, field in self.schema_fields().items():
+
+            # print(attr_name, type(field))
+            #
+            # if isinstance(field, RepeatedField):
+            #     pass
+
+            v = getattr(self, attr_name)
+
+            if isinstance(field, SchemaNodeField):
+                v.shake_tree()
+            elif isinstance(field, RepeatedField) and isinstance(
+                field.schema_field, SchemaNodeField
+            ):
+
+                # Either RepeatedField needs knowledge of SchemaNodeField or SchemaNode does.
+                # I've gone with SchemaNode
+                v = field.schema_field.empty_value()
+                field.empty_schema_field = field.schema_field.prepare_value(v)
+                field.empty_schema_field.shake_tree()
 
     def valid_node(self):
         """
@@ -171,8 +313,8 @@ class SchemaNode:
         refs = self.schema_refs()
         if key in refs:
 
-            if key in self.out_of_scope_fields:
-                raise KeyError(f"Field '{key}' out of scope in '{self._ref}'")
+            # if key in self.out_of_scope_fields:
+            #     raise KeyError(f"Field '{key}' out of scope in '{self._ref}'")
 
             attr_name, _ = refs[key]
             return getattr(self, attr_name)
@@ -196,8 +338,8 @@ class SchemaNode:
 
             if key in (ref, attr_name):
 
-                if key in self.out_of_scope_fields:
-                    raise KeyError(f"Field '{key}' out of scope in '{self._ref}'")
+                # if ref in self.out_of_scope_fields:
+                #     raise KeyError(f"Field '{key}' out of scope in '{self._ref}'")
 
                 setattr(self, attr_name, value)
                 return

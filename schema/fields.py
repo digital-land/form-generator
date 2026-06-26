@@ -1,5 +1,5 @@
 from collections import namedtuple
-import copy
+
 
 from . import SchemaValidationException, tidy_string
 
@@ -37,24 +37,41 @@ class AbstractSchemaField:
 
         if self._descriptor_name not in instance.__dict__:
             # empty node - this avoids key errors when finding a value within the tree that isn't
-            # set. This value isn't passed to :meth:`valid_update`
+            # set.
             self._parent_node = instance
-            instance.__dict__[self._descriptor_name] = self.empty_value()
+            v = self.empty_value()
+            instance.__dict__[self._descriptor_name] = self.prepare_value(v)
 
         return instance.__dict__.get(self._descriptor_name)
 
     def __set__(self, instance, value) -> None:
-        self._parent_node = instance
-
-        # raise exception if field isn't happy about the new value
-        self.valid_update(value)
-        current_value = instance.__dict__.get(self._descriptor_name)
-        instance.__dict__[self._descriptor_name] = self.prepare_value(value, current_value)
-
-    def valid_update(self, proposed_value):
         """
-        Hook to be optionally implemented by subclasses for performing field level checks on
-        new values.
+        This is how descriptors are assigned values.
+
+        The value isn't validated as legal. See :meth:`validate`.
+        """
+        self._parent_node = instance
+        instance.__dict__[self._descriptor_name] = self.prepare_value(value)
+
+    @property
+    def _value(self):
+        """
+        External use of the field should use `node.attrib_name` access to descriptor's value.
+
+        This is a convenience for internal use and it has a difference: it raises a KeyError
+        exception when the value hasn't been initiated.
+        """
+        if self._parent_node is None:
+            raise ValueError("Tree not initiated, use .shake_tree")
+
+        current_value = self._parent_node.__dict__[self._descriptor_name]
+        return current_value
+
+    def validate(self):
+        """
+        Hook to be optionally implemented by subclasses for performing field level validation checks.
+
+        TBC - When this is called the whole tree will have been loaded.
 
         @see :meth:`SchemaNode.valid_node` for node level validation.
 
@@ -62,21 +79,30 @@ class AbstractSchemaField:
          or
         @raise SchemaValidationException
         """
-        if self.required and proposed_value is None:
+        if self.required and self._value is None:
             raise SchemaValidationException([f"Field '{self.ref}' is required"])
         return
 
     def empty_value(self):
         """
-        Value to use when creating a new blank field.
+        The `value` that could be passed to :meth:`prepare_value` to populate the data structure
+        returned by :meth:`empty_value`.
 
-        Subclasses to override this.
+        @return mixed
         """
         return None
 
-    def prepare_value(self, value, current_value):
+    @property
+    def _is_empty(self):
+        return self._value == self.empty_value()
+
+    def prepare_value(self, value):
         """
         Coerce a user supplied value into the value stored on the node.
+
+        Values stored on the parent object (by way of `AbstractSchemaField`s being descriptors)
+        sometimes need an internal structure. This method can be overridden by subclasses to build
+        these container structures.
 
         Default behaviour stores the value unchanged. Subclasses representing nested structures
         or where validation is needed override this.
@@ -141,9 +167,10 @@ class StringField(AbstractSchemaField):
             return []
         return [f"max_length={self.max_length}"]
 
-    def valid_update(self, proposed_value):
-        super().valid_update(proposed_value)
-        if self.required and proposed_value == "":
+    def validate(self):
+        super().validate()
+        # None already checked in super()
+        if self.required and self._value == "":
             raise SchemaValidationException([f"Field '{self.ref}' is required"])
 
         return
@@ -315,29 +342,43 @@ class SchemaNodeField(AbstractSchemaField):
             return [f"schema_node_cls={self.schema_node_cls}"]
         return [f"schema_node_cls={self.schema_node_cls.__name__}"]
 
-    def valid_update(self, proposed_value):
+    def validate(self):
         """ """
-        super().valid_update(proposed_value)
-        if proposed_value is not None and not isinstance(proposed_value, dict):
-            raise SchemaValidationException([f"Field '{self.ref}' expects an object"])
+        super().validate()
+        node = self._value
+        node.valid_node()
 
     def empty_value(self):
+        return {}
+        # node = self.schema_node_cls(parent_node=self._parent_node)
+        # return node
 
-        # relay field's parent to new node
-        node = self.schema_node_cls(parent_node=self._parent_node)
-        return node
+    @property
+    def _is_empty(self):
+        try:
+            _node = self._value
+        except (KeyError, AttributeError):
+            return True
+        return False
 
-    def prepare_value(self, value, current_value):
+    def prepare_value(self, value):
         """
         Load dictionary of values into child node.
 
-        @param value: (dict)
+        @param value: (`SchemaNode`)
         """
-        if current_value is None:
-            node = self.empty_value()
-        else:
-            node = current_value
-        node.load_payload(value)
+        # current value
+        try:
+            node = self._value
+        except (KeyError, AttributeError):
+            # it's new
+            node = self.schema_node_cls(parent_node=self._parent_node)
+
+        # just key errors
+        failure_reasons = node.set_payload(value)
+        if failure_reasons:
+            raise SchemaValidationException(failure_reasons)
+
         return node
 
 
@@ -362,6 +403,9 @@ class RepeatedField(AbstractSchemaField):
             msg = "Coding error, child type can't have a parent before repeated constructor"
             raise ValueError(msg)
 
+        # hold's instantiated field when needed for tree traversal at class level (no values)
+        self.empty_schema_field = None
+
         super().__init__(**kwargs)
 
     def _subclass_construction_params(self):
@@ -370,16 +414,11 @@ class RepeatedField(AbstractSchemaField):
 
     def empty_value(self):
 
-        # `empty_value` is called by descriptor's get, that's the first time the field instance
-        # sees the parent instance. Pass this on.
-        self.schema_field._parent_node = self._parent_node
-        self.schema_field.empty_value()
-
         # empty repeated field is an empty list. This list is assigned by the __get__ of the
         # descriptor to the parent instance. `self.schema_field`'s values will go in a list.
         return []
 
-    def prepare_value(self, value, _current_value):
+    def prepare_value(self, value):
         """
         Load a list of values, each conforming to `self.schema_field`.
         """
@@ -399,7 +438,7 @@ class RepeatedField(AbstractSchemaField):
             try:
 
                 # value to store in parent's __dict__
-                field_val = self.schema_field.prepare_value(item, None)
+                field_val = self.schema_field.prepare_value(item)
                 loaded.append(field_val)
 
             except SchemaValidationException as e:
