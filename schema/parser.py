@@ -46,7 +46,7 @@ class SchemaTreeParser:
 
         if self.schema_node_cls is None and application_type_map is not None:
             # set the schema_node_cls
-            application_types = payload["submission-details"]["application-types"]
+            application_types = payload.get("submission-details", {}).get("application-types", [])
             if len(application_types) != 1 or not isinstance(application_types[0], str):
                 msg = (
                     "Expecting single string in submission-details.application-types. This demo "

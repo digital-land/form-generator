@@ -291,7 +291,7 @@ class GenerateApplication:
         )
 
         schema_node = schema_node_cls()
-        schema_node.load_payload(self.schema_tree_fixture())
+        schema_node.set_payload(self.schema_tree_fixture())
 
         elements = self._node_flowables(schema_node)
 

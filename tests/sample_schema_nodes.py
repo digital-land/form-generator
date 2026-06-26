@@ -26,10 +26,11 @@ from schema.node import SchemaNode
 
 # test only field
 class EmailField(StringField):
-    def valid_update(self, proposed_value):
+    def validate(self):
 
-        super().valid_update(proposed_value)
-        if proposed_value and "@" not in proposed_value:
+        super().validate()
+        email_address = self._value
+        if email_address and "@" not in email_address:
             raise SchemaValidationException(["Email addresses must have an @"])
 
 
@@ -128,7 +129,7 @@ class Partnership(SchemaNode):
 class Animal(SchemaNode):
     _ref = "animal"
     keeper = SchemaNodeField(ref="keeper", schema_node_cls=ContactDetail)
-    animal_name = StringField(ref="animal-name")
+    animal_name = StringField(ref="animal-name", required=True)
     where = RepeatedField(schema_field=StringField(ref="location"))
     classification = DynamicEnumField(
         ref="classification",

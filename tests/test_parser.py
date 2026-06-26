@@ -2,7 +2,7 @@ import unittest
 
 from schema.parser import SchemaTreeParser, SchemaValidationException
 
-from tests.sample_schema_nodes import ContactDetail, PhoneNumber
+from tests.sample_schema_nodes import ContactDetail, PhoneNumber, Animal
 
 
 class TestSchemaTreeParser(unittest.TestCase):
@@ -57,3 +57,14 @@ class TestSchemaTreeParser(unittest.TestCase):
         node = parser.load_json(payload)
 
         self.assertEqual(node["fax-number"].number, node.fax.number)
+
+    def test_required_field_missing(self):
+        """
+        'animal_name' field isn't given in JSON and is a required field.
+        """
+        parser = SchemaTreeParser(schema_node_cls=Animal)
+        with self.assertRaises(SchemaValidationException) as ctx:
+            parser.load_json('{"location": ["Aquarium"]}')
+
+        expected = "Field 'animal-name' is required"
+        self.assertIn(expected, ctx.exception.reasons)

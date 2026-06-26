@@ -64,16 +64,24 @@ class TestSchemaPlanning(unittest.TestCase):
         # listed building consent
         node = Lbc()
 
-        # ownership_certs.lbc_owners is in scope when LBC application
-        node.load_payload(payload)
+        target_failure_reason = "Field 'lbc-owners' out of scope in 'ownership-certs'"
 
-        expected = "Field 'lbc-owners' out of scope in 'ownership-certs'"
+        # ownership_certs.lbc_owners is in scope when LBC application
+        failure_reasons = []
+        try:
+            node.load_payload(payload)
+        except SchemaValidationException as e:
+            failure_reasons.extend(e.reasons)
+
+        msg = "Other errors exist, just checking this doesn't exist in happy path"
+        self.assertNotIn(target_failure_reason, failure_reasons, msg)
+
         msg = "ownership_certs.lbc_owners not in scope for full applications"
         payload["submission-details"]["application-types"] = ["full"]
         with self.assertRaises(SchemaValidationException) as ctx:
             node.load_payload(payload)
 
-        self.assertIn(expected, ctx.exception.reasons, msg)
+        self.assertIn(target_failure_reason, ctx.exception.reasons, msg)
 
     def test_required_if_when_answer_in_list(self):
         """
@@ -82,13 +90,13 @@ class TestSchemaPlanning(unittest.TestCase):
         Field is required when another field is one of several values.
         """
         payload = {"contact-type": "agent"}
-        expected = ["contact-reference is needed for current value in 'contact-type'"]
+        expected = "contact-reference is needed for current value in 'contact-type'"
 
         node = SiteVisit()
         with self.assertRaises(SchemaValidationException) as ctx:
             node.load_payload(payload)
 
-        self.assertEqual(expected, ctx.exception.reasons)
+        self.assertIn(expected, ctx.exception.reasons)
 
     def test_required_if_when_answer_contains_value(self):
         """
@@ -98,13 +106,13 @@ class TestSchemaPlanning(unittest.TestCase):
         """
 
         payload = {"use": "sui"}
-        expected = ["One or more matches required in field(s): use"]
+        expected = "One or more matches required in field(s): use"
 
         node = FloorspaceDetails()
         with self.assertRaises(SchemaValidationException) as ctx:
             node.load_payload(payload)
 
-        self.assertEqual(expected, ctx.exception.reasons)
+        self.assertIn(expected, ctx.exception.reasons)
 
     def test_required_if_when_value_is_empty(self):
         """
@@ -125,18 +133,24 @@ class TestSchemaPlanning(unittest.TestCase):
         }
 
         payload = {"operational-times": [], "hours-not-known": False}
-        expected = ["Field validation problem for: operational-times"]
+        target_reason = "Field validation problem for: operational-times"
 
         node = HoursOfOperation()
         with self.assertRaises(SchemaValidationException) as ctx:
             node.load_payload(payload)
 
-        self.assertEqual(expected, ctx.exception.reasons)
+        self.assertIn(target_reason, ctx.exception.reasons)
 
         msg = "Non-empty operational-times is valid"
         payload = {"operational-times": [operational_times_sample], "hours-not-known": False}
-        node.load_payload(payload)
-        self.assertIsNone(node.valid_node(), msg)
+
+        failure_reasons = []
+        try:
+            node.load_payload(payload)
+        except SchemaValidationException as e:
+            failure_reasons.extend(e.reasons)
+
+        self.assertNotIn(target_reason, failure_reasons, msg)
 
     def test_required_if_when_value_not_empty(self):
         """
@@ -145,13 +159,13 @@ class TestSchemaPlanning(unittest.TestCase):
         Field is required when another value has been provided.
         """
         payload = {"known-constraints": ["conservation-area"]}
-        expected = ["Field validation problem for: known-constraints"]
+        expected = "Field validation problem for: known-constraints"
 
         node = SiteInfo()
         with self.assertRaises(SchemaValidationException) as ctx:
             node.load_payload(payload)
 
-        self.assertEqual(expected, ctx.exception.reasons)
+        self.assertIn(expected, ctx.exception.reasons)
 
     def test_required_when_any_all(self):
         """

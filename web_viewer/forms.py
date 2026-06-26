@@ -6,6 +6,7 @@ from wtforms import HiddenField as WTFHiddenField
 from wtforms import RadioField as WTFRadioField
 from wtforms import StringField as WTFStringField
 
+from schema import SchemaValidationException
 from schema.fields import BooleanField as SchemaBooleanField
 from schema.fields import EnumField as SchemaEnumField
 from schema.fields import HiddenStringField as SchemaHiddenStringField
@@ -154,7 +155,9 @@ class FormTree:
         # Load data into SchemaNode - values needed here so nodes can read from the tree to make
         # validation decisions.
         if self.loaded_values:
-            root_node.load_payload(self.loaded_values)
+            key_errors = root_node.set_payload(self.loaded_values)
+            if key_errors:
+                raise SchemaValidationException(key_errors)
 
         collection = self._collection(node_cls=root_node.__class__)
 
