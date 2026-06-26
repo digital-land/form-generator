@@ -10,6 +10,8 @@ process.
 Multiple (as opposed to single) inheritance makes it easier to organise each lineage.
 """
 
+import copy
+
 from schema.fields import (
     AbstractSchemaField,
     DynamicEnumField,
@@ -79,12 +81,32 @@ def schema_fusion(schema_node_classes, user_interface_classes):
         raise ValueError(f"Un-matched UI classes: {cls_names}")
 
     for spec_cls_name, fusion_cls in r.items():
-        for child in fusion_cls.descendant_schema_nodes():
-            # replace descendants with Fusion descendants
-            # TODO - this is wrong as it's mutating a class from elsewhere
-            #      - It's only going to be noticed if _specification classes are used alongside
-            #        of _fusion classes
-            child.schema_node_cls = r[child.schema_node_cls.__name__]
+
+        for attr_name, field in fusion_cls.schema_fields().items():
+
+            if isinstance(field, SchemaNodeField):
+
+                cls_name = field.schema_node_cls.__name__
+
+                cloned_field = copy.copy(field)
+                cloned_field.schema_node_cls = r[cls_name]
+
+                setattr(fusion_cls, attr_name, cloned_field)
+
+            elif isinstance(field, RepeatedField) and isinstance(
+                field.schema_field, SchemaNodeField
+            ):
+                # Repeated SchemaNodeFields
+
+                cls_name = field.schema_field.schema_node_cls.__name__
+
+                cloned_field = copy.copy(field)
+
+                cloned_schema = copy.copy(field.schema_field)
+                cloned_schema.schema_node_cls = r[cls_name]
+                cloned_field.schema_field = cloned_schema
+
+                setattr(fusion_cls, attr_name, cloned_field)
 
     return r
 

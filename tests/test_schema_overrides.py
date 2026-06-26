@@ -74,3 +74,28 @@ class TestSchemaOverrides(unittest.TestCase):
             schema_fusion(sample_spec_nodes, sample_ui_nodes)
 
         self.assertIn("Un-matched UI classes", str(context.exception))
+
+    def test_independent_fusion_classes(self):
+        """
+        Fusion classes are the specification classes optionally overridden with UI options.
+        This is a regression test from when descendants of the source 'specification' classes
+        were mutated by the process of building fusion classes.
+        """
+        from schema.planning_application_specification import AgentContact as SpecAgentContact
+        from schema.planning_application_specification import ContactDetails as SpecContactDetails
+        from schema.planning_application import AgentContact as FusionAgentContact
+        from schema.planning_application import ContactDetails as FusionContactDetails
+
+        spec_name = SpecAgentContact.contact_details.schema_node_cls.__name__
+        self.assertEqual("ContactDetails", spec_name)
+
+        fusion_name = FusionAgentContact.contact_details.schema_node_cls.__name__
+        self.assertEqual("ContactDetails_FusionCls", fusion_name)
+
+        msg = "Check for SchemaNode class inside Repeated field"
+
+        spec_name = SpecContactDetails.phone_numbers.schema_field.schema_node_cls.__name__
+        self.assertEqual("PhoneNumber", spec_name, msg)
+
+        fusion_name = FusionContactDetails.phone_numbers.schema_field.schema_node_cls.__name__
+        self.assertEqual("PhoneNumber_FusionCls", fusion_name, msg)

@@ -56,8 +56,8 @@ class TestPdfBuilder(unittest.TestCase):
         flowables = self.flowables(ContactDetail)
         headers = [(f.text, f.style.name) for f in flowables if isinstance(f, Paragraph)]
 
-        self.assertIn(("FaxNumber_FusionCls", "section"), headers)
-        self.assertIn(("PhoneNumber_FusionCls", "section"), headers)
+        self.assertIn(("FaxNumber", "section"), headers)
+        self.assertIn(("PhoneNumber", "section"), headers)
 
     def test_nested_node_field_rendered_as_field_block(self):
         """
