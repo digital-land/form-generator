@@ -350,8 +350,6 @@ class SchemaNodeField(AbstractSchemaField):
 
     def empty_value(self):
         return {}
-        # node = self.schema_node_cls(parent_node=self._parent_node)
-        # return node
 
     @property
     def _is_empty(self):
@@ -365,7 +363,7 @@ class SchemaNodeField(AbstractSchemaField):
         """
         Load dictionary of values into child node.
 
-        @param value: (`SchemaNode`)
+        @param value: (dict)
         """
         # current value
         try:

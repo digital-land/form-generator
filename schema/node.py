@@ -126,32 +126,6 @@ class SchemaNode:
         traverse_failures = self.validate_traverse()
         failure_reasons.extend(traverse_failures)
 
-        # for fieldset, check_scope in [(payload_fieldset, False), (schema_fieldset, True)]:
-        #     for k, v in fieldset.items():
-        #
-        #         if check_scope and k in self.out_of_scope_fields:
-        #             print("continue for ", k)
-        #             continue
-        #
-        #         try:
-        #             # `__setitem__` resolves the key to a field and routes through the descriptor
-        #             #  so the value is validated
-        #             self[k] = v
-        #         except KeyError as e:
-        #             # Reverse the onus so it makes sense for user
-        #             # e.g.
-        #             # Field 'modules' not found in 'submission-details'
-        #             # to
-        #             # Field 'modules' not expected in 'submission-details'
-        #             msg = e.args[0].replace(" not found in ", " not expected in ")
-        #             failure_reasons.append(msg)
-        #         except SchemaValidationException as e:
-        #             # descendant fields validate their own values; aggregate their reasons
-        #             failure_reasons.extend(e.reasons)
-
-        # at this point all recursive building is done, nodes and fields are populated so run
-        # node level checks
-
         if len(failure_reasons) > 0:
             raise SchemaValidationException(failure_reasons)
 
@@ -269,11 +243,6 @@ class SchemaNode:
 
         for attr_name, field in self.schema_fields().items():
 
-            # print(attr_name, type(field))
-            #
-            # if isinstance(field, RepeatedField):
-            #     pass
-
             v = getattr(self, attr_name)
 
             if isinstance(field, SchemaNodeField):
@@ -281,9 +250,9 @@ class SchemaNode:
             elif isinstance(field, RepeatedField) and isinstance(
                 field.schema_field, SchemaNodeField
             ):
-
-                # Either RepeatedField needs knowledge of SchemaNodeField or SchemaNode does.
-                # I've gone with SchemaNode
+                # Wake up the repeated field.
+                # Implementation note -Either RepeatedField needs knowledge of SchemaNodeField
+                # or SchemaNode does. I've gone with SchemaNode
                 v = field.schema_field.empty_value()
                 field.empty_schema_field = field.schema_field.prepare_value(v)
                 field.empty_schema_field.shake_tree()
@@ -313,9 +282,6 @@ class SchemaNode:
         refs = self.schema_refs()
         if key in refs:
 
-            # if key in self.out_of_scope_fields:
-            #     raise KeyError(f"Field '{key}' out of scope in '{self._ref}'")
-
             attr_name, _ = refs[key]
             return getattr(self, attr_name)
 
@@ -337,9 +303,6 @@ class SchemaNode:
         for ref, (attr_name, _field) in self.schema_refs().items():
 
             if key in (ref, attr_name):
-
-                # if ref in self.out_of_scope_fields:
-                #     raise KeyError(f"Field '{key}' out of scope in '{self._ref}'")
 
                 setattr(self, attr_name, value)
                 return

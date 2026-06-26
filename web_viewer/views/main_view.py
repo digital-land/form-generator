@@ -90,9 +90,6 @@ def evaluate_payload():
         except SchemaValidationException as e:
             reasons = e.reasons
 
-        if node:
-            xx = node.as_native()
-
         # return the user supplied payload. `node.as_native()` would give schema built version
         page_vars.update({"payload": serialised_payload, "reasons": reasons})
 
