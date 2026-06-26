@@ -46,22 +46,8 @@ class TestForms(WebTestCase):
         """
         Data values appear in the form.
         """
-        # No UI overrides
-        #
-        # ticket scheduled to fix this a work arount
-        # ------------------
-        spec_classes = [ContactDetail, FaxNumber, Partnership, PhoneNumber]
-        fusion_cls_map = schema_fusion(spec_classes, [])
-        fusion_contact_details_cls = fusion_cls_map["Partnership"]
+        form_tree = FormTree(root_node=Partnership)
 
-        form_tree = FormTree(root_node=fusion_contact_details_cls)
-        # ------------------
-
-        # this instead
-
-        # form_tree = FormTree(root_node=Partnership)
-
-        # ------------------
         # this should be in the same format as :meth:`FormTree.as_native`
         forced_value = {"person-a": {"fax-number": {"number": "123456789"}}}
         form_tree.load(forced_value)
