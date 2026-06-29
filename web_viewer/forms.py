@@ -159,7 +159,7 @@ class FormTree:
             if key_errors:
                 raise SchemaValidationException(key_errors)
 
-        collection = self._collection(node_cls=root_node.__class__)
+        collection = self._collection(node_cls=root_node.__class__, node_obj=root_node)
 
         lookup_d = self._loaded_as_prefixed()
         prefix_scoreboard = set(lookup_d.keys())
@@ -186,43 +186,67 @@ class FormTree:
 
         return collection
 
-    def _collection(self, node_cls, prefix=None):
+    def _collection(self, node_cls, node_obj, prefix=None, out_of_scope=False):
         """
         Schema node tree traverse. Build a form from each schema node.
 
-        Note that the class defines the tree. An object of the class may not use all fields so
-        shouldn't be used to build forms. The data should be added after the tree has been built
-        from the class hierarchy.
+        The schema node *class* defines the tree, the schema node *object* holds data. This is
+        because the class defines what is possible and the object will be equal or less than this.
 
-        @param node_cls: subclass os `SchemaNode`, not object
+        Data in the tree is used to make validation and field scope decisions. Fields that are 'out
+        of scope' shouldn't be shown to the user.
+
+        @param node_cls: subclass of `SchemaNode`, not object - defines the form structure
+        @param node_obj: (SchemaNode) loaded instance of `node_cls`.
+        @param out_of_scope: (bool) True when an ancestor node put this whole node out of scope.
+            The form (and its descendants) are flagged so the template skips rendering them.
         """
         if prefix is None:
             prefix = ""
 
         form = schema_auto_form(node_cls)(prefix=prefix)
+
+        # Fields/nodes the loaded context puts out of scope. These are flagged rather than removed
+        # so the structure stays defined by the class; the template skips flagged fields and cards.
+        descoped_refs = node_obj.out_of_scope_fields
+        form._out_of_scope = out_of_scope
+
         results = [form]
 
-        for schema_node_field_cls in node_cls.descendant_schema_nodes():
+        for ref, (attr_name, field) in node_cls.schema_refs().items():
 
-            node_ref = schema_node_field_cls.ref
-            if node_ref is None:
-                node_ref = schema_node_field_cls.schema_node_cls._ref
+            descoped = ref in descoped_refs
 
-            if node_ref is None:
-                #  and issubclass(desc_node_cls, SchemaRepeatedField):
-                # node_ref = desc_node_cls.._ref
-                raise NotImplementedError("TODO")
-
-            if prefix:
-                child_prefix = f"{prefix}.{node_ref}"
+            if isinstance(field, SchemaSchemaNodeField):
+                child_cls = field.schema_node_cls
+                child_obj = getattr(node_obj, attr_name)
+            elif isinstance(field, SchemaRepeatedField) and isinstance(
+                field.schema_field, SchemaSchemaNodeField
+            ):
+                child_cls = field.schema_field.schema_node_cls
+                # repeated nodes render once as a template; use a loaded child for context when
+                # there is one, otherwise a fresh instance wired to this node so its
+                # out_of_scope_fields can still read up the tree.
+                children = getattr(node_obj, attr_name)
+                child_obj = children[0] if children else child_cls(parent_node=node_obj)
             else:
-                child_prefix = node_ref
+                # leaf field - flag it so the template drops it from `visible_fields`
+                if descoped and attr_name in form._fields:
+                    wt_field = form[attr_name]
+                    render_kw = dict(wt_field.render_kw or {})
+                    render_kw["data-out-of-scope"] = "true"
+                    wt_field.render_kw = render_kw
+                continue
 
             # fusion nodes = user interface + specification
-            # descendant_cls = descendant_node_field.schema_node_cls
-            # descendant = getattr(node, descendant_node_field)
+            child_prefix = f"{prefix}.{ref}" if prefix else ref
             results.extend(
-                self._collection(schema_node_field_cls.schema_node_cls, prefix=child_prefix)
+                self._collection(
+                    child_cls,
+                    node_obj=child_obj,
+                    prefix=child_prefix,
+                    out_of_scope=out_of_scope or descoped,
+                )
             )
 
         return results

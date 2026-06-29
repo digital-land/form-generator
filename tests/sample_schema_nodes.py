@@ -115,6 +115,14 @@ class Partnership(SchemaNode):
     a = SchemaNodeField(ref="person-a", schema_node_cls=ContactDetail)
     b = SchemaNodeField(ref="person-b", schema_node_cls=ContactDetail)
 
+    @property
+    def out_of_scope_fields(self):
+        # a sole trader has no second person; the whole `person-b` node drops out of scope
+        de_scoped = super().out_of_scope_fields
+        if self.a.email == "sole-trader@me.com":
+            de_scoped.add("person-b")
+        return de_scoped
+
     def valid_node(self):
         """
         Example validation check looks at a couple of places in the tree.

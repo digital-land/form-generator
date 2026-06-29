@@ -1,8 +1,7 @@
 from flask import render_template_string
 
-from schema.planning_application import schema_fusion
 from tests.base import WebTestCase
-from tests.sample_schema_nodes import Animal, FaxNumber, ContactDetail, Partnership, PhoneNumber
+from tests.sample_schema_nodes import Animal, ContactDetail, Partnership
 from web_viewer.forms import schema_auto_form, FormTree
 
 
@@ -117,6 +116,39 @@ class TestForms(WebTestCase):
         html = self.render_forms(forms)
         expected = 'title="Add another" onclick='
         self.assertIn(expected, html)
+
+    def test_out_of_scope_leaf_field_hidden(self):
+        """
+        A leaf field a node puts out of scope isn't rendered.
+        """
+        # Animal puts `location` (the `where` repeated field) out of scope for Bob
+        form_tree = FormTree(root_node=Animal)
+        form_tree.load({"keeper": {"email": "bob@thezoo.com"}})
+        html = self.render_forms(form_tree.collection())
+        self.assertNotIn('name="where"', html)
+
+        # in scope for anyone else
+        form_tree = FormTree(root_node=Animal)
+        form_tree.load({"keeper": {"email": "tim@thezoo.com"}})
+        html = self.render_forms(form_tree.collection())
+        self.assertIn('name="where"', html)
+
+    def test_out_of_scope_node_card_hidden(self):
+        """
+        A whole child node (and its descendant cards) a node puts out of scope isn't rendered.
+        """
+        # Partnership puts the `person-b` node out of scope for a sole trader
+        form_tree = FormTree(root_node=Partnership)
+        form_tree.load({"person-a": {"email": "sole-trader@me.com"}})
+        html = self.render_forms(form_tree.collection())
+        self.assertNotIn("person-b", html)
+        self.assertIn("person-a", html)
+
+        # both people in scope otherwise
+        form_tree = FormTree(root_node=Partnership)
+        form_tree.load({"person-a": {"email": "a@me.com"}})
+        html = self.render_forms(form_tree.collection())
+        self.assertIn("person-b", html)
 
     def test_dynamic_enums(self):
         """

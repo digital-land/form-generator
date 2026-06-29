@@ -1,4 +1,5 @@
 {% macro render_form_card(form, depth=0) %}
+{% if not form._out_of_scope %}
 <div class="card mb-4" style="margin-left: {{ depth * 1.5 }}rem">
   <div class="card-header">
     <h5 class="mb-0">{{ form._display or form.__class__.__name__ }}</h5>
@@ -6,7 +7,12 @@
     <small class="text-muted">{{ form._description }}</small>
     {% endif %}
   </div>
-  {% set visible_fields = form | selectattr("widget.input_type", "ne", "hidden") | list %}
+  {% set visible_fields = [] %}
+  {% for field in form %}
+  {% if field.widget.input_type != 'hidden' and not (field.render_kw and field.render_kw.get('data-out-of-scope')) %}
+  {% set _ = visible_fields.append(field) %}
+  {% endif %}
+  {% endfor %}
   {% if visible_fields %}
   <div class="card-body">
     <div class="row g-3">
@@ -51,4 +57,5 @@
   </div>
   {% endif %}
 </div>
+{% endif %}
 {% endmacro %}
