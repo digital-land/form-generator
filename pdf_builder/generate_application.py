@@ -12,7 +12,6 @@ from reportlab.platypus import (
 )
 
 from schema.fields import (
-    AbstractSchemaField,
     BooleanField,
     EnumField,
     HiddenStringField,
@@ -193,11 +192,18 @@ class GenerateApplication:
         # keep a field and its input area on the same page where possible
         return [KeepTogether(elements)]
 
-    def _node_flowables(self, schema_node_class, field=None):
+    def _node_flowables(self, node_cls, node_obj, field=None):
         """
         Recursively render a schema node as a section of the form.
 
-        @param schema_node_class: (SchemaNode subclass)
+        The schema node *class* defines the tree, the schema node *object* holds data. This is
+        because the class defines what is possible and the object will be equal or less than this.
+
+        Data in the tree is used to make field scope decisions. Fields that are 'out of scope'
+        shouldn't be shown to the user.
+
+        @param node_cls: subclass of `SchemaNode`, not object - defines the section structure
+        @param node_obj: (SchemaNode) loaded instance of `node_cls`.
         @param field: (SchemaNodeField) - the field that referenced this node, if any. Its
             display/description take precedence over the node's own. None for the root node.
         @return: (list of flowables)
@@ -205,33 +211,45 @@ class GenerateApplication:
         elements = []
         is_root = field is None
 
-        display = (field.display if field else None) or getattr(schema_node_class, "_display", None)
+        display = (field.display if field else None) or getattr(node_cls, "_display", None)
         description = (field.description if field else None) or getattr(
-            schema_node_class, "_description", None
+            node_cls, "_description", None
         )
 
         header_style = self.styles["form_title"] if is_root else self.styles["section"]
-        elements.append(Paragraph(display or schema_node_class.__name__, header_style))
+        elements.append(Paragraph(display or node_cls.__name__, header_style))
         if description:
             desc_style = (
                 self.styles["form_description"] if is_root else self.styles["section_description"]
             )
             elements.append(Paragraph(description, desc_style))
 
-        for attr_name, attr_value in schema_node_class.schema_fields().items():
+        # Fields/nodes the loaded data puts out of scope are not rendered.
+        descoped_refs = node_obj.out_of_scope_fields
 
-            if attr_name.startswith("_") or not isinstance(attr_value, AbstractSchemaField):
+        for ref, (attr_name, field_attr) in node_cls.schema_refs().items():
+
+            if ref in descoped_refs:
                 continue
 
-            repeated = isinstance(attr_value, RepeatedField)
-            inner = attr_value.schema_field if repeated else attr_value
+            repeated = isinstance(field_attr, RepeatedField)
+            inner = field_attr.schema_field if repeated else field_attr
 
             if isinstance(inner, HiddenStringField):
                 # hidden values are not shown to the user
                 continue
 
             if isinstance(inner, SchemaNodeField):
-                elements.extend(self._node_flowables(inner.schema_node_cls, field=inner))
+                child_cls = inner.schema_node_cls
+                if repeated:
+                    # repeated nodes render once as a template; use a loaded child for context
+                    # when there is one, otherwise a fresh instance wired to this node so its
+                    # out_of_scope_fields can still read up the tree.
+                    children = getattr(node_obj, attr_name)
+                    child_obj = children[0] if children else child_cls(parent_node=node_obj)
+                else:
+                    child_obj = getattr(node_obj, attr_name)
+                elements.extend(self._node_flowables(child_cls, child_obj, field=inner))
             else:
                 elements.extend(self._field_flowables(inner, attr_name, repeated))
 
@@ -293,7 +311,7 @@ class GenerateApplication:
         schema_node = schema_node_cls()
         schema_node.set_payload(self.schema_tree_fixture())
 
-        elements = self._node_flowables(schema_node)
+        elements = self._node_flowables(schema_node_cls, schema_node)
 
         doc.build(elements, onFirstPage=self._on_page, onLaterPages=self._on_page)
 
