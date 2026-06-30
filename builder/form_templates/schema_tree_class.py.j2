@@ -30,8 +30,6 @@ class {{ class_name }}(SchemaNode):
 
     {% for field_name, field_instance in schema_fields %}{{ field_name }} = {{ field_instance.__repr__() }}
     {% endfor %}
-    {% for field_name, field_instance in descendants %}{{ field_name }} = {{ field_instance.__repr__() }}
-    {% endfor %}
 
     {% if validation_rules %}
     def valid_node(self):
