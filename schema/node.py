@@ -23,13 +23,16 @@ class SchemaNode:
     def schema_fields(cls):
         """
         @return: (dict) (str : cls) of attribute name : subclass of :clas:`AbstractSchemaField`
+
+        Order honours the that of attributes declared in the class.
         """
-        # multiple inheritance so can't use vars() or __dict__
+        # Walking the MRO (rather than dir(), which sorts alphabetically). Reversed MRO means base
+        # class fields come first.
         sf = {}
-        for cls_att in dir(cls):
-            v = getattr(cls, cls_att)
-            if isinstance(v, AbstractSchemaField):
-                sf[cls_att] = v
+        for klass in reversed(cls.__mro__):
+            for attr_name, v in vars(klass).items():
+                if isinstance(v, AbstractSchemaField):
+                    sf[attr_name] = v
 
         return sf
 
@@ -151,6 +154,9 @@ class SchemaNode:
                 # Field 'modules' not expected in 'submission-details'
                 msg = e.args[0].replace(" not found in ", " not expected in ")
                 failure_reasons.append(msg)
+            except SchemaValidationException as e:
+                # One field rejecting its value must not abandon the remaining fields.
+                failure_reasons.extend(e.reasons)
 
         return failure_reasons
 
