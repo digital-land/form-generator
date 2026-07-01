@@ -179,17 +179,18 @@ class SchemaNode:
                 # field : subclass of AbstractSchemaField
                 # attr_name : class property/attribute name
 
+                if ref in out_of_scope_fields:
+                    # If a field is out_of_scope don't validate it. But do report an error if a
+                    # value was given.
+                    if not field.is_empty:
+                        failure_reasons.append(f"Field '{ref}' out of scope in '{node._ref}'")
+                    continue
+
                 try:
                     field.validate()
                 except SchemaValidationException as e:
                     # descendant fields validate their own values; aggregate their reasons
                     failure_reasons.extend(e.reasons)
-
-                if ref in out_of_scope_fields and not field._is_empty:
-                    failure_reasons.append(f"Field '{ref}' out of scope in '{node._ref}'")
-
-                    # don't worry about any other issues
-                    continue
 
                 if isinstance(field, SchemaNodeField):
 
@@ -228,8 +229,16 @@ class SchemaNode:
             return value
 
         payload = {}
-        for ref, (attr_name, _field) in self.schema_refs().items():
-            payload[ref] = native(getattr(self, attr_name))
+        for ref, (attr_name, field) in self.schema_refs().items():
+            value = native(getattr(self, attr_name))
+
+            # A field left unset isn't needed in the payload. Each field decides what counts as
+            # empty (e.g. structural nodes and lists are always kept); see
+            # :meth:`AbstractSchemaField.is_empty_value`.
+            if field.is_empty_value(value):
+                continue
+
+            payload[ref] = value
 
         return payload
 

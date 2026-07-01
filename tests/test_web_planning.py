@@ -59,30 +59,38 @@ class TestWebPlanning(WebTestCase):
         ]:
             self.assertIn(expected, response.text, msg)
 
+    def text_area_payload(self, response_text):
+        """
+        The page returned when submitting an application contains a textarea holding
+        JSON payload. Find this, de-serialise from JSON.
+
+        @return: mixed native python values
+        """
+        match = re.search(r"<textarea[^>]*>(.*?)</textarea>", response_text, re.DOTALL)
+        self.assertIsNotNone(match, "Payload textarea not found")
+
+        # textarea contents are HTML-escaped (e.g. &#34;) so unescape before parsing
+        payload = json.loads(html.unescape(match.group(1)))
+        return payload
+
     def test_agent_reference_round_trips_into_payload(self):
         """
         POST an 'Agent reference' value, extract the JSON shown in the payload textarea
         and confirm the value survived the round trip through the schema.
         """
-        payload = {"agent-contact-agent_reference": "AGENT-XYZ-123", "email": "me@somewhere.com"}
+        web_forms = {"agent-contact-agent_reference": "AGENT-XYZ-123", "email": "me@somewhere.com"}
         response = self.client.post(
             "/application/outline-all",
-            data=payload,
+            data=web_forms,
         )
         self.assertEqual(response.status_code, 200)
 
-        match = re.search(r"<textarea[^>]*>(.*?)</textarea>", response.text, re.DOTALL)
-        self.assertIsNotNone(match, "Payload textarea not found")
-
-        # textarea contents are HTML-escaped (e.g. &#34;) so unescape before parsing
-        payload = json.loads(html.unescape(match.group(1)))
-
+        payload = self.text_area_payload(response.text)
         self.assertEqual(
             "AGENT-XYZ-123",
             payload["agent-contact"]["agent-reference"],
         )
 
-    @unittest.skip("Needs valid sample application")
     def test_evaluate_full_application_is_valid(self):
         """
         POST the full application payload to the evaluate view and confirm it reports valid.
@@ -120,3 +128,26 @@ class TestWebPlanning(WebTestCase):
         response = self.client.get("/application/outline-all?profile=gla")
         self.assertEqual(response.status_code, 200)
         self.assertIn(gla_only_known_value, response.text)
+
+    def test_prune_empty_values(self):
+        """
+        Empty string and None are both treated as empty values. These fields aren't needed in the
+        returned payload.
+        """
+
+        web_forms = {
+            "agent-contact-agent_reference": "",
+            "agent-contact.contact-details-email": "me@somewhere.com",
+        }
+
+        response = self.client.post("/application/outline-all", data=web_forms)
+        self.assertEqual(response.status_code, 200)
+        payload = self.text_area_payload(response.text)
+
+        self.assertIn("agent-contact", payload, "Other fields in this section are required")
+
+        msg = (
+            "Reference not supplied so field shouldn't be present but email is so contact details "
+            "node not empty so should be there."
+        )
+        self.assertNotIn("agent-reference", payload["agent-contact"], msg)
