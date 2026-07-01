@@ -97,6 +97,13 @@ class GenerateApplication:
                 fontSize=9,
                 spaceAfter=4,
             ),
+            "prototype_notice": ParagraphStyle(
+                "prototype_notice",
+                parent=base["Normal"],
+                fontName="Helvetica-Bold",
+                fontSize=9,
+                textColor=black,
+            ),
             "option": ParagraphStyle("option", parent=base["Normal"]),
             "note": ParagraphStyle(
                 "note",
@@ -106,6 +113,36 @@ class GenerateApplication:
                 spaceAfter=4,
             ),
         }
+
+    def _prototype_notice(self):
+        """
+        @return: (flowable) a bordered box warning that this is a prototype, shown at the top
+            of the first page.
+        """
+        text = (
+            "Prototype output only, demonstrating that the planning application data standard "
+            "can generate a working form; not a production service and not to be issued as an "
+            "official application form."
+        )
+        box = Table(
+            [[Paragraph(text, self.styles["prototype_notice"])]],
+            colWidths=[self.content_width],
+        )
+        box.setStyle(
+            TableStyle(
+                [
+                    ("BOX", (0, 0), (-1, -1), 1, black),
+                    ("ROUNDEDCORNERS", [self.BOX_CORNER_RADIUS] * 4),
+                    ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                    ("TOPPADDING", (0, 0), (-1, -1), 8),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 10),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+                ]
+            )
+        )
+        box.hAlign = "LEFT"
+        return box
 
     def _write_box(self):
         """
@@ -311,7 +348,8 @@ class GenerateApplication:
         schema_node = schema_node_cls()
         schema_node.set_payload(self.schema_tree_fixture())
 
-        elements = self._node_flowables(schema_node_cls, schema_node)
+        elements = [self._prototype_notice(), Spacer(1, 0.5 * cm)]
+        elements.extend(self._node_flowables(schema_node_cls, schema_node))
 
         doc.build(elements, onFirstPage=self._on_page, onLaterPages=self._on_page)
 
