@@ -68,40 +68,6 @@ def application_index():
     return render_template("main/index.html", **page_vars)
 
 
-@main_blueprint.route("/evaluate", methods=["GET", "POST"])
-def evaluate_payload():
-    """
-    Render the application page so a user can supply their own JSON document to be
-    evaluated. No form tree or profile as these are determined from the payload.
-    POSTs to :func:`application`, which performs the evaluation.
-    """
-    page_vars = {"nav_menu_active": "evaluate_payload"}
-
-    if request.method == "POST":
-        if request.mimetype != "application/x-www-form-urlencoded":
-            abort(415, description="Payload must be submitted as form data")
-
-        # the textarea value is the serialised JSON the user pasted; pass it to load_json
-        # unparsed and let the parser deserialise and validate it
-        serialised_payload = request.form.get("payload", "")
-        parser = SchemaTreeParser(schema_node_cls=None)
-        node = None
-        reasons = []
-        try:
-            node = parser.load_json(
-                serialised_payload,
-                application_type_map=planning_application_roots_mapping,
-            )
-
-        except SchemaValidationException as e:
-            reasons = e.reasons
-
-        # return the user supplied payload. `node.as_native()` would give schema built version
-        page_vars.update({"payload": serialised_payload, "reasons": reasons})
-
-    return render_template("main/view_payload.html", **page_vars)
-
-
 @main_blueprint.route("/application/<application_ref>", methods=["GET", "POST"])
 def application(application_ref):
 
@@ -175,3 +141,36 @@ def application_pdf(application_ref):
         as_attachment=False,
         download_name=f"{application_ref}-{profile}.pdf",
     )
+
+
+@main_blueprint.route("/evaluate", methods=["GET", "POST"])
+def evaluate_payload():
+    """
+    Render the application page so a user can supply their own JSON document to be
+    evaluated. No form tree or profile as these are determined from the payload.
+    POSTs to :func:`application`, which performs the evaluation.
+    """
+    page_vars = {"nav_menu_active": "evaluate_payload"}
+
+    if request.method == "POST":
+        if request.mimetype != "application/x-www-form-urlencoded":
+            abort(415, description="Payload must be submitted as form data")
+
+        # the textarea value is the serialised JSON the user pasted; pass it to load_json
+        # unparsed and let the parser deserialise and validate it
+        serialised_payload = request.form.get("payload", "")
+        parser = SchemaTreeParser(schema_node_cls=None)
+        reasons = []
+        try:
+            parser.load_json(
+                serialised_payload,
+                application_type_map=planning_application_roots_mapping,
+            )
+
+        except SchemaValidationException as e:
+            reasons = e.reasons
+
+        # return the user supplied payload. `node.as_native()` would give schema built version
+        page_vars.update({"payload": serialised_payload, "reasons": reasons})
+
+    return render_template("main/view_payload.html", **page_vars)
