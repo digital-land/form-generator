@@ -93,8 +93,19 @@ class AbstractSchemaField:
         return None
 
     @property
-    def _is_empty(self):
+    def is_empty(self):
         return self._value == self.empty_value()
+
+    def is_empty_value(self, value):
+        """
+        Whether `value` represents an unset field. Takes the value as an argument (rather than
+        reading the bound value like :attr:`is_empty`) so it can be asked about a value already
+        in hand without depending on which node the shared descriptor is currently bound to.
+
+        @param value: mixed, depends on subclass
+        @return: (bool)
+        """
+        return value == self.empty_value()
 
     def prepare_value(self, value):
         """
@@ -167,13 +178,14 @@ class StringField(AbstractSchemaField):
             return []
         return [f"max_length={self.max_length}"]
 
-    def validate(self):
-        super().validate()
-        # None already checked in super()
-        if self.required and self._value == "":
-            raise SchemaValidationException([f"Field '{self.ref}' is required"])
-
-        return
+    def prepare_value(self, value):
+        # An empty string carries no information, so store it as the field's empty value. Empty
+        # and unset strings are then represented identically throughout the tree: the required
+        # check in :meth:`AbstractSchemaField.validate` catches both as None, and the generic
+        # :meth:`AbstractSchemaField.is_empty_value` recognises both without a special case.
+        if value == "":
+            return self.empty_value()
+        return value
 
 
 class HiddenStringField(StringField):
@@ -352,12 +364,46 @@ class SchemaNodeField(AbstractSchemaField):
         return {}
 
     @property
-    def _is_empty(self):
+    def is_empty(self):
         try:
-            _node = self._value
+            node = self._value
         except (KeyError, AttributeError):
             return True
-        return False
+
+        # Is empty when every field within it is empty. An auto-created descendant node isn't
+        # mistaken for user supplied data.
+        return self._node_is_empty(node)
+
+    @staticmethod
+    def _node_is_empty(node):
+        """
+        @param node: (SchemaNode) - a descendant node.
+        @return: (bool) True when no field in the node (or its descendants) holds a value.
+
+        Values are read with `getattr` rather than each field's `is_empty`. Fields are shared
+        class attributes whose `_parent_node` tracks the last node touched, so `is_empty` can
+        read a sibling node's value; `getattr` always resolves against this node's own data.
+        """
+        for attr_name, field in node.schema_fields().items():
+            value = getattr(node, attr_name)
+
+            if isinstance(value, list) and not isinstance(field, RepeatedField):
+                raise ValueError("I don't understand")
+
+            if hasattr(value, "schema_fields") and not isinstance(field, SchemaNodeField):
+                raise ValueError("I don't understand")
+
+            if isinstance(field, RepeatedField):
+                if value:
+                    return False
+            elif isinstance(field, SchemaNodeField):
+                # descendant node - recurse
+                if not SchemaNodeField._node_is_empty(value):
+                    return False
+            elif value != field.empty_value():
+                return False
+
+        return True
 
     def prepare_value(self, value):
         """

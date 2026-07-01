@@ -173,3 +173,48 @@ class TestSchemaTree(unittest.TestCase):
 
         expected = ["Field 'location' out of scope in 'animal'"]
         self.assertEqual(expected, ctx.exception.reasons)
+
+    def test_as_native_removes_empty(self):
+        """
+        SchemaNode().as_native shouldn't include empty fields.
+        """
+        input_payload = {
+            "person-a": {"email": "me@somewhere.co.uk", "fax-number": {"number": "0123"}},
+            "person-b": {"email": "", "fax-number": {"number": ""}},
+        }
+        node = Partnership()
+        node.load_payload(input_payload)
+
+        expected_payload = {
+            "person-a": {"email": "me@somewhere.co.uk", "fax-number": {"number": "0123"}}
+        }
+
+        output_payload = node.as_native()
+        self.assertEqual(expected_payload, output_payload)
+
+    def test_out_of_scope_node_emptiness_recurses_into_descendant(self):
+        """
+        A sole trader takes the whole `person-b` node out of scope. Whether it's flagged depends
+        on `SchemaNodeField.is_empty`, which recurses through person-b's own fields - including
+        the nested `fax` node (itself a `SchemaNodeField`). An empty person-b carries no data so
+        isn't flagged; data held only in that nested node still counts as supplied.
+        """
+        # person-b is out of scope and empty. Judging that recurses into person-b's empty `fax`
+        # node, so nothing is flagged and the payload is valid.
+        node = Partnership()
+        node.load_payload({"person-a": {"email": "sole-trader@me.com"}})
+
+        # person-b is out of scope but carries data only in its nested `fax` node. The recursion
+        # reaches that node, finds a value and reports person-b as not empty - so it's flagged.
+        node = Partnership()
+        with self.assertRaises(SchemaValidationException) as ctx:
+            node.load_payload(
+                {
+                    "person-a": {"email": "sole-trader@me.com"},
+                    "person-b": {"fax-number": {"number": "0123"}},
+                }
+            )
+
+        self.assertIn(
+            "Field 'person-b' out of scope in 'two-people'", ctx.exception.reasons
+        )
