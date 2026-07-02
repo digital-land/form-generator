@@ -48,8 +48,12 @@
     <textarea id="payload" name="payload" class="form-control font-monospace" rows="24">{{ payload }}</textarea>
   </div>
 
-  <div class="mb-4">
+  <div class="d-flex align-items-center gap-3 mb-4">
     <button type="submit" class="btn btn-primary">Submit</button>
+    <div class="form-check mb-0">
+      <input type="checkbox" class="form-check-input" id="simplify" name="simplify"{% if simplify %} checked{% endif %}>
+      <label class="form-check-label" for="simplify">Simplify valid payloads where possible</label>
+    </div>
   </div>
 </form>
 

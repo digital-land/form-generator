@@ -102,6 +102,31 @@ class TestWebPlanning(WebTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("The payload is valid.", response.text)
 
+    def test_evaluate_simplify_returns_schema_payload_when_valid(self):
+        """
+        With 'simplify' ticked and a valid payload, the evaluate view returns the schema built
+        version (as the application view does) rather than echoing the user's raw text.
+        """
+        native = json.loads((DATA_PATH / "web_payloads" / "application_full.json").read_text())
+        # compact serialisation so we can tell the echoed text apart from the re-serialised
+        # (indented) schema built version
+        compact_payload = json.dumps(native, separators=(",", ":"))
+
+        response = self.client.post(
+            "/evaluate", data={"payload": compact_payload, "simplify": "on"}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("The payload is valid.", response.text)
+
+        # schema built payload prunes empty values, so it differs from the raw input while
+        # keeping the meaningful content
+        returned = self.text_area_payload(response.text)
+        self.assertNotEqual(native, returned)
+        self.assertEqual(
+            native["submission-details"]["application-types"],
+            returned["submission-details"]["application-types"],
+        )
+
     def test_submission_details(self):
         """
         The specification allows many application types in a single payload. For demo web viewer
