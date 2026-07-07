@@ -7,8 +7,7 @@ from flask import render_template_string
 
 from schema.planning_application import SubmissionDetails
 from tests.base import WebTestCase
-from web_viewer.forms import schema_auto_form
-import unittest
+from web_viewer.forms import FormFabricate
 
 DATA_PATH = Path(__file__).parent / "data"
 
@@ -36,7 +35,7 @@ class TestWebPlanning(WebTestCase):
 
         from schema.planning_application import Person as FusionPerson
 
-        form = schema_auto_form(FusionPerson)()
+        form = FormFabricate.schema_auto_form(FusionPerson)()
 
         msg = "In _specification it's 'Person obj' , in _ui it's 'A Person'"
         self.assertEqual("A Person", form._display, msg)
@@ -91,6 +90,43 @@ class TestWebPlanning(WebTestCase):
             payload["agent-contact"]["agent-reference"],
         )
 
+    def test_repeated_node_entries_round_trip_into_payload(self):
+        """
+        POST two phone number entries (the second as added in the browser by the 'add
+        another' control) and confirm each item is separately accessible in the payload.
+        """
+        web_forms = {
+            "agent-contact.contact-details-email": "me@somewhere.com",
+            "agent-contact.contact-details-phone_numbers-0-number": "01234 567890",
+            "agent-contact.contact-details-phone_numbers-0-contact_priority": "primary",
+            "agent-contact.contact-details-phone_numbers-1-number": "07777 777777",
+            "agent-contact.contact-details-phone_numbers-1-contact_priority": "secondary",
+        }
+        response = self.client.post("/application/outline-all", data=web_forms)
+        self.assertEqual(response.status_code, 200)
+
+        payload = self.text_area_payload(response.text)
+        phone_numbers = payload["agent-contact"]["contact-details"]["phone-numbers"]
+
+        expected = [
+            {"number": "01234 567890", "contact-priority": "primary"},
+            {"number": "07777 777777", "contact-priority": "secondary"},
+        ]
+        self.assertEqual(expected, phone_numbers)
+
+    def test_repeated_field_renders_entry_and_add_control(self):
+        """
+        A repeated node renders one indexed entry and the control to add another.
+        """
+        response = self.client.get("/application/outline-all")
+        self.assertEqual(response.status_code, 200)
+
+        for expected in [
+            'name="agent-contact.contact-details-phone_numbers-0-number"',
+            'onclick="addRepeatedEntry(this)"',
+        ]:
+            self.assertIn(expected, response.text)
+
     def test_evaluate_full_application_is_valid(self):
         """
         POST the full application payload to the evaluate view and confirm it reports valid.
@@ -133,7 +169,7 @@ class TestWebPlanning(WebTestCase):
         simplify to one so don't show the big enum just set application's reference when in web
         view.
         """
-        form = schema_auto_form(SubmissionDetails)()
+        form = FormFabricate.schema_auto_form(SubmissionDetails)()
 
         html = render_template_string(
             '{% from "main/macros.html" import render_form_card %}{{ render_form_card(form) }}',

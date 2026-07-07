@@ -1,6 +1,6 @@
 from schema.planning_application_specification import Employment
 from tests.base import WebTestCase
-from web_viewer.forms import schema_auto_form, FormTree
+from web_viewer.forms import FormFabricate, FormTree
 
 
 class TestFormsPlanning(WebTestCase):
@@ -16,14 +16,14 @@ class TestFormsPlanning(WebTestCase):
         """
         prefix = "test"
         node = Employment
-        form = schema_auto_form(node)(prefix=prefix)
+        form = FormFabricate.schema_auto_form(node)(prefix=prefix)
 
         results = [form]
         for descendant_node_field in node.descendant_schema_nodes():
             child_prefix = f"{prefix}.{descendant_node_field.ref}"
 
             descendant = descendant_node_field.schema_node_cls
-            child_form = schema_auto_form(descendant)(prefix=child_prefix)
+            child_form = FormFabricate.schema_auto_form(descendant)(prefix=child_prefix)
             results.append(child_form)
 
         # suffix is a WTForms addition
