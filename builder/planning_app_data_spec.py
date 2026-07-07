@@ -125,7 +125,6 @@ class ApplicationBase(SchemaBase):
     start_date: str | None = None
     end_date: str | None = None
     modules: list[Module | dict] = field(default_factory=list)
-    # components: list[Component] = field(default_factory=list)
     base_type: str | None = None
     allow_additional_properties: bool = False
 
@@ -395,14 +394,17 @@ class PlanningAppDataResolved(PlanningAppDataSpec):
 
             resolved[app_ref] = app_r
 
-        # def _resolve_inheritance(self, index: dict[str, Application]) -> None:
-
+        abstract_classes = []
         for app_ref, app in resolved.items():
+
+            if app.base_type:
+                abstract_classes.append(app_ref)
 
             if app.extends:
                 parent_app = resolved[app.extends]
 
-                assert parent_app.extends is None, "TODO: recursive version of this"
+                if parent_app.extends is not None:
+                    raise NotImplementedError("TODO: recursive 'extends'")
 
                 for parent_module in parent_app.modules:
                     if parent_module not in app.modules:
@@ -411,6 +413,10 @@ class PlanningAppDataResolved(PlanningAppDataSpec):
                 for field_entry in parent_app.field_entries:
                     # TODO - correct order?
                     app.field_entries.append(field_entry)
+
+        # base-type: true - means this isn't a 'concrete' application type
+        for abstract_ref in abstract_classes:
+            del resolved[abstract_ref]
 
         return resolved
 

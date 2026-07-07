@@ -1,6 +1,5 @@
 ---
 application: restaurant
-base-type: true
 name: Restaurant
 description: A place to eat food
 synonyms: []
