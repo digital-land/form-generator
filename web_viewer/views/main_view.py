@@ -159,10 +159,13 @@ def evaluate_payload():
         # the textarea value is the serialised JSON the user pasted; pass it to load_json
         # unparsed and let the parser deserialise and validate it
         serialised_payload = request.form.get("payload", "")
+        # checkbox: only present in the form data when ticked
+        simplify = request.form.get("simplify") is not None
         parser = SchemaTreeParser(schema_node_cls=None)
         reasons = []
+        node = None
         try:
-            parser.load_json(
+            node = parser.load_json(
                 serialised_payload,
                 application_type_map=planning_application_roots_mapping,
             )
@@ -170,7 +173,12 @@ def evaluate_payload():
         except SchemaValidationException as e:
             reasons = e.reasons
 
-        # return the user supplied payload. `node.as_native()` would give schema built version
-        page_vars.update({"payload": serialised_payload, "reasons": reasons})
+        # default to echoing the user supplied payload. When the user opts to simplify and the
+        # payload is valid, return the schema built version instead (as the application view does)
+        payload = serialised_payload
+        if simplify and not reasons and node is not None:
+            payload = json.dumps(node.as_native(), indent=2, ensure_ascii=False)
+
+        page_vars.update({"payload": payload, "reasons": reasons, "simplify": simplify})
 
     return render_template("main/view_payload.html", **page_vars)

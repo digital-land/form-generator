@@ -2,7 +2,7 @@ from flask import render_template_string
 
 from tests.base import WebTestCase
 from tests.sample_schema_nodes import Animal, ContactDetail, Partnership
-from web_viewer.forms import schema_auto_form, FormTree
+from web_viewer.forms import FormFabricate, FormTree
 
 
 class TestForms(WebTestCase):
@@ -21,25 +21,18 @@ class TestForms(WebTestCase):
         )
         return html
 
-    def test_repeated_node_field_is_skipped_without_error(self):
-        # `phones` is a RepeatedField wrapping a node - it describes descendants, so it
-        # shouldn't become a form field and shouldn't raise
-        form = schema_auto_form(ContactDetail)()
+    def test_repeated_node_field_is_a_field_list(self):
+        """
+        `phones` is a RepeatedField wrapping a node - each entry is a subform holding the
+        node's fields.
 
-        self.assertNotIn("phones", form._fields)
+        These should end up as WTForms FieldList and FormFields.
+        """
+        form = FormFabricate.schema_auto_form(ContactDetail)()
 
-    def test_node_field_is_skipped(self):
-        # `fax` is a node field, rendered separately as its own card
-        form = schema_auto_form(ContactDetail)()
-
-        self.assertNotIn("fax", form._fields)
-
-    def test_non_repeated_field_has_no_marker(self):
-        # `email` is a plain string field - no '+' control
-        form = schema_auto_form(ContactDetail)()
-
-        self.assertIn("email", form._fields)
-        self.assertIsNone(form.email.render_kw)
+        self.assertEqual("FieldList", form.phones.type)
+        self.assertEqual("FormField", form.phones.entries[0].type)
+        self.assertIn("number", form.phones.entries[0].form._fields)
 
     def test_load_value(self):
         """
@@ -61,18 +54,78 @@ class TestForms(WebTestCase):
 
         self.assertIn(expected, html)
 
-    def test_prefix_load(self):
-        payload = {"person-a": {"email": "a@me.com", "fax-number": {"number": "123456789"}}}
+    def test_load_repeated_node(self):
+        """
+        A payload with multiple entries for a repeated node renders one entry per item.
+        """
+        form_tree = FormTree(root_node=ContactDetail)
+        form_tree.load({"phones": [{"number": "111"}, {"number": "222"}]})
 
-        expected = {
-            "person-a-": [("email", "a@me.com")],
-            "person-a.fax-number-": [("number", "123456789")],
+        html = self.render_forms(form_tree.collection())
+
+        for expected in [
+            'name="phones-0-number"',
+            'value="111"',
+            'name="phones-1-number"',
+            'value="222"',
+        ]:
+            self.assertIn(expected, html)
+
+    def test_load_repeated_values(self):
+        """
+        A payload with multiple values for a repeated field renders one input per value.
+        """
+        form_tree = FormTree(root_node=Animal)
+        form_tree.load({"keeper": {"email": "tim@thezoo.com"}, "location": ["zoo", "safari"]})
+
+        html = self.render_forms(form_tree.collection())
+
+        for expected in [
+            'name="where-0"',
+            'value="zoo"',
+            'name="where-1"',
+            'value="safari"',
+        ]:
+            self.assertIn(expected, html)
+
+    def test_post_repeated_values(self):
+        """
+        Each entry the user added in the browser arrives in the POST under an indexed name
+        and each item is accessible in the payload.
+        """
+        post_data = {"where-0": "zoo", "where-1": "safari", "animal_name": "Gila Monster"}
+        with self.app.test_request_context("/", method="POST", data=post_data):
+            form_tree = FormTree(root_node=Animal)
+            payload = form_tree.as_native()
+
+        self.assertEqual(["zoo", "safari"], payload["where"])
+
+    def test_post_repeated_node(self):
+        """
+        Repeated node entries arrive as a list of dicts, one per entry.
+        """
+        post_data = {
+            "email": "me@somewhere.com",
+            "phones-0-number": "111",
+            "phones-1-number": "222",
         }
-        ftree = FormTree(root_node=None)
-        ftree.load(payload)
+        with self.app.test_request_context("/", method="POST", data=post_data):
+            form_tree = FormTree(root_node=ContactDetail)
+            payload = form_tree.as_native()
 
-        # note - order doesn't actually matter.
-        self.assertEqual(expected, ftree._loaded_as_prefixed())
+        self.assertEqual([{"number": "111"}, {"number": "222"}], payload["phones"])
+
+    def test_post_blank_repeated_entries_dropped(self):
+        """
+        The always-rendered blank entry (and any entry left blank) carries no information
+        so shouldn't create an item in the payload.
+        """
+        post_data = {"email": "me@somewhere.com", "phones-0-number": ""}
+        with self.app.test_request_context("/", method="POST", data=post_data):
+            form_tree = FormTree(root_node=ContactDetail)
+            payload = form_tree.as_native()
+
+        self.assertEqual([], payload["phones"])
 
     def test_enum_filter(self):
         """
@@ -125,13 +178,13 @@ class TestForms(WebTestCase):
         form_tree = FormTree(root_node=Animal)
         form_tree.load({"keeper": {"email": "bob@thezoo.com"}})
         html = self.render_forms(form_tree.collection())
-        self.assertNotIn('name="where"', html)
+        self.assertNotIn('name="where-0"', html)
 
         # in scope for anyone else
         form_tree = FormTree(root_node=Animal)
         form_tree.load({"keeper": {"email": "tim@thezoo.com"}})
         html = self.render_forms(form_tree.collection())
-        self.assertIn('name="where"', html)
+        self.assertIn('name="where-0"', html)
 
     def test_out_of_scope_node_card_hidden(self):
         """

@@ -1,3 +1,95 @@
+{% macro field_errors(field) %}
+{% for error in field.errors %}
+<div class="invalid-feedback d-block">{{ error }}</div>
+{% endfor %}
+{% endmacro %}
+
+{% macro render_input(field) %}
+{# a single value input - labelling (except checkboxes) is the caller's concern #}
+{% if field.type == 'BooleanField' %}
+<div class="form-check mt-2">
+  {{ field(class="form-check-input" + (" is-invalid" if field.errors else "")) }}
+  {{ field.label(class="form-check-label") }}
+  {{ field_errors(field) }}
+</div>
+{% elif field.type == 'RadioField' %}
+<div>
+  {% for subfield in field %}
+  <div class="form-check">
+    {{ subfield(class="form-check-input" + (" is-invalid" if field.errors else "")) }}
+    {{ subfield.label(class="form-check-label") }}
+  </div>
+  {% endfor %}
+  {{ field_errors(field) }}
+</div>
+{% else %}
+{{ field(class="form-control" + (" is-invalid" if field.errors else "")) }}
+{{ field_errors(field) }}
+{% endif %}
+{% endmacro %}
+
+{% macro render_subform(form_field, entry_number=none) %}
+{# a node nested within a repeated entry - a bordered section rather than its own card #}
+<div class="border rounded p-3">
+  <h5 class="mb-0">{{ form_field._display or form_field.label.text }}{% if entry_number %} <span class="text-muted fw-normal repeat-entry-number">#{{ entry_number }}</span>{% endif %}</h5>
+  {% if form_field._description %}
+  <small class="text-muted">{{ form_field._description }}</small>
+  {% endif %}
+  {{ render_fields(form_field) }}
+</div>
+{% endmacro %}
+
+{% macro render_field(field) %}
+{% if field.type == 'FieldList' %}
+{# a repeated field/node - the field can be used multiple times, one entry per use.
+   Entry names carry an index ('name-0', 'name-1', ...) so each POSTed item is
+   separately addressable. The button clones the last entry. #}
+{% if field.entries[0].type != 'FormField' %}
+{{ field.label(class="form-label fw-semibold") }}
+{% endif %}
+<div data-repeat-list data-repeat-name="{{ field.name }}">
+  {% for entry in field %}
+  <div data-repeat-entry class="mb-2">
+    {% if entry.type == 'FormField' %}
+    {{ render_subform(entry, loop.index) }}
+    {% else %}
+    {{ render_input(entry) }}
+    {% endif %}
+  </div>
+  {% endfor %}
+  <button type="button" class="btn btn-sm btn-outline-secondary"
+          title="Add another" onclick="addRepeatedEntry(this)">+ Add another</button>
+</div>
+{% elif field.type == 'FormField' %}
+{{ render_subform(field) }}
+{% elif field.type == 'BooleanField' %}
+{{ render_input(field) }}
+{% else %}
+{{ field.label(class="form-label fw-semibold") }}
+{{ render_input(field) }}
+{% endif %}
+{% endmacro %}
+
+{% macro render_fields(container) %}
+{% set visible_fields = [] %}
+{% for field in container %}
+{% set self_hidden = field.widget.input_type is defined and field.widget.input_type == 'hidden' %}
+{% set entries_hidden = field.type == 'FieldList' and field.entries and (field.entries[0].widget.input_type is defined and field.entries[0].widget.input_type == 'hidden') %}
+{% if not self_hidden and not entries_hidden and not (field.render_kw and field.render_kw.get('data-out-of-scope')) %}
+{% set _ = visible_fields.append(field) %}
+{% endif %}
+{% endfor %}
+{% if visible_fields %}
+<div class="row g-3">
+  {% for field in visible_fields %}
+  <div class="{{ 'col-12' if field.type in ('FieldList', 'FormField') else 'col-md-6' }}">
+    {{ render_field(field) }}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endmacro %}
+
 {% macro render_form_card(form, depth=0) %}
 {% if not form._out_of_scope %}
 <div class="card mb-4" style="margin-left: {{ depth * 1.5 }}rem">
@@ -7,53 +99,10 @@
     <small class="text-muted">{{ form._description }}</small>
     {% endif %}
   </div>
-  {% set visible_fields = [] %}
-  {% for field in form %}
-  {% if field.widget.input_type != 'hidden' and not (field.render_kw and field.render_kw.get('data-out-of-scope')) %}
-  {% set _ = visible_fields.append(field) %}
-  {% endif %}
-  {% endfor %}
-  {% if visible_fields %}
+  {% set body = render_fields(form) %}
+  {% if body|trim %}
   <div class="card-body">
-    <div class="row g-3">
-      {% for field in visible_fields %}
-      {% set is_repeated = field.render_kw and field.render_kw.get('data-repeated') %}
-      <div class="col-md-6">
-        {% if field.type == 'BooleanField' %}
-        <div class="form-check mt-2">
-          {{ field(class="form-check-input" + (" is-invalid" if field.errors else "")) }}
-          {{ field.label(class="form-check-label") }}
-          {% for error in field.errors %}
-            <div class="invalid-feedback">{{ error }}</div>
-          {% endfor %}
-        </div>
-        {% elif field.type == 'RadioField' %}
-        {{ field.label(class="form-label fw-semibold") }}
-        <div>
-          {% for subfield in field %}
-          <div class="form-check">
-            {{ subfield(class="form-check-input" + (" is-invalid" if field.errors else "")) }}
-            {{ subfield.label(class="form-check-label") }}
-          </div>
-          {% endfor %}
-          {% for error in field.errors %}
-            <div class="invalid-feedback d-block">{{ error }}</div>
-          {% endfor %}
-        </div>
-        {% else %}
-        {{ field.label(class="form-label fw-semibold") }}
-        {{ field(class="form-control" + (" is-invalid" if field.errors else "")) }}
-        {% for error in field.errors %}
-          <div class="invalid-feedback">{{ error }}</div>
-        {% endfor %}
-        {% endif %}
-        {% if is_repeated %}
-        <button type="button" class="btn btn-sm btn-outline-secondary mt-2"
-                title="Add another" onclick="repeatedFieldComingSoon()">+</button>
-        {% endif %}
-      </div>
-      {% endfor %}
-    </div>
+    {{ body }}
   </div>
   {% endif %}
 </div>
