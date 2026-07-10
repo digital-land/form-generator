@@ -673,7 +673,6 @@ class Employment(SchemaNode):
         ref="existing-employees",
         display="Existing employees",
         description="Counts of existing employees",
-        required=True,
         schema_node_cls=Employees,
     )
     proposed_employees = SchemaNodeField(
