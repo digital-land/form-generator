@@ -50,9 +50,13 @@ Storing these Python classes in a Python module file comes with the cost of havi
 
 For convenience, this repo includes the current build of the schema in [schema/planning_applications.py](schema/planning_applications.py). It is built using [black](https://github.com/psf/black), the python formatter. This is primarily to keep the output consistent. If you used the instructions at the top level of this repo black will be included in your python virtual environment.
 
+Re-build with this command-
+
 
 ```python
 python builder/build_schema.py|black - > schema/planning_application_specification.py
 ```
 
-When re-generating the schema there is the opportunity to see a simple summary by viewing the code diff. e.g. for git repos `git diff`.
+Then check what has changed by viewing the code diff. e.g. for git repos `git diff`.
+
+Our internal workflow deploys when a feature branch is merged to main so create a branch before running the command above.

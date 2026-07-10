@@ -528,9 +528,9 @@ def build_enum_field(planning_spec, field_info, codelist_ref):
 if __name__ == "__main__":
     from builder import PROJECT_ROOT
 
-    # TODO get this from local config
-    p = "/Users/si/Documents/TPXimpact/Projects/planning-application-data-specification"
+    from settings.local_config import Config
 
+    p = Config.PLANNING_APPLICATION_DATA_SPECIFICATION_REPO
     specification = PlanningAppDataResolved(planning_app_repo_path=p)
 
     r = render_python(
