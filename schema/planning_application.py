@@ -88,6 +88,10 @@ def schema_fusion(schema_node_classes, user_interface_classes):
 
                 cls_name = field.schema_node_cls.__name__
 
+                if cls_name not in r:
+                    msg = f"{spec_cls_name}.{attr_name} refers to unknown class: {cls_name}"
+                    raise ValueError(msg)
+
                 cloned_field = copy.copy(field)
                 cloned_field.schema_node_cls = r[cls_name]
 

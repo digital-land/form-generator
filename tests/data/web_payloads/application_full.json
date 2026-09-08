@@ -93,8 +93,8 @@
         "title": "Mr",
         "first-name": "Alex",
         "last-name": "Taylor",
-        "address-text": "7 Elgin Drive, Northwood, UK",
-        "postcode": "HA6 2YR"
+        "contact-address": { "address-text": "7 Elgin Drive, Northwood, UK",
+        "postcode": "HA6 2YR"}
       },
       "company": "Middlesex & Herts"
     }
@@ -119,8 +119,8 @@
           "title": "Mr",
           "first-name": "Jordan",
           "last-name": "Morgan",
-          "address-text": "Flat A, 26, Albion Road, Hackney, London",
-          "postcode": "N16 9PH"
+          "contact-address": {"address-text": "Flat A, 26, Albion Road, Hackney, London",
+          "postcode": "N16 9PH"}
         }
       }
     ]
@@ -281,8 +281,8 @@
           "title": "",
           "first-name": "Sam",
           "last-name": "Riley",
-          "address-text": "26 Albion Road, Newington Green",
-          "postcode": "N16 9PH"
+          "contact-address": {"address-text": "26 Albion Road, Newington Green",
+          "postcode": "N16 9PH"}
         },
         "notice-served-date": "2020-07-08"
       }
@@ -327,15 +327,13 @@
   "site-details": {
     "site-locations": [
       {
-        "site-boundary": "",
-        "address-text": "Flat A, 26 Albion Road, Hackney, London",
-        "postcode": "N16 9PH",
+        "geometry": "xx",
+        "site-address": {"address-text": "Flat A, 26 Albion Road, Hackney, London",
+        "postcode": "N16 9PH"},
         "easting": 532891,
         "northing": 185566,
         "latitude": "",
-        "longitude": "",
-        "description": "",
-        "uprns": []
+        "longitude": ""
       }
     ]
   },

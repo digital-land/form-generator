@@ -55,15 +55,18 @@ class TestSchemaOverrides(unittest.TestCase):
 
     def test_schema_fusion(self):
 
-        from schema.planning_application_ui import Person as UiPerson
-        from schema.planning_application_specification import Person as SpecificationPerson
+        from tests.sample_schema_nodes import PhoneNumber as SpecificationPhoneNumber
+        from tests.sample_ui_nodes import PhoneNumber as UiPhoneNumber
 
-        sample_spec_nodes = [SpecificationPerson]
-        sample_ui_nodes = [UiPerson]
+        # from schema.planning_application_ui import Person as UiPerson
+        # from schema.planning_application_specification import Person as SpecificationPerson
+
+        sample_spec_nodes = [SpecificationPhoneNumber]
+        sample_ui_nodes = [UiPhoneNumber]
 
         fusion_mapping = schema_fusion(sample_spec_nodes, sample_ui_nodes)
-        msg = "Just expecting the Person specification to have a FusionCls"
-        self.assertEqual({"Person"}, set(fusion_mapping.keys()), msg)
+        msg = "Just expecting the PhoneNumber specification to have a FusionCls"
+        self.assertEqual({"PhoneNumber"}, set(fusion_mapping.keys()), msg)
 
         class LonelyUi(UserInterfaceOverride):
             _display = "Please be my friend"
