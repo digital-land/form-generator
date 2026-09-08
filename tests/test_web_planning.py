@@ -14,7 +14,10 @@ DATA_PATH = Path(__file__).parent / "data"
 
 class TestWebPlanning(WebTestCase):
     """
-    Web pages using schema.planning_application
+    Web pages using schema.planning_application.
+
+    These tests depend on generated code built from external 'data specification' repo so might be
+    brittle.
     """
 
     def test_application_root(self):

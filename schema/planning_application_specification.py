@@ -101,6 +101,25 @@ class AgentContact(SchemaNode):
             raise SchemaValidationException(reasons)
 
 
+class ContactAddress(SchemaNode):
+    _ref = "contact-address"
+    _display = "Contact address"
+    _description = "Address information used for correspondence, including text representation, postcode and UPRN. "
+
+    address_text = StringField(
+        ref="address-text",
+        display="Address Text",
+        description="Text representation of an address or site",
+        required=True,
+    )
+    postcode = StringField(
+        ref="postcode", display="Postcode", description="Postcode for a contact address or site"
+    )
+    uprn = StringField(
+        ref="uprn", display="UPRN", description="Unique Property Reference Number for a property"
+    )
+
+
 class Person(SchemaNode):
     _ref = "person"
     _display = "Person obj"
@@ -119,13 +138,13 @@ class Person(SchemaNode):
         description="The last name of the individual",
         required=True,
     )
-    address_text = StringField(
-        ref="address-text",
-        display="Address Text",
-        description="Flexible field for capturing addresses",
+    contact_address = SchemaNodeField(
+        ref="contact-address",
+        display="Contact address",
+        description="A structured object containing an address used for correspondence.",
         required=True,
+        schema_node_cls=ContactAddress,
     )
-    postcode = StringField(ref="postcode", display="Postcode", description="The postal code")
 
 
 class Agent(SchemaNode):
@@ -673,6 +692,7 @@ class Employment(SchemaNode):
         ref="existing-employees",
         display="Existing employees",
         description="Counts of existing employees",
+        required=True,
         schema_node_cls=Employees,
     )
     proposed_employees = SchemaNodeField(
@@ -2195,7 +2215,7 @@ class PreAppAdvice(SchemaNode):
     )
     officer_name = StringField(
         ref="officer-name",
-        display="Officer name",
+        display="Planning officer name",
         description="Name of the planning officer who provided the pre-application advice",
     )
     reference = StringField(
@@ -2471,6 +2491,42 @@ class RelatedApplicationDetails(SchemaNode):
         display="Decision date",
         description="The date when the decision was made, in YYYY-MM-DD format",
     )
+    eia_application = BooleanField(
+        ref="eia-application",
+        display="EIA application",
+        description="Whether the related application was an Environmental Impact Assessment application",
+        required=True,
+    )
+    environmental_statement_submitted = BooleanField(
+        ref="environmental-statement-submitted",
+        display="Environmental statement submitted",
+        description="Whether an Environmental Statement was submitted with the related application",
+    )
+
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if self["eia-application"] == True and not self["environmental-statement-submitted"]:
+            reasons.append(
+                "environmental-statement-submitted is needed for current value in 'eia-application'"
+            )
+
+        if reasons:
+            raise SchemaValidationException(reasons)
+
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if app_types.isdisjoint({"reserved-matters"}):
+            de_scoped.add("eia-application")
+
+        if app_types.isdisjoint({"reserved-matters"}):
+            de_scoped.add("environmental-statement-submitted")
+
+        return de_scoped
 
 
 class ProposalDetails(SchemaNode):
@@ -2481,7 +2537,7 @@ class ProposalDetails(SchemaNode):
     description = StringField(
         ref="description",
         display="Proposal description",
-        description="A description of what is being proposed, including the development, works, or change of use",
+        description="A description of the development, works, change of use or reserved matters for which approval is sought",
         required=True,
     )
     reserved_matters = RepeatedField(
@@ -2570,6 +2626,7 @@ class ProposalDetails(SchemaNode):
                 "hh",
                 "lbc",
                 "outline",
+                "reserved-matters",
                 "technical-details-consent",
             }
         ):
@@ -2589,6 +2646,7 @@ class ProposalDetails(SchemaNode):
                 "hh",
                 "lbc",
                 "outline",
+                "reserved-matters",
                 "technical-details-consent",
             }
         ):
@@ -2602,6 +2660,7 @@ class ProposalDetails(SchemaNode):
                 "hh",
                 "lbc",
                 "outline",
+                "reserved-matters",
                 "technical-details-consent",
             }
         ):
@@ -2615,6 +2674,7 @@ class ProposalDetails(SchemaNode):
                 "hh",
                 "lbc",
                 "outline",
+                "reserved-matters",
                 "technical-details-consent",
             }
         ):
@@ -2628,6 +2688,7 @@ class ProposalDetails(SchemaNode):
                 "hh",
                 "lbc",
                 "outline",
+                "reserved-matters",
                 "technical-details-consent",
             }
         ):
@@ -3076,22 +3137,54 @@ class SiteArea(SchemaNode):
     )
 
 
-class SiteLocation(SchemaNode):
-    _ref = "site-location"
-    _display = "Site location"
-    _description = "Details about the location of a development site, including its boundary, address, and/or coordinates "
+class SiteAddress(SchemaNode):
+    _ref = "site-address"
+    _display = "Site address"
+    _description = "Address information used to describe a development site, including text representation, postcode, UPRNs and USRNs. "
 
-    site_boundary = StringField(
-        ref="site-boundary",
-        display="Site boundary",
-        description="Geometry of the site of the development, typically in GeoJSON format",
-    )
     address_text = StringField(
         ref="address-text",
         display="Address Text",
-        description="Flexible field for capturing addresses",
+        description="Text representation of an address or site",
+        required=True,
     )
-    postcode = StringField(ref="postcode", display="Postcode", description="The postal code")
+    postcode = StringField(
+        ref="postcode", display="Postcode", description="Postcode for a contact address or site"
+    )
+    uprns = RepeatedField(
+        schema_field=StringField(
+            ref="uprns",
+            display="UPRNs",
+            description="Unique Property Reference Numbers (UPRNs) for existing premises within a site boundary",
+        )
+    )
+    usrns = RepeatedField(
+        schema_field=StringField(
+            ref="usrns",
+            display="USRNs",
+            description="Unique Street Reference Numbers (USRNs) associated with the site",
+        )
+    )
+
+
+class SiteLocation(SchemaNode):
+    _ref = "site-location"
+    _display = "Site location"
+    _description = "Details about the location of a development site, including its boundary, site address and coordinates. "
+
+    geometry = StringField(
+        ref="geometry",
+        display="Site boundary",
+        description="A polygon or multipolygon boundary",
+        required=True,
+    )
+    site_address = SchemaNodeField(
+        ref="site-address",
+        display="Site address",
+        description="A structured object containing an address used to describe a development site.",
+        required=True,
+        schema_node_cls=SiteAddress,
+    )
     easting = StringField(
         ref="easting",
         display="Easting",
@@ -3109,18 +3202,6 @@ class SiteLocation(SchemaNode):
         ref="longitude",
         display="Longitude",
         description="Longitude coordinate in WGS84 (EPSG:4326)",
-    )
-    description = StringField(
-        ref="description",
-        display="Description",
-        description="A text description providing details about the subject.",
-    )
-    uprns = RepeatedField(
-        schema_field=StringField(
-            ref="uprns",
-            display="UPRNs",
-            description="Unique Property Reference Numbers (UPRNs) for properties within the site boundary",
-        )
     )
 
 
@@ -3185,6 +3266,11 @@ class SiteVisit(SchemaNode):
                 key="applicant", label="Applicant", description="The applicant of the application"
             ),
             EnumOption(key="agent", label="Agent", description="The agent who completed the form"),
+            EnumOption(
+                key="other",
+                label="Other",
+                description="Another person who should be contacted to arrange a site visit",
+            ),
         ],
     )
     contact_reference = StringField(
@@ -3216,7 +3302,7 @@ class SiteVisit(SchemaNode):
 class File(SchemaNode):
     _ref = "file"
     _display = "File"
-    _description = "Structure for digital files to be included in the submission of an application "
+    _description = "Structure for describing a digital file attached to a submission, including its name, its type, size and encoded content "
 
     base64_content = StringField(
         ref="base64-content",
@@ -3310,9 +3396,9 @@ class Document(SchemaNode):
                     description="Written arboricultural advice",
                 ),
                 EnumOption(
-                    key="completed-app-form",
-                    label="Completed application form",
-                    description="The application form that must be completed for all planning applications, including the relevant sections and questions",
+                    key="application-form",
+                    label="Application form",
+                    description="The application form required for a planning application, including the relevant sections and questions",
                 ),
                 EnumOption(
                     key="daylight-sunlight-assessment",
@@ -3535,7 +3621,7 @@ class Document(SchemaNode):
     file = SchemaNodeField(
         ref="file",
         display="File",
-        description="The digital file or a reference to where the file is stored",
+        description="Details of the digital file attached to a submission",
         required=True,
         schema_node_cls=File,
     )
@@ -7858,7 +7944,10 @@ class GroundsProposedUse(SchemaNode):
         description="Details of temporary use including duration and specific arrangements",
     )
     reason = StringField(
-        ref="reason", display="Reason", description="A textual reason", required=True
+        ref="reason",
+        display="Reason",
+        description="A textual explanation of why something is proposed, required or decided",
+        required=True,
     )
 
     def valid_node(self):
@@ -7874,7 +7963,7 @@ class GroundsProposedUse(SchemaNode):
 
 class LdcProspectiveUse(SchemaNode):
     _ref = "ldc-prospective-use"
-    _display = "Lawful development certificate: Proposed Use"
+    _display = "Lawful development certificate: Proposed use or development"
     _description = "An application for a certificate confirming that a proposed use of buildings or other land, or operations proposed to be carried out in, on, over or under land, would be lawful for planning purposes. "
 
     submission_details = SchemaNodeField(
@@ -7970,40 +8059,101 @@ class LdcProspectiveUse(SchemaNode):
     )
 
 
-class ReplacementDrawing(SchemaNode):
-    _ref = "replacement-drawing"
-    _display = "Replacement drawing"
-    _description = "Details of an approved drawing being replaced by a new drawing, including references to both old and new drawings "
+class ApprovedDrawing(SchemaNode):
+    _ref = "approved-drawing"
+    _display = "Approved drawing"
+    _description = "A drawing approved as part of the original planning decision "
 
-    old_drawing_reference = StringField(
-        ref="old-drawing-reference",
-        display="Old drawing reference",
-        description="Reference of the old drawing being replaced",
+    name = StringField(
+        ref="name",
+        display="Name",
+        description="Name or title of the approved drawing",
         required=True,
     )
-    new_drawing_reference = StringField(
-        ref="new-drawing-reference",
-        display="New drawing reference",
-        description="Reference for the new drawing that replaces the old drawing",
+    reference = StringField(
+        ref="reference",
+        display="Reference",
+        description="Reference number of the approved drawing",
         required=True,
     )
-    reason = StringField(ref="reason", display="Reason", description="A textual reason")
 
 
 class SupportingInfo(SchemaNode):
     _ref = "supporting-info"
     _display = "Supporting information"
-    _description = "Any additional information which will help with the planning application"
+    _description = "Drawings approved as part of the original decision and drawings submitted with the reserved matters application"
 
-    replacement_drawings = RepeatedField(
-        required=True,
+    approved_drawings = RepeatedField(
         schema_field=SchemaNodeField(
-            ref="replacement-drawings",
-            display="Replacement drawings",
-            description="List of approved drawings being replaced by new drawings",
-            schema_node_cls=ReplacementDrawing,
-        ),
+            ref="approved-drawings",
+            display="Approved drawings",
+            description="Drawings approved as part of the original planning decision",
+            schema_node_cls=ApprovedDrawing,
+        )
     )
+    submitted_drawing_references = RepeatedField(
+        schema_field=StringField(
+            ref="submitted-drawing-references",
+            display="Submitted drawing references",
+            description="Reference numbers of drawings submitted with the application for approval",
+        )
+    )
+    approved_drawings_document = SchemaNodeField(
+        ref="approved-drawings-document",
+        display="Approved drawings schedule",
+        description="Reference to an uploaded decision notice or drawing schedule that identifies drawings approved as part of the original planning decision",
+        schema_node_cls=SupportingDocument,
+    )
+    submitted_drawings_document = SchemaNodeField(
+        ref="submitted-drawings-document",
+        display="Submitted drawings schedule",
+        description="Reference to an uploaded schedule that identifies drawings submitted with the application for approval",
+        schema_node_cls=SupportingDocument,
+    )
+    reason = StringField(
+        ref="reason",
+        display="Reason",
+        description="Reasons for any changes to the original drawings",
+    )
+
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if (self["submitted-drawings-document"] is not None and not self["approved-drawings"]) and (
+            self["submitted-drawings-document"].__len__() == 0 and not self["approved-drawings"]
+        ):
+            reasons.append("Field validation problem for: submitted-drawings-document")
+
+        if (
+            self["submitted-drawings-document"] is not None
+            and not self["submitted-drawing-references"]
+        ) and (
+            self["submitted-drawings-document"].__len__() == 0
+            and not self["submitted-drawing-references"]
+        ):
+            reasons.append("Field validation problem for: submitted-drawings-document")
+
+        if (
+            self["submitted-drawing-references"] is not None
+            and not self["approved-drawings-document"]
+        ) and (
+            self["submitted-drawing-references"].__len__() == 0
+            and not self["approved-drawings-document"]
+        ):
+            reasons.append("Field validation problem for: submitted-drawing-references")
+
+        if (
+            self["submitted-drawing-references"] is not None
+            and not self["submitted-drawings-document"]
+        ) and (
+            self["submitted-drawing-references"].__len__() == 0
+            and not self["submitted-drawings-document"]
+        ):
+            reasons.append("Field validation problem for: submitted-drawing-references")
+
+        if reasons:
+            raise SchemaValidationException(reasons)
 
 
 class ReservedMatters(SchemaNode):
@@ -8087,7 +8237,7 @@ class ReservedMatters(SchemaNode):
     supporting_info = SchemaNodeField(
         ref="supporting-info",
         display="Supporting information",
-        description="Any additional information which will help with the planning application",
+        description="Drawings approved as part of the original decision and drawings submitted with the reserved matters application",
         schema_node_cls=SupportingInfo,
     )
 
@@ -10007,7 +10157,7 @@ class SiteOwner(SchemaNode):
     address_text = StringField(
         ref="address-text",
         display="Address Text",
-        description="Flexible field for capturing addresses",
+        description="Text representation of an address or site",
         required=True,
     )
 
@@ -11767,33 +11917,18 @@ class Full(SchemaNode):
     )
 
 
-class Address(SchemaNode):
-    _ref = "address"
-    _display = "Address"
-    _description = "Address information including text representation, postcode, and UPRN "
-
-    address_text = StringField(
-        ref="address-text",
-        display="Address Text",
-        description="Flexible field for capturing addresses",
-        required=True,
-    )
-    postcode = StringField(ref="postcode", display="Postcode", description="The postal code")
-    uprn = StringField(ref="uprn", display="UPRN", description="Unique Property Reference Number")
-
-
 class AdjPremises(SchemaNode):
     _ref = "adj-premises"
     _display = "Adjacent premises"
-    _description = "Details of properties next to the development site"
+    _description = "Addresses of premises next to the development site, used to notify their owners or occupiers."
 
     addresses = RepeatedField(
         required=True,
         schema_field=SchemaNodeField(
             ref="addresses",
             display="Addresses",
-            description="A list of addresses for the adjoining properties",
-            schema_node_cls=Address,
+            description="A list of addresses for adjacent premises, used to notify their owners or occupiers.",
+            schema_node_cls=ContactAddress,
         ),
     )
 
@@ -11961,7 +12096,7 @@ class PaExtension(SchemaNode):
     adj_premises = SchemaNodeField(
         ref="adj-premises",
         display="Adjacent premises",
-        description="Details of properties next to the development site",
+        description="Addresses of premises next to the development site, used to notify their owners or occupiers.",
         schema_node_cls=AdjPremises,
     )
     desc_proposed_works = SchemaNodeField(
@@ -12028,27 +12163,15 @@ class PaExtension(SchemaNode):
 
 class DischargeCon(SchemaNode):
     _ref = "discharge-con"
-    _display = "Discharge condition"
-    _description = (
-        "How any conditions imposed as part of being given planning permission will be met"
-    )
+    _display = "Discharge of conditions"
+    _description = "Information submitted to demonstrate how the requirements of one or more planning conditions will be met"
 
-    description_list = StringField(
-        ref="description-list",
-        display="Description list",
-        description="Description or list of materials/details that are being submitted for approval",
+    description = StringField(
+        ref="description",
+        display="Description",
+        description="A full description or list of the materials or other details submitted for approval",
         required=True,
     )
-
-    @property
-    def out_of_scope_fields(self):
-        de_scoped = super().out_of_scope_fields
-        app_types = set(self._root_node.by_ref("submission-details.application-types"))
-
-        if app_types.isdisjoint({"approval-condition"}):
-            de_scoped.add("description-list")
-
-        return de_scoped
 
 
 class PartDischarge(SchemaNode):
@@ -12143,8 +12266,8 @@ class ApprovalCondition(SchemaNode):
     )
     discharge_con = SchemaNodeField(
         ref="discharge-con",
-        display="Discharge condition",
-        description="How any conditions imposed as part of being given planning permission will be met",
+        display="Discharge of conditions",
+        description="Information submitted to demonstrate how the requirements of one or more planning conditions will be met",
         schema_node_cls=DischargeCon,
     )
     part_discharge = SchemaNodeField(
@@ -12616,7 +12739,10 @@ class GroundsLdc(SchemaNode):
         )
     )
     reason = StringField(
-        ref="reason", display="Reason", description="A textual reason", required=True
+        ref="reason",
+        display="Reason",
+        description="A textual explanation of why something is proposed, required or decided",
+        required=True,
     )
 
 
@@ -12676,7 +12802,7 @@ class InfoSupportLdc(SchemaNode):
 
 class LdcExistingUse(SchemaNode):
     _ref = "ldc-existing-use"
-    _display = "Lawful development certificate: Existing Use"
+    _display = "Lawful development certificate: Existing use or development"
     _description = "An application for a certificate confirming that an existing use of land, operational development or an activity being carried out in breach of a planning condition is lawful for planning purposes "
 
     submission_details = SchemaNodeField(
