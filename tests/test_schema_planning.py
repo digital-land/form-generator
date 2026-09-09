@@ -1,8 +1,10 @@
 import unittest
+from unittest import mock
 
 from schema import SchemaValidationException
 from schema.planning_application import gla_planning_app_roots
 from schema.planning_application_specification import (
+    Bng,
     FloorspaceDetails,
     HoursOfOperation,
     InterestInLand,
@@ -184,3 +186,30 @@ class TestSchemaPlanning(unittest.TestCase):
             node.load_payload(payload)
 
         self.assertIn(expected, ctx.exception.reasons)
+
+    @mock.patch("schema.planning_application_specification.Bng._root_node")
+    def test_bng_exemption_reasons(self, mocked_bng):
+
+        # Mock "submission-details.application-types"
+        mocked_bng.by_ref.return_value = {"full", "magic"}
+
+        payload = {
+            "bng-condition-applies": False,
+            "bng-condition-exemption-reasons": [
+                {
+                    "exemption-type": "pre-commencement",
+                    "reason": "Pre biodiversity net gain rules took effect.",
+                }
+            ],
+        }
+
+        node = Bng()
+        msg = (
+            "Successful load returns None. This is a regression test. The following 'required "
+            "fields exceptions' shouldn't be present when 'bng-condition-applies==False' for "
+            "fields: 'pre-development-date', 'pre-development-biodiversity-value', 'loss-date',"
+            " 'pre-loss-biodiversity-value', 'metric-publication-date',"
+            "'irreplaceable-habitats'."
+        )
+
+        self.assertIsNone(node.load_payload(payload), msg)

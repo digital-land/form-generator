@@ -82,7 +82,7 @@ class SchemaNode:
         @raise :class:`SchemaValidationException` is payload doesn't conform to schema
         """
 
-        # TODO - there is an ambiguity here that needs a tidy - either ref of class attribute
+        # TODO - there is an ambiguity here that needs a tidy - either ref or class attribute
         # could be in the payload. Really it should be just ref. That way the payload is more
         # closely aligned with the specification.
 
