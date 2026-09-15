@@ -80,7 +80,7 @@ class AbstractSchemaField:
         @raise SchemaValidationException
         """
         if self.required and self._value is None:
-            raise SchemaValidationException([f"Field '{self.ref}' is required"])
+            raise SchemaValidationException([f"Field '{self.node_path}' is required"])
         return
 
     def empty_value(self):
@@ -91,6 +91,19 @@ class AbstractSchemaField:
         @return mixed
         """
         return None
+
+    @property
+    def node_path(self):
+        """
+        User readable dotted notation path of current field from root node.
+
+        @return: str
+        """
+        if self._parent_node is None or self._parent_node.node_path == "":
+            return self.ref
+
+        node_path = f"{self._parent_node.node_path}.{self.ref}"
+        return node_path
 
     @property
     def is_empty(self):

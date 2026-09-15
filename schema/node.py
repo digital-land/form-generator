@@ -287,12 +287,34 @@ class SchemaNode:
         """
         return
 
+    def is_empty_field(self, field_ref):
+        """
+        @param field_ref (str): within current node or use dotted path notation for fields from root
+        @return: boolean indicating if a value has been supplied
+        """
+        if "." in field_ref:
+            # @see :meth:`by_ref`
+            node_pointer = self._root_node
+            node_path, end_field_ref = field_ref.rsplit(".", 1)
+            for part in node_path.split("."):
+                node_pointer = node_pointer[part]
+
+            _attr_name, field = node_pointer.schema_refs()[end_field_ref]
+            v = node_pointer[end_field_ref]
+
+        else:
+            # field in current node
+            _attr_name, field = self.schema_refs()[field_ref]
+            v = self[field_ref]
+
+        return field.is_empty_value(v)
+
     def __getitem__(self, key):
         """
         Dictionary like access to fields by their schema 'ref'.
 
-        node.phone and node['phone-number'] should be the same thing. The former is the class
-        attribute, the latter is the field's 'ref'.
+        node.phone_number and node['phone-number'] should be the same thing. The former is the
+        class attribute, the latter is the field's 'ref'.
         """
         refs = self.schema_refs()
         if key in refs:
@@ -362,6 +384,28 @@ class SchemaNode:
             node = node._parent_node
 
         return node
+
+    @property
+    def node_path(self):
+        """
+        User readable dotted notation path of current node from root node.
+
+        @return: str
+        """
+        # ascend tree pre-pending with node names
+        node_lineage = []
+        pointer = self
+        while pointer is not None:
+            node_lineage.insert(0, pointer._ref)
+            pointer = pointer._parent_node
+
+        # Top level is the Application type, it's confusing to show this to user as
+        # it isn't part of the submitted data's tree.
+        if len(node_lineage) > 0:
+            del node_lineage[0]
+
+        node_path = ".".join(node_lineage)
+        return node_path
 
     @property
     def out_of_scope_fields(self):

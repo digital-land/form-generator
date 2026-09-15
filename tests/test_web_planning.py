@@ -215,3 +215,21 @@ class TestWebPlanning(WebTestCase):
             "node not empty so should be there."
         )
         self.assertNotIn("agent-reference", payload["agent-contact"], msg)
+
+    def test_module_path_included(self):
+        """
+        When a field fails validation the module and field name should be be in the error message.
+        """
+        payload = (DATA_PATH / "web_payloads" / "application_full.json").read_text()
+        payload_native = json.loads(payload)
+
+        # remove a required field
+        del payload_native["submission-details"]["submission-reference"]
+        response = self.client.post("/evaluate", data={"payload": json.dumps(payload_native)})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("The payload is valid.", response.text, "This payload should be invalid")
+
+        msg = "Module 'submission-details' and field 'submission-reference' must both be in error"
+        expected_error_msg = "Field &#39;submission-details.submission-reference&#39; is required"
+        self.assertIn(expected_error_msg, response.text, msg)
