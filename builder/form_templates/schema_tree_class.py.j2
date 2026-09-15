@@ -1,5 +1,8 @@
-{% macro validation_term(r) -%}{%if '.' in r.switch_field%}{% set value_for = 'self._root_node.by_ref("' + r.switch_field + '")' %}{%else%}{% set value_for = 'self["' + r.switch_field + '"]'%}{%endif%}{{value_for}}{{r.switch_method_call}} {{r.operand}} {{r.switch_value}}{%if r.subject_field %} and not self["{{r.subject_field}}"]{%endif%}{%- endmacro -%}
+{% macro logical_connective_expansion(block) -%}
+{% for r in block.rules %}{% if r.rules is defined %}({{ logical_connective_expansion(r) }}){% else %}({{ validation_term(r) }}){% if not loop.last %} {{ block.op }} {% endif %}{% endif %}{% if r.rules is defined and not loop.last%} {{ block.op }} {% endif %}{% endfor %}{%- endmacro -%}
 
+{% macro validation_term(r) -%}
+{%if r.switch_field is none %}{% set value_for = 'self'%}{%elif '.' in r.switch_field%}{% set value_for = 'self._root_node.by_ref("' + r.switch_field + '")' %}{%else%}{% set value_for = 'self["' + r.switch_field + '"]'%}{%endif%}{{value_for}}{{r.switch_method_call}} {{r.operand}} {{r.switch_value}}{%- endmacro -%}
 
 {% if document_header %}
 #
@@ -35,14 +38,15 @@ class {{ class_name }}(SchemaNode):
     def valid_node(self):
         super().valid_node()
         reasons = []
+
         {% for r in validation_rules %}
-        {% if r.rules is defined %}
-        if ({% for sub in r.rules %}({{ validation_term(sub) }}){% if not loop.last %} {{ r.op }} {% endif %}{% endfor %}):
+        if {{ logical_connective_expansion(r) }}:
+            {%if r.rule_message.startswith('f"') or r.rule_message.startswith("f'")%}
+            {# builder considers this safe to render as f-string#}
+            reasons.append({{r.rule_message}})
+            {%else%}
             reasons.append("{{r.rule_message}}")
-        {% else %}
-        if {{ validation_term(r) }}:
-            reasons.append("{{r.subject_field}} is needed for current value in '{{r.switch_field}}'")
-        {% endif %}
+            {%endif%}
         {% endfor %}
         if reasons:
             raise SchemaValidationException(reasons)
