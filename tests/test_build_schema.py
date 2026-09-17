@@ -2,8 +2,14 @@ import unittest
 from pathlib import Path
 
 from builder import PROJECT_ROOT
-from builder.build_schema import render_python, walk_resolved_schema
-from builder.planning_app_data_spec import PlanningAppDataResolved
+from builder.build_conditions import (
+    BuildConditions,
+    ContraintRule,
+    RuleConjunction,
+    RuleDisjunction,
+)
+from builder.build_schema import render_python, TemplatedBuilder, walk_resolved_schema
+from builder.planning_app_data_spec import Field, PlanningAppDataResolved
 
 
 DATA_PATH = Path(__file__).parent / "data"
@@ -37,17 +43,15 @@ class TestBuildSchema(unittest.TestCase):
             ),
             ("schema_node_cls=SiteLocation", "Link to child class"),
             (
-                'if self["contact-type"] in ["agent", "friend"] and not self["other-contact"]:',
+                'if (self["contact-type"] in ["agent", "friend"]) and (self.is_empty_field(\'other-contact\') == True):',
                 "Expected in GroundsLdc.valid_node",
             ),
             (
-                (
-                    'if ((self["first-name"] is not None and not self["fullname"]) and '
-                    '(self["first-name"].__len__() == 0 and not self["fullname"])):'
-                ),
+                "if (self.is_empty_field('first-name') == True) and (self.is_empty_field('fullname') == True):",
                 "Expected in Person.valid_node - full name needed if first-name (str) is empty.",
             ),
         ]
+
         for expected, msg in expected_snippets:
             self.assertIn(expected, py_out, msg)
 
@@ -87,7 +91,9 @@ class TestBuildSchema(unittest.TestCase):
         self.assertIn(expected_snippet, py_out, msg)
 
         msg = "valid node rule: Reason should be given if dish doesn't contain cheese"
-        expected_snippet = 'if self["contains-cheese"] == False and not self["reason"]:'
+        expected_snippet = (
+            "if (self[\"contains-cheese\"] == False) and (self.is_empty_field('reason') == True):"
+        )
         self.assertIn(expected_snippet, py_out, msg)
 
     def test_reorder(self):
@@ -104,3 +110,75 @@ class TestBuildSchema(unittest.TestCase):
         # not checking for correct order
         msg = "Should have same number of items in and out."
         self.assertEqual(spec_summary, py_summary, msg)
+
+    def test_render_validation_multiple_booleans(self):
+        """
+        Regression test for building `valid_node(..)` with 'OR' operator.
+        """
+
+        render = TemplatedBuilder(project_root=PROJECT_ROOT)
+
+        example_field = Field(
+            ref="contamination-assessment",
+            name="",
+            description="",
+            content="",
+            required_if=[
+                {
+                    "any": [
+                        {"field": "is-contaminated-land", "value": True},
+                        {"field": "is-suspected-contaminated-land", "value": True},
+                        {"field": "proposed-use-contamination-risk", "value": True},
+                    ]
+                }
+            ],
+        )
+
+        validation_simplified = BuildConditions.rules(example_field)
+
+        template_context = {
+            "class_name": "TestX",
+            "validation_rules": validation_simplified,
+        }
+        py_output = render.build(template_context, "schema_tree_class.py.j2")
+
+        expected_output = (
+            'if ((self["is-contaminated-land"] == True) '
+            'or (self["is-suspected-contaminated-land"] == True) '
+            'or (self["proposed-use-contamination-risk"] == True)) '
+            "and (self.is_empty_field('contamination-assessment') == True):"
+        )
+
+        self.assertIn(expected_output, py_output)
+
+    def test_nested_operations_logic(self):
+        """
+        OR multiple conditions
+        AND two of the OR groups.
+        """
+        rule = {}
+        for label in ["a", "b", "c", "d", "e", "f"]:
+            rule[label] = ContraintRule(switch_field=label, switch_value=True, operand="==")
+
+        validation_simplified = [
+            RuleConjunction(
+                "rc0",
+                RuleDisjunction("rc1", rule["a"], rule["b"], rule["c"]),
+                RuleDisjunction("rc2", rule["d"], rule["e"], rule["f"]),
+            )
+        ]
+
+        template_context = {
+            "class_name": "TestX",
+            "validation_rules": validation_simplified,
+        }
+
+        render = TemplatedBuilder(project_root=PROJECT_ROOT)
+        py_output = render.build(template_context, "schema_tree_class.py.j2")
+
+        expected_output = (
+            'if ((self["a"] == True) or (self["b"] == True) or (self["c"] == True))'
+            ' and ((self["d"] == True) or (self["e"] == True) or (self["f"] == True)):'
+        )
+
+        self.assertIn(expected_output, py_output)

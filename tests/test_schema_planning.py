@@ -32,10 +32,10 @@ class TestSchemaPlanning(unittest.TestCase):
         payload = {"advice-sought": True}
 
         expected = [
-            "officer-name is needed for current value in 'advice-sought'",
-            "reference is needed for current value in 'advice-sought'",
-            "advice-date is needed for current value in 'advice-sought'",
-            "advice-summary is needed for current value in 'advice-sought'",
+            ".officer-name is needed for current value in .advice-sought",
+            ".reference is needed for current value in .advice-sought",
+            ".advice-date is needed for current value in .advice-sought",
+            ".advice-summary is needed for current value in .advice-sought",
         ]
 
         node = PreAppAdvice()
@@ -92,7 +92,7 @@ class TestSchemaPlanning(unittest.TestCase):
         Field is required when another field is one of several values.
         """
         payload = {"contact-type": "agent"}
-        expected = "contact-reference is needed for current value in 'contact-type'"
+        expected = ".contact-reference is needed for current value in .contact-type"
 
         node = SiteVisit()
         with self.assertRaises(SchemaValidationException) as ctx:
@@ -108,7 +108,7 @@ class TestSchemaPlanning(unittest.TestCase):
         """
 
         payload = {"use": "sui"}
-        expected = "One or more matches required in field(s): use"
+        expected = "One or more matches required for  in field(s): use"
 
         node = FloorspaceDetails()
         with self.assertRaises(SchemaValidationException) as ctx:
@@ -134,8 +134,8 @@ class TestSchemaPlanning(unittest.TestCase):
             ],
         }
 
-        payload = {"operational-times": [], "hours-not-known": False}
-        target_reason = "Field validation problem for: operational-times"
+        payload = {"operational-times": [], "hours-not-known": True}
+        target_reason = ".operational-times is needed for current value in .hours-not-known"
 
         node = HoursOfOperation()
         with self.assertRaises(SchemaValidationException) as ctx:
@@ -144,7 +144,7 @@ class TestSchemaPlanning(unittest.TestCase):
         self.assertIn(target_reason, ctx.exception.reasons)
 
         msg = "Non-empty operational-times is valid"
-        payload = {"operational-times": [operational_times_sample], "hours-not-known": False}
+        payload["operational-times"].append(operational_times_sample)
 
         failure_reasons = []
         try:
