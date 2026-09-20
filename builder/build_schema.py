@@ -128,6 +128,10 @@ def render_python(project_root, planning_spec):
             if field_name in ["_ref", "_display", "_description"]:
                 raise ValueError("Reserved word for schema classes found as field name.")
 
+            if "." in field_name:
+                # could be stricter here - it should really be alpha numeric with underscores
+                raise ValueError(f"Field name '{field_name}' contains restricted characters")
+
             field_info = {
                 "ref": field_entry.origin.ref,
                 "display": field_entry.origin.name,
@@ -149,7 +153,7 @@ def render_python(project_root, planning_spec):
 
             elif isinstance(field_x, Field):
 
-                field_rules = BuildConditions.rules(field_x)
+                field_rules = BuildConditions.required_if_rules(field_x)
                 validation_simplified.extend(field_rules)
 
                 if field_x.datatype == "string":
@@ -191,20 +195,11 @@ def render_python(project_root, planning_spec):
 
             # module + component rules
             if field_entry.origin != field_entry.target:
-                field_rules = BuildConditions.rules(field_entry.origin)
+                field_rules = BuildConditions.required_if_rules(field_entry.origin)
                 validation_simplified.extend(field_rules)
 
-            applies_if = getattr(field_entry.origin, "applies_if")
-            if applies_if:
-                # very rigid expected format. Will raise KeyError if not as expected
-                app_type_field = "application-type"
-                app_types = [f"{safe_literal(a)}" for a in applies_if[app_type_field]["in"]]
-                v = ", ".join(app_types)
-                v_as_set = "{" + v + "}"
-
-                # tuple (str, str) (subject_field, py_representation_of_set)
-                scope_rule = (field_entry.origin.ref, v_as_set)
-                out_of_scope_rules.append(scope_rule)
+            field_rules = BuildConditions.applies_if_rules(field_entry.origin)
+            out_of_scope_rules.extend(field_rules)
 
         # schema_base_item is ComponentResolved or Module or Application
         # just vanity - I don't want the namespace in the class name unless it does overlap
