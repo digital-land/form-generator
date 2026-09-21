@@ -83,13 +83,17 @@ class AgentContact(SchemaNode):
             self.is_empty_field("agent-reference") == True
         ):
 
-            reasons.append("Field validation problem for: agent-details.agent.reference")
+            reasons.append(
+                f"{self.node_path}.agent-reference requires non-empty value in agent-details.agent.reference"
+            )
 
         if (self.is_empty_field("agent-details.agent.reference") == False) and (
             self.is_empty_field("contact-details") == True
         ):
 
-            reasons.append("Field validation problem for: agent-details.agent.reference")
+            reasons.append(
+                f"{self.node_path}.contact-details requires non-empty value in agent-details.agent.reference"
+            )
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -471,6 +475,7 @@ class Bng(SchemaNode):
         ref="bng-details",
         display="Biodiversity net gain details",
         description="Comprehensive details about biodiversity net gain assessment including pre-development value, habitat loss information, and supporting documentation",
+        required=True,
         schema_node_cls=BngDetails,
     )
 
@@ -484,12 +489,6 @@ class Bng(SchemaNode):
 
             reasons.append(
                 f"{self.node_path}.bng-condition-exemption-reasons is needed for current value in {self.node_path}.bng-condition-applies"
-            )
-
-        if (self["bng-condition-applies"] == True) and (self.is_empty_field("bng-details") == True):
-
-            reasons.append(
-                f"{self.node_path}.bng-details is needed for current value in {self.node_path}.bng-condition-applies"
             )
 
         if reasons:
@@ -513,8 +512,11 @@ class Bng(SchemaNode):
         ):
             de_scoped.add("bng-condition-exemption-reasons")
 
-        if app_types.isdisjoint(
-            {"full", "technical-details-consent", "outline", "demolition-con-area"}
+        if not (
+            not app_types.isdisjoint(
+                {"full", "technical-details-consent", "outline", "demolition-con-area"}
+            )
+            and self["bng-condition-applies"] == True
         ):
             de_scoped.add("bng-details")
 
@@ -1350,7 +1352,9 @@ class HoursOfOperation(SchemaNode):
             self.is_empty_field("hours-not-known") == True
         ):
 
-            reasons.append("Field validation problem for: operational-times")
+            reasons.append(
+                f"{self.node_path}.hours-not-known requires empty value in {self.node_path}.operational-times"
+            )
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -2071,6 +2075,22 @@ class NonResFloorspace(SchemaNode):
                 f"{self.node_path}.floorspace-details-outline is needed for current value in {self.node_path}.non-residential-change-outline"
             )
 
+        if (self["floorspace-details"] in ["c1", "c2", "c2a", "other"]) and (
+            self.is_empty_field("room-details") == True
+        ):
+
+            reasons.append(
+                f'{self.node_path}.room-details requires value from ["c1", "c2", "c2a", "other"] in {self.node_path}.floorspace-details'
+            )
+
+        if (self["floorspace-details-outline"] in ["c1", "c2", "c2a", "other"]) and (
+            self.is_empty_field("room-details-outline") == True
+        ):
+
+            reasons.append(
+                f'{self.node_path}.room-details-outline requires value from ["c1", "c2", "c2a", "other"] in {self.node_path}.floorspace-details-outline'
+            )
+
         if reasons:
             raise SchemaValidationException(reasons)
 
@@ -2238,7 +2258,7 @@ class OwnershipCerts(SchemaNode):
         ):
 
             reasons.append(
-                f"{self.node_path}.steps-taken is needed for current value in {self.node_path}.ownership-cert-option"
+                f'{self.node_path}.steps-taken requires value from ["certificate-c", "certificate-d"] in {self.node_path}.ownership-cert-option'
             )
 
         if (self["ownership-cert-option"] in ["certificate-c", "certificate-d"]) and (
@@ -2246,7 +2266,7 @@ class OwnershipCerts(SchemaNode):
         ):
 
             reasons.append(
-                f"{self.node_path}.newspaper-notices is needed for current value in {self.node_path}.ownership-cert-option"
+                f'{self.node_path}.newspaper-notices requires value from ["certificate-c", "certificate-d"] in {self.node_path}.ownership-cert-option'
             )
 
         if reasons:
@@ -2592,6 +2612,12 @@ class RelatedApplicationDetails(SchemaNode):
         super().valid_node()
         reasons = []
 
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+        if {"non-material-amendment"}.issubset(app_types) and self.is_empty_field("decision-date"):
+            reasons.append(
+                f'{self.node_path}.decision-date is needed when application type is in [{"non-material-amendment"}]'
+            )
+
         if (self["eia-application"] == True) and (
             self.is_empty_field("environmental-statement-submitted") == True
         ):
@@ -2865,12 +2891,12 @@ class UnitQuantities(SchemaNode):
         super().valid_node()
         reasons = []
 
-        if ((self["units-unknown"] == False)) and (
+        if ((self["units-unknown"] == False) or (self["units-per-bedroom-no"])) and (
             self.is_empty_field("units-per-bedroom-no") == True
         ):
 
             reasons.append(
-                f"One or more matches required for {self.node_path} in field(s): units-unknown"
+                f"One or more matches required for {self.node_path} in field(s): units-per-bedroom-no, units-unknown"
             )
 
         if reasons:
@@ -3401,7 +3427,7 @@ class SiteVisit(SchemaNode):
         ):
 
             reasons.append(
-                f"{self.node_path}.contact-reference is needed for current value in {self.node_path}.contact-type"
+                f'{self.node_path}.contact-reference requires value from ["applicant", "agent"] in {self.node_path}.contact-type'
             )
 
         if (self["contact-type"] == "other") and (self.is_empty_field("other-contact") == True):
@@ -3468,7 +3494,7 @@ class Document(SchemaNode):
         schema_field=EnumField(
             ref="document-types",
             display="Document types",
-            description="List of codelist references that the document covers",
+            description="Planning requirement references identifying the information this document provides. A document may address more than one requirement. These references identify its coverage; they do not establish that the requirements have been satisfied.",
             select_options=[
                 EnumOption(
                     key="acoustic-report",
@@ -3488,7 +3514,7 @@ class Document(SchemaNode):
                 EnumOption(
                     key="arboriculturist-report",
                     label="Arboricultural impact assessment",
-                    description="A supporting report from an arboriculturist for any proposed work on trees - providing detail on the conditions of the trees on or next to the development site",
+                    description="An assessment of how proposed development affects trees on or near the site, including trees to be retained or removed and measures needed to protect retained trees during construction.",
                 ),
                 EnumOption(
                     key="archaeological-assessment",
@@ -3498,7 +3524,7 @@ class Document(SchemaNode):
                 EnumOption(
                     key="biodiversity-survey-report",
                     label="Biodiversity survey and report",
-                    description="Information on biodiversity interests and protected species and any possible impacts on them from the development, plus details of any measures proposed to mitigate or compensate for the impacts",
+                    description="Information on existing habitats, biodiversity interests and protected species, the effects of proposed development and measures to avoid, mitigate or compensate for adverse impacts and enhance biodiversity. Includes relevant surveys and plans showing existing and proposed habitats where needed, which may be supplied within the report or as accompanying documents.",
                 ),
                 EnumOption(
                     key="cil-form",
@@ -3507,8 +3533,8 @@ class Document(SchemaNode):
                 ),
                 EnumOption(
                     key="condition-of-trees",
-                    label="Condition of Trees",
-                    description="Written arboricultural advice",
+                    label="Tree condition evidence",
+                    description="Written arboricultural advice or other diagnostic information from an appropriate expert supporting proposed works to a tree protected by a tree preservation order where the reasons for the works include disease or concern that the tree might break or fall.",
                 ),
                 EnumOption(
                     key="application-form",
@@ -3571,7 +3597,7 @@ class Document(SchemaNode):
                 EnumOption(
                     key="heritage-statement",
                     label="Heritage statement",
-                    description="This statement describes a heritage asset, its significance and the proposed works that are being applied for",
+                    description="A statement describing the heritage assets affected by a proposal, their significance including the contribution of their setting, the proposed works and the potential effects on that significance.",
                 ),
                 EnumOption(
                     key="hydrocarbon-licence",
@@ -3581,7 +3607,7 @@ class Document(SchemaNode):
                 EnumOption(
                     key="land-contamination-assessment",
                     label="Land contamination assessment",
-                    description="Report on potential land contamination issues - if contamination is found on site remediation and mitigation proposals will need to be included",
+                    description="An assessment of potential or known land contamination, including relevant site history, ground conditions and site investigation findings, the nature and extent of contamination, risks to people and the environment and any further investigation, remediation or mitigation needed to make the site suitable for the proposed use.",
                 ),
                 EnumOption(
                     key="landscaping-plan",
@@ -3606,7 +3632,7 @@ class Document(SchemaNode):
                 EnumOption(
                     key="noise-assessment",
                     label="Noise assessment",
-                    description="A report that assesses the impact of noise from the proposed development on the surrounding area",
+                    description="A report assessing existing noise affecting the proposed development and noise generated by it, including vibration where relevant, effects on future occupiers and surrounding properties and any measures needed to avoid or reduce adverse impacts.",
                 ),
                 EnumOption(
                     key="photos",
@@ -3724,6 +3750,41 @@ class Document(SchemaNode):
                     label="Water impact assessment",
                     description="An assessment of how the proposed development may affect water bodies, water quality, water supply or related water environments.",
                 ),
+                EnumOption(
+                    key="viability-assessment",
+                    label="Viability assessment",
+                    description="An assessment of development viability and the contributions a proposal can support, including the maximum possible contribution to affordable housing and other infrastructure",
+                ),
+                EnumOption(
+                    key="town-centre-impact-assessment",
+                    label="Town centre impact assessment",
+                    description="An assessment of how the proposed development would affect existing and planned investment in nearby town centres, their economic health and continued success, including effects on shops, trade and consumer choice.",
+                ),
+                EnumOption(
+                    key="telecommunications-report",
+                    label="Telecommunications supporting information",
+                    description="Information supporting a proposed telecommunications installation, covering consultation outcomes, options for using existing masts or buildings, compliance with radiation exposure limits and potential interference with equipment or aviation services, where relevant.",
+                ),
+                EnumOption(
+                    key="renewables-decommissioning-report",
+                    label="Renewable and low carbon energy and electricity network decommissioning proposals",
+                    description="Proposals for removing renewable or low carbon energy installations or electricity network infrastructure at the end of a time-limited development, restoring the site and explaining how that work will be carried out.",
+                ),
+                EnumOption(
+                    key="recreation-facilities-assessment",
+                    label="Sports, open space and recreation facilities assessment",
+                    description="An assessment establishing whether existing recreational land or facilities are surplus.",
+                ),
+                EnumOption(
+                    key="coastal-change-assessment",
+                    label="Coastal change vulnerability assessment",
+                    description="An assessment of coastal-change risks, shoreline-policy compatibility and the development’s wider benefits.",
+                ),
+                EnumOption(
+                    key="protected-landscape-assessment",
+                    label="Protected landscape assessment",
+                    description="An assessment of development need, alternatives and environmental, landscape and recreation impacts in a protected landscape.",
+                ),
             ],
         ),
     )
@@ -3748,16 +3809,12 @@ class Fee(SchemaNode):
     _description = "Structure for application fees including amounts due, amounts paid, and transaction references "
 
     amount = StringField(
-        ref="amount",
-        display="Amount",
-        description="The total amount due for the application fee",
-        required=True,
+        ref="amount", display="Amount", description="The total amount due for the application fee"
     )
     amount_paid = StringField(
         ref="amount-paid",
         display="Amount paid",
         description="The amount paid towards the application fee",
-        required=True,
     )
     transactions = RepeatedField(
         schema_field=StringField(
@@ -8322,25 +8379,33 @@ class SupportingInfo(SchemaNode):
             self.is_empty_field("approved-drawings") == True
         ):
 
-            reasons.append("Field validation problem for: submitted-drawings-document")
+            reasons.append(
+                f"{self.node_path}.approved-drawings requires empty value in {self.node_path}.submitted-drawings-document"
+            )
 
         if (self.is_empty_field("submitted-drawings-document") == True) and (
             self.is_empty_field("submitted-drawing-references") == True
         ):
 
-            reasons.append("Field validation problem for: submitted-drawings-document")
+            reasons.append(
+                f"{self.node_path}.submitted-drawing-references requires empty value in {self.node_path}.submitted-drawings-document"
+            )
 
         if (self.is_empty_field("submitted-drawing-references") == True) and (
             self.is_empty_field("approved-drawings-document") == True
         ):
 
-            reasons.append("Field validation problem for: submitted-drawing-references")
+            reasons.append(
+                f"{self.node_path}.approved-drawings-document requires empty value in {self.node_path}.submitted-drawing-references"
+            )
 
         if (self.is_empty_field("submitted-drawing-references") == True) and (
             self.is_empty_field("submitted-drawings-document") == True
         ):
 
-            reasons.append("Field validation problem for: submitted-drawing-references")
+            reasons.append(
+                f"{self.node_path}.submitted-drawings-document requires empty value in {self.node_path}.submitted-drawing-references"
+            )
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -9701,7 +9766,9 @@ class SiteInfo(SchemaNode):
             self.is_empty_field("supporting-documents") == True
         ):
 
-            reasons.append("Field validation problem for: known-constraints")
+            reasons.append(
+                f"{self.node_path}.supporting-documents requires non-empty value in {self.node_path}.known-constraints"
+            )
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -10329,7 +10396,9 @@ class OilGasOwnershipNotices(SchemaNode):
             self.is_empty_field("steps-taken") == True
         ):
 
-            reasons.append("Field validation problem for: invalid-posted-notices")
+            reasons.append(
+                f"{self.node_path}.steps-taken requires non-empty value in {self.node_path}.invalid-posted-notices"
+            )
 
         if reasons:
             raise SchemaValidationException(reasons)
@@ -11000,7 +11069,7 @@ class OilgasPermissionType(SchemaNode):
         ) and (self.is_empty_field("related-permissions") == True):
 
             reasons.append(
-                f"{self.node_path}.related-permissions is needed for current value in {self.node_path}.oilgas-permission-types"
+                f'{self.node_path}.related-permissions requires value from ["renewal-unimplemented", "renewal-temporary", "extension-existing-site", "variation-condition", "romp-review", "minerals-development"] in {self.node_path}.oilgas-permission-types'
             )
 
         if (self["will-consolidate-permissions"] == True) and (
@@ -11750,7 +11819,7 @@ class InterestInLand(SchemaNode):
         ):
 
             reasons.append(
-                "All fields need to match for field(s): applicant-owns-land, permission-obtained"
+                f"All fields need to match for {self.node_path} with field(s): applicant-owns-land, permission-obtained"
             )
 
         if reasons:
@@ -13027,6 +13096,29 @@ class GroundsLdc(SchemaNode):
         required=True,
     )
 
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if (self["grounds-pre-2024"] in ["other"]) and (
+            self.is_empty_field("other-details") == True
+        ):
+
+            reasons.append(
+                f'{self.node_path}.other-details requires value from ["other"] in {self.node_path}.grounds-pre-2024'
+            )
+
+        if (self["grounds-post-2024"] in ["other"]) and (
+            self.is_empty_field("other-details") == True
+        ):
+
+            reasons.append(
+                f'{self.node_path}.other-details requires value from ["other"] in {self.node_path}.grounds-post-2024'
+            )
+
+        if reasons:
+            raise SchemaValidationException(reasons)
+
 
 class InfoSupportLdc(SchemaNode):
     _ref = "info-support-ldc"
@@ -13617,7 +13709,7 @@ class LdcInterest(SchemaNode):
         ):
 
             reasons.append(
-                f"{self.node_path}.owner-details is needed for current value in {self.node_path}.applicant-interest-type"
+                f'{self.node_path}.owner-details requires value from ["lessee", "occupier"] in {self.node_path}.applicant-interest-type'
             )
 
         if (self["applicant-interest-type"] == "none") and (

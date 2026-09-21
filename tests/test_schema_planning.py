@@ -1,13 +1,16 @@
 import unittest
+from unittest import mock
 
 from schema import SchemaValidationException
 from schema.planning_application import gla_planning_app_roots
 from schema.planning_application_specification import (
+    Bng,
     FloorspaceDetails,
     HoursOfOperation,
     InterestInLand,
     Lbc,
     PreAppAdvice,
+    RelatedApplicationDetails,
     SiteInfo,
     SiteVisit,
 )
@@ -90,7 +93,7 @@ class TestSchemaPlanning(unittest.TestCase):
         Field is required when another field is one of several values.
         """
         payload = {"contact-type": "agent"}
-        expected = ".contact-reference is needed for current value in .contact-type"
+        expected = '.contact-reference requires value from ["applicant", "agent"] in .contact-type'
 
         node = SiteVisit()
         with self.assertRaises(SchemaValidationException) as ctx:
@@ -159,7 +162,7 @@ class TestSchemaPlanning(unittest.TestCase):
         Field is required when another value has been provided.
         """
         payload = {"known-constraints": ["conservation-area"]}
-        expected = "Field validation problem for: known-constraints"
+        expected = ".supporting-documents requires non-empty value in .known-constraints"
 
         node = SiteInfo()
         with self.assertRaises(SchemaValidationException) as ctx:
@@ -177,10 +180,65 @@ class TestSchemaPlanning(unittest.TestCase):
             "applicant-owns-land": False,
             "permission-obtained": False,
         }
-        expected = "All fields need to match for field(s): applicant-owns-land, permission-obtained"
+        expected = (
+            "All fields need to match for  with field(s): applicant-owns-land, permission-obtained"
+        )
 
         node = InterestInLand()
         with self.assertRaises(SchemaValidationException) as ctx:
             node.load_payload(payload)
 
+        self.assertIn(expected, ctx.exception.reasons)
+
+    @mock.patch("schema.planning_application_specification.Bng._root_node")
+    def test_bng_exemption_reasons(self, mocked_bng):
+
+        # Mock "submission-details.application-types", first is needed for test, 2nd for checking
+        # mock is working if breakpoint is set.
+        mocked_bng.by_ref.return_value = {"full", "mock_application_type"}
+
+        payload = {
+            "bng-condition-applies": False,
+            "bng-condition-exemption-reasons": [
+                {
+                    "exemption-type": "pre-commencement",
+                    "reason": "Pre biodiversity net gain rules took effect.",
+                }
+            ],
+        }
+
+        node = Bng()
+        msg = (
+            "Successful load returns None. This is a regression test. The following 'required "
+            "fields exceptions' shouldn't be present when 'bng-condition-applies==False' for "
+            "fields: 'pre-development-date', 'pre-development-biodiversity-value', 'loss-date',"
+            " 'pre-loss-biodiversity-value', 'metric-publication-date',"
+            "'irreplaceable-habitats'."
+        )
+
+        self.assertIsNone(node.load_payload(payload), msg)
+
+    @mock.patch("schema.planning_application_specification.RelatedApplicationDetails._root_node")
+    def test_related_application_details(self, mocked_related_application_details):
+        """
+        When application type is "non-material-amendment", "decision_date" is required.
+        """
+
+        # Mock "submission-details.application-types", first is needed for test, 2nd for checking
+        # mock is working if breakpoint is set.
+        mocked_related_application_details.by_ref.return_value = {
+            "non-material-amendment",
+            "mock_application_type",
+        }
+
+        payload = {
+            "reference": "x",
+            "description": "x",
+        }
+
+        node = RelatedApplicationDetails()
+        with self.assertRaises(SchemaValidationException) as ctx:
+            node.load_payload(payload)
+
+        expected = ".decision-date is needed when application type is in [non-material-amendment]"
         self.assertIn(expected, ctx.exception.reasons)

@@ -134,7 +134,7 @@ class TestBuildSchema(unittest.TestCase):
             ],
         )
 
-        validation_simplified = BuildConditions.rules(example_field)
+        validation_simplified = BuildConditions.required_if_rules(example_field)
 
         template_context = {
             "class_name": "TestX",
@@ -182,3 +182,63 @@ class TestBuildSchema(unittest.TestCase):
         )
 
         self.assertIn(expected_output, py_output)
+
+    def test_render_contains_condition(self):
+        """
+        required_if's 'contains' clause when related to another field
+        """
+        """
+        YML looks like this-
+
+        - field: room-details
+          required-if:
+          - field: floorspace-details
+            description: if floorspace-details contains an item where use is c1, c2, c2a or other
+            contains:
+              field: use
+              in:
+              - c1
+              - c2
+              - c2a
+              - other
+        """
+        render = TemplatedBuilder(project_root=PROJECT_ROOT)
+
+        example_field = Field(
+            ref="room-details",
+            name="Room details",
+            content="",
+            description="List of room changes for hotels, residential institutions and hostels",
+            required_if=[
+                {
+                    "field": "floorspace-details",
+                    "description": "if floorspace-details contains an item where use is c1, c2, c2a or other",
+                    "contains": {
+                        "field": "use",
+                        "in": ["c1", "c2", "c2a", "other"],
+                    },
+                }
+            ],
+        )
+
+        validation_simplified = BuildConditions.required_if_rules(example_field)
+
+        template_context = {
+            "class_name": "TestX",
+            "validation_rules": validation_simplified,
+        }
+        py_output = render.build(template_context, "schema_tree_class.py.j2")
+
+        expected_lines = [
+            (
+                'if (self["floorspace-details"] in ["c1", "c2", "c2a", "other"]) '
+                "and (self.is_empty_field('room-details') == True):"
+            ),
+            (
+                '{self.node_path}.room-details requires value from ["c1", "c2", "c2a", "other"]'
+                " in {self.node_path}.floorspace-details"
+            ),
+        ]
+
+        for expected in expected_lines:
+            self.assertIn(expected, py_output)
