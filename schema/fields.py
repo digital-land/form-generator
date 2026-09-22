@@ -80,7 +80,9 @@ class AbstractSchemaField:
         @raise SchemaValidationException
         """
         if self.required and self._value is None:
-            raise SchemaValidationException([f"Field '{self.node_path}' is required"])
+            raise SchemaValidationException(
+                [f"Field '{self.node_path}' is required"], node_path=self.node_path
+            )
         return
 
     def empty_value(self):

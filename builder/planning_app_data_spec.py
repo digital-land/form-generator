@@ -24,6 +24,7 @@ class SchemaBase:
     description: str
     content: str
     notes: str | None = None
+    rules: list[Rule] = field(default_factory=list)
 
 
 @dataclass
@@ -44,7 +45,6 @@ class Field(SchemaBase):
     typology: str | None = None
     start_date: str | None = None
     replacement_field: str | None = None
-    rules: list[Rule] = field(default_factory=list)
     minimum_items: int | None = None
 
 
@@ -79,7 +79,6 @@ class ComponentBase(SchemaBase):
     entry_date: str | None = None
     end_date: str | None = None
     validation: Any | None = None
-    rules: list[Rule] = field(default_factory=list)
 
 
 @dataclass
@@ -102,7 +101,6 @@ class ComponentResolved(ComponentBase):
 class ModuleBase(SchemaBase):
     entry_date: str | None = None
     end_date: str | None = None
-    rules: list[Rule] = field(default_factory=list)
     implementation: str | None = None
 
 
