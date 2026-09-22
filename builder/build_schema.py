@@ -4,7 +4,6 @@ import warnings
 
 from jinja2 import Environment, FileSystemLoader
 
-from builder import safe_literal
 from builder.build_conditions import BuildConditions
 from builder.planning_app_data_spec import (
     ComponentResolved,

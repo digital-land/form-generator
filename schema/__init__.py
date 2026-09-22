@@ -27,6 +27,13 @@ class SchemaValidationException(Exception):
     Raised when data that doesn't conform with the schema is parsed.
     """
 
-    def __init__(self, reasons):
+    def __init__(self, reasons, node_path=None):
+        """
+        @param reasons: (list of str)
+        @param node_path: (str) - dotted notation of position within tree. This path is often in
+                                the reason but including as structured data is useful for grouping
+                                fails.
+        """
         self.reasons = reasons
+        self.node_path = node_path
         super().__init__("; ".join(reasons))

@@ -88,8 +88,8 @@ class SchemaNode:
 
         payload_keys_visited = set()
         payload_fieldset = {}
-        schema_fieldset = {}  # fields not in payload
-        for ref, (attr_name, field) in self.schema_refs().items():
+        missing_fieldset = set()  # fields not in payload
+        for ref, (attr_name, _field) in self.schema_refs().items():
 
             if ref in payload:
                 payload_keys_visited.add(ref)
@@ -102,10 +102,7 @@ class SchemaNode:
                 payload_fieldset[attr_name] = v
 
             else:
-                # .valid_update() for field not supplied in payload but is part of node
-                # print("scope: ", ref)
-                v = field.empty_value()
-                schema_fieldset[ref] = v
+                missing_fieldset.add(ref)
 
         unused_payload_keys = set(payload.keys()) - payload_keys_visited
         for k in unused_payload_keys:
@@ -126,8 +123,25 @@ class SchemaNode:
         except SchemaValidationException as e:
             failure_reasons.extend(e.reasons)
 
+        # list of `SchemaValidationException`
         traverse_failures = self.validate_traverse()
-        failure_reasons.extend(traverse_failures)
+
+        # vanity error message tidy - group errors related to missing module in payload
+        # this covers top level only. Could be extended to more general recursive case.
+        nodes_with_failures = set()  # de-dupe failure messages
+        for sv_exception in traverse_failures:
+
+            if sv_exception.node_path and "." in sv_exception.node_path:
+                # the exception includes a non-relative path
+                root_node = sv_exception.node_path.split(".")[0]
+                if root_node in missing_fieldset:
+                    if root_node not in nodes_with_failures:
+                        failure_reason = f"Module '{root_node}' is required"
+                        failure_reasons.append(failure_reason)
+                        nodes_with_failures.add(root_node)
+
+                    continue
+            failure_reasons.extend(sv_exception.reasons)
 
         if len(failure_reasons) > 0:
             raise SchemaValidationException(failure_reasons)
@@ -183,14 +197,16 @@ class SchemaNode:
                     # If a field is out_of_scope don't validate it. But do report an error if a
                     # value was given.
                     if not field.is_empty:
-                        failure_reasons.append(f"Field '{ref}' out of scope in '{node._ref}'")
+                        msg = f"Field '{ref}' out of scope in '{node._ref}'"
+                        e = SchemaValidationException(reasons=[msg], node_path=node.node_path)
+                        failure_reasons.append(e)
                     continue
 
                 try:
                     field.validate()
                 except SchemaValidationException as e:
                     # descendant fields validate their own values; aggregate their reasons
-                    failure_reasons.extend(e.reasons)
+                    failure_reasons.append(e)
 
                 if isinstance(field, SchemaNodeField):
 

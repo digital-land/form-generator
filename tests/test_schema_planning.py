@@ -242,3 +242,31 @@ class TestSchemaPlanning(unittest.TestCase):
 
         expected = ".decision-date is needed when application type is in [non-material-amendment]"
         self.assertIn(expected, ctx.exception.reasons)
+
+    def test_missing_module_errors_grouped(self):
+        """
+        When a payload doesn't contain a module, instead of giving one error per field from the
+        missing module the validation error should just call out the missing module.
+        """
+        payload = {
+            "submission-details": {"application-types": ["lbc"]},
+            "ownership_certs": {"lbc-owners": [{}]},
+        }
+
+        # listed building consent - any node could be used for this test
+        node = Lbc()
+
+        # ownership_certs.lbc_owners is in scope when LBC application
+        failure_reasons = []
+        try:
+            node.load_payload(payload)
+        except SchemaValidationException as e:
+            failure_reasons.extend(e.reasons)
+
+        target_failure_reason = "Field 'agent-details.agent.reference' is required"
+        msg = "Regression test - this is an old message"
+        self.assertNotIn(target_failure_reason, failure_reasons, msg)
+
+        target_failure_reason = "Module 'agent-details' is required"
+        msg = "Expecting just the module level validation error message"
+        self.assertIn(target_failure_reason, failure_reasons, msg)
