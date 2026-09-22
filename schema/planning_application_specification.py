@@ -96,7 +96,7 @@ class AgentContact(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class ContactAddress(SchemaNode):
@@ -441,7 +441,7 @@ class BngDetails(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class Bng(SchemaNode):
@@ -492,7 +492,7 @@ class Bng(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
     @property
     def out_of_scope_fields(self):
@@ -581,7 +581,7 @@ class ConflictOfInterest(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
     @property
     def out_of_scope_fields(self):
@@ -909,7 +909,7 @@ class ExistingUseDetail(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class ExistingUse(SchemaNode):
@@ -993,7 +993,7 @@ class ExistingUse(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class FloodRiskAssessment(SchemaNode):
@@ -1090,7 +1090,7 @@ class FloodRiskAssessment(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class TimeRange(SchemaNode):
@@ -1152,7 +1152,7 @@ class OperationalTimes(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class HoursOfOperation(SchemaNode):
@@ -1357,7 +1357,7 @@ class HoursOfOperation(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class HrsOperation(SchemaNode):
@@ -1599,7 +1599,7 @@ class FloorspaceDetails(SchemaNode):
             reasons.append(f"One or more matches required for {self.node_path} in field(s): use")
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class FloorspaceDetailsOutline(SchemaNode):
@@ -1827,7 +1827,7 @@ class FloorspaceDetailsOutline(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class RoomDetails(SchemaNode):
@@ -1898,7 +1898,7 @@ class RoomDetails(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class RoomDetailsOutline(SchemaNode):
@@ -1993,7 +1993,7 @@ class RoomDetailsOutline(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class NonResFloorspace(SchemaNode):
@@ -2092,7 +2092,7 @@ class NonResFloorspace(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
     @property
     def out_of_scope_fields(self):
@@ -2270,7 +2270,7 @@ class OwnershipCerts(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
     @property
     def out_of_scope_fields(self):
@@ -2354,7 +2354,7 @@ class PreAppAdvice(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class WasteManagement(SchemaNode):
@@ -2627,7 +2627,7 @@ class RelatedApplicationDetails(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
     @property
     def out_of_scope_fields(self):
@@ -2731,7 +2731,7 @@ class ProposalDetails(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
     @property
     def out_of_scope_fields(self):
@@ -2861,7 +2861,7 @@ class BedroomCount(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class UnitQuantities(SchemaNode):
@@ -2900,7 +2900,7 @@ class UnitQuantities(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
     @property
     def out_of_scope_fields(self):
@@ -3237,7 +3237,7 @@ class ResUnits(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class SiteArea(SchemaNode):
@@ -3437,7 +3437,7 @@ class SiteVisit(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class File(SchemaNode):
@@ -5861,7 +5861,7 @@ class AccessRightsOfWay(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
     @property
     def out_of_scope_fields(self):
@@ -6023,7 +6023,7 @@ class FoulSewage(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
     @property
     def out_of_scope_fields(self):
@@ -6092,7 +6092,7 @@ class HazardousSubstance(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class HazSubstances(SchemaNode):
@@ -6158,7 +6158,7 @@ class HazSubstances(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
     @property
     def out_of_scope_fields(self):
@@ -6294,7 +6294,7 @@ class Materials(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class TradeEffluent(SchemaNode):
@@ -6325,7 +6325,7 @@ class TradeEffluent(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class TreesHedges(SchemaNode):
@@ -6391,7 +6391,7 @@ class TreesHedges(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
     @property
     def out_of_scope_fields(self):
@@ -6554,7 +6554,7 @@ class ParkingSpace(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
     @property
     def out_of_scope_fields(self):
@@ -6664,7 +6664,7 @@ class WasteStorageCollection(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
     @property
     def out_of_scope_fields(self):
@@ -6910,7 +6910,7 @@ class CommunityConsultation(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class Demolition(SchemaNode):
@@ -7019,7 +7019,7 @@ class Demolition(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class ImmunityFromListing(SchemaNode):
@@ -7061,7 +7061,7 @@ class ImmunityFromListing(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class LbAlter(SchemaNode):
@@ -7136,7 +7136,7 @@ class LbAlter(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class LbGrade(SchemaNode):
@@ -7212,7 +7212,7 @@ class RelatedApplications(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class Lbc(SchemaNode):
@@ -7491,7 +7491,7 @@ class InterestDetails(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class LdcProposedWorkLb(SchemaNode):
@@ -7814,7 +7814,7 @@ class ProposalDetailsLdc(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class GroundsExistingUse(SchemaNode):
@@ -8013,7 +8013,7 @@ class GroundsExistingUse(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class GroundsProposedUse(SchemaNode):
@@ -8213,7 +8213,7 @@ class GroundsProposedUse(SchemaNode):
             reasons.append(f"One or more matches required for {self.node_path} in field(s): use")
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class LdcProspectiveUse(SchemaNode):
@@ -8408,7 +8408,7 @@ class SupportingInfo(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class ReservedMatters(SchemaNode):
@@ -8822,7 +8822,7 @@ class TreesOwnership(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
     @property
     def out_of_scope_fields(self):
@@ -8915,6 +8915,306 @@ class ConsentUnderTpo(SchemaNode):
         display="Trees ownership",
         description="Who owns any trees affected by the proposed development.",
         schema_node_cls=TreesOwnership,
+    )
+
+
+class AgriculturalTenancyConsent(SchemaNode):
+    _ref = "agricultural-tenancy-consent"
+    _display = "Agricultural tenancy consent"
+    _description = "Whether land is occupied under agricultural tenancy agreements and all parties have consented to the proposed change of use."
+
+    agricultural_tenants = BooleanField(
+        ref="agricultural-tenants",
+        display="Agricultural tenants",
+        description="Whether any part of the land covered by or within the curtilage of the building is occupied under any agricultural tenancy agreements.",
+        required=True,
+    )
+    tenancy_parties_consent = BooleanField(
+        ref="tenancy-parties-consent",
+        display="Consent of all tenancy parties",
+        description="Whether all parties to the agricultural tenancy agreements have consented to the proposed change of use.",
+    )
+
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if (self["agricultural-tenants"] == True) and (
+            self.is_empty_field("tenancy-parties-consent") == True
+        ):
+
+            reasons.append(
+                f"{self.node_path}.tenancy-parties-consent is needed for current value in {self.node_path}.agricultural-tenants"
+            )
+
+        if reasons:
+            raise SchemaValidationException(reasons, node_path=self.node_path)
+
+
+class ExistingBuildingPremises(SchemaNode):
+    _ref = "existing-building-premises"
+    _display = "Existing building premises"
+    _description = "Addresses of flats and other premises within the existing building, supplied as a structured list or in supporting documents."
+
+    addresses = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="addresses",
+            display="Addresses",
+            description="Addresses of all flats and other premises within the existing building.",
+            schema_node_cls=ContactAddress,
+        )
+    )
+    supporting_documents = RepeatedField(
+        schema_field=SchemaNodeField(
+            ref="supporting-documents",
+            display="Supporting documents",
+            description="References to documents supplied with the application containing the complete list of addresses of flats and other premises within the existing building.",
+            schema_node_cls=SupportingDocument,
+        )
+    )
+
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if (self.is_empty_field("supporting-documents") == True) and (
+            self.is_empty_field("addresses") == True
+        ):
+
+            reasons.append(
+                f"{self.node_path}.addresses requires empty value in {self.node_path}.supporting-documents"
+            )
+
+        if (self.is_empty_field("addresses") == True) and (
+            self.is_empty_field("supporting-documents") == True
+        ):
+
+            reasons.append(
+                f"{self.node_path}.supporting-documents requires empty value in {self.node_path}.addresses"
+            )
+
+        if reasons:
+            raise SchemaValidationException(reasons, node_path=self.node_path)
+
+
+class MaBuildingEligibility(SchemaNode):
+    _ref = "ma-building-eligibility"
+    _display = "Class MA current building and site eligibility"
+    _description = "The qualifying use history and location restrictions of the existing building and site for a Class MA change of use from commercial, business and service use to dwellinghouses."
+
+    use_two_years_plus = BooleanField(
+        ref="use-two-years-plus",
+        display="Qualifying use for at least two years",
+        description="Whether the building has been in qualifying uses continuously for at least two years immediately before the application date.",
+        required=True,
+    )
+    has_location_restriction = BooleanField(
+        ref="has-location-restriction",
+        display="Has location restriction",
+        description="Whether the building, land covered by it or land within its curtilage is affected by any of the location restrictions for the application route.",
+        required=True,
+    )
+
+
+class MaProposalEligibility(SchemaNode):
+    _ref = "ma-proposal-eligibility"
+    _display = "Class MA proposed change eligibility"
+    _description = "Article 4 restrictions, space standards and continued residential use for a proposed Class MA change of use from commercial, business and service use to dwellinghouses."
+
+    article_4_restriction = EnumField(
+        ref="article-4-restriction",
+        display="Article 4 restriction",
+        description="Whether an Article 4 direction is or was in place that removed the relevant permitted development rights for the proposed change of use.",
+        required=True,
+        select_options=[
+            EnumOption(key="yes", label="Yes", description="Affirmative response"),
+            EnumOption(key="no", label="No", description="Negative response"),
+            EnumOption(
+                key="not-applicable",
+                label="Not Applicable",
+                description="Response not applicable or not provided",
+            ),
+        ],
+    )
+    meets_space_standard = BooleanField(
+        ref="meets-space-standard",
+        display="Meets space standard",
+        description="Whether all proposed new dwellinghouses have gross internal floor areas of at least 37 square metres and comply with the nationally described space standard.",
+        required=True,
+    )
+    dwellinghouse_use = BooleanField(
+        ref="dwellinghouse-use",
+        display="Dwellinghouse use",
+        description="Whether every dwellinghouse in the building will remain in Use Class C3 following the change of use, with no other use except purposes ancillary to its use as a dwellinghouse.",
+        required=True,
+    )
+
+
+class MaWorksImpacts(SchemaNode):
+    _ref = "ma-works-impacts"
+    _display = "Class MA proposed works and impacts"
+    _description = "The proposed development, net increase in dwellinghouses and impacts and risks associated with a Class MA change of use to dwellinghouses."
+
+    proposal_description = StringField(
+        ref="proposal-description",
+        display="Proposal description",
+        description="Description of the proposed development, including details of any dwellinghouses and other works proposed.",
+        required=True,
+    )
+    natural_light_details = StringField(
+        ref="natural-light-details",
+        display="Natural light details",
+        description="Details of the provision of adequate natural light in all habitable rooms of the proposed dwellinghouses.",
+        required=True,
+    )
+    net_dwellings_increase = StringField(
+        ref="net-dwellings-increase",
+        display="Net increase in dwellings",
+        description="The number of dwellinghouses proposed by the development minus the number of dwellinghouses in the existing building.",
+        required=True,
+    )
+    transport_impacts = StringField(
+        ref="transport-impacts",
+        display="Transport impacts",
+        description="Details of transport impacts from the proposed development and how they will be mitigated, particularly to ensure safe site access.",
+        required=True,
+    )
+    contamination_risks = StringField(
+        ref="contamination-risks",
+        display="Contamination risks",
+        description="Details of contamination risks associated with the proposed development and how they will be mitigated.",
+        required=True,
+    )
+    flooding_risks = StringField(
+        ref="flooding-risks",
+        display="Flooding risks",
+        description="Details of flooding risks associated with the proposed development and how they will be mitigated.",
+        required=True,
+    )
+    commercial_noise_impacts = StringField(
+        ref="commercial-noise-impacts",
+        display="Commercial noise impacts",
+        description="Details of the impacts of noise from commercial premises on the intended occupiers of the proposed dwellinghouses and how they will be mitigated.",
+        required=True,
+    )
+    fire_safety_impacts = StringField(
+        ref="fire-safety-impacts",
+        display="Fire safety impacts",
+        description="Details of fire safety impacts on the intended occupants of the building.",
+    )
+    conservation_area_impacts = StringField(
+        ref="conservation-area-impacts",
+        display="Conservation area impacts",
+        description="Details of the impacts of the proposed change of use on the character or sustainability of the conservation area and how they will be mitigated.",
+    )
+    industrial_area_impacts = StringField(
+        ref="industrial-area-impacts",
+        display="Industrial area impacts",
+        description="Details of impacts on intended occupiers from introducing residential use into an area used for general or heavy industry, waste management, storage and distribution or a mix of these uses, and how they will be mitigated.",
+    )
+    local_service_loss_impacts = StringField(
+        ref="local-service-loss-impacts",
+        display="Local service loss impacts",
+        description="Details of impacts on local service provision from the loss of a registered nursery or health centre through the proposed development and how they will be mitigated.",
+    )
+
+
+class ChoCommercialToDwh(SchemaNode):
+    _ref = "cho-commercial-to-dwh"
+    _display = "Prior approval: Commercial, business and service use to dwellinghouses"
+    _description = "Prior approval for a change of use from Commercial, Business and Service use (Use Class E) to dwellinghouses (Use Class C3) under Class MA."
+
+    submission_details = SchemaNodeField(
+        ref="submission-details",
+        display="Submission details",
+        description="Details about the submitted payload, including how it is identified, routed, validated, handled and traced",
+        required=True,
+        schema_node_cls=SubmissionDetails,
+    )
+    submission_details = SchemaNodeField(
+        ref="submission-details",
+        display="Submission details",
+        description="Details about the submitted payload, including how it is identified, routed, validated, handled and traced",
+        required=True,
+        schema_node_cls=SubmissionDetails,
+    )
+    agricultural_tenancy_consent = SchemaNodeField(
+        ref="agricultural-tenancy-consent",
+        display="Agricultural tenancy consent",
+        description="Whether land is occupied under agricultural tenancy agreements and all parties have consented to the proposed change of use.",
+        schema_node_cls=AgriculturalTenancyConsent,
+    )
+    existing_building_premises = SchemaNodeField(
+        ref="existing-building-premises",
+        display="Existing building premises",
+        description="Addresses of flats and other premises within the existing building, supplied as a structured list or in supporting documents.",
+        schema_node_cls=ExistingBuildingPremises,
+    )
+    ma_building_eligibility = SchemaNodeField(
+        ref="ma-building-eligibility",
+        display="Class MA current building and site eligibility",
+        description="The qualifying use history and location restrictions of the existing building and site for a Class MA change of use from commercial, business and service use to dwellinghouses.",
+        schema_node_cls=MaBuildingEligibility,
+    )
+    ma_proposal_eligibility = SchemaNodeField(
+        ref="ma-proposal-eligibility",
+        display="Class MA proposed change eligibility",
+        description="Article 4 restrictions, space standards and continued residential use for a proposed Class MA change of use from commercial, business and service use to dwellinghouses.",
+        schema_node_cls=MaProposalEligibility,
+    )
+    ma_works_impacts = SchemaNodeField(
+        ref="ma-works-impacts",
+        display="Class MA proposed works and impacts",
+        description="The proposed development, net increase in dwellinghouses and impacts and risks associated with a Class MA change of use to dwellinghouses.",
+        schema_node_cls=MaWorksImpacts,
+    )
+    agent_contact = SchemaNodeField(
+        ref="agent-contact",
+        display="Agent contact details",
+        description="Name and contact information if an agent is being used.",
+        schema_node_cls=AgentContact,
+    )
+    agent_details = SchemaNodeField(
+        ref="agent-details",
+        display="Agent details",
+        description="Name and contact information if an agent is being used.",
+        schema_node_cls=AgentDetails,
+    )
+    applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
+        display="Applicant contact details",
+        description="Telephone number and email address of the applicant.",
+        schema_node_cls=ApplicantContact,
+    )
+    applicant_details = SchemaNodeField(
+        ref="applicant-details",
+        display="Applicant details",
+        description="Name and contact information for the parties making the application.",
+        schema_node_cls=ApplicantDetails,
+    )
+    conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
+        display="Conflict of interest",
+        description="Details of any conflict of interest that may exist between the applicant and planning authority.",
+        schema_node_cls=ConflictOfInterest,
+    )
+    checklist = SchemaNodeField(
+        ref="checklist",
+        display="Checklist",
+        description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
+        schema_node_cls=Checklist,
+    )
+    declaration = SchemaNodeField(
+        ref="declaration",
+        display="Declaration",
+        description="Signed and dated verification of the application's accuracy.",
+        schema_node_cls=Declaration,
+    )
+    site_details = SchemaNodeField(
+        ref="site-details",
+        display="Site details",
+        description="Where the proposed development will be built.",
+        schema_node_cls=SiteDetails,
     )
 
 
@@ -9302,7 +9602,7 @@ class EligibilityProposal(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class PaStorey(SchemaNode):
@@ -9676,7 +9976,7 @@ class Use(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class ExistingUsecomponentresolved(SchemaNode):
@@ -9771,7 +10071,7 @@ class SiteInfo(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class Pip(SchemaNode):
@@ -9941,7 +10241,7 @@ class DescYourProposal(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
     @property
     def out_of_scope_fields(self):
@@ -10099,7 +10399,7 @@ class Parking(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class Hh(SchemaNode):
@@ -10401,7 +10701,7 @@ class OilGasOwnershipNotices(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class PlansDrawingsSupportingMaterials(SchemaNode):
@@ -10566,7 +10866,7 @@ class RelatedPermissionDetails(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class RelatedProposal(SchemaNode):
@@ -11081,7 +11381,7 @@ class OilgasPermissionType(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class DevType(SchemaNode):
@@ -11184,7 +11484,7 @@ class DevType(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class VolAgreement(SchemaNode):
@@ -11217,7 +11517,7 @@ class VolAgreement(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class ExtractionOilGas(SchemaNode):
@@ -11455,7 +11755,7 @@ class Eligibility(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class ReplacementDocument(SchemaNode):
@@ -11524,7 +11824,7 @@ class NmAmendmentDetails(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class NonMaterialAmendment(SchemaNode):
@@ -11687,7 +11987,7 @@ class AdvertLocation(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class AdvertPeriod(SchemaNode):
@@ -11753,7 +12053,7 @@ class AdvertisementProposalType(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class AdvertisementTypes(SchemaNode):
@@ -11823,7 +12123,7 @@ class InterestInLand(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class Advertisement(SchemaNode):
@@ -11929,7 +12229,7 @@ class Advertisement(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class ProposedAdvertDetails(SchemaNode):
@@ -12416,7 +12716,7 @@ class EligibilityExtension(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class PaExtension(SchemaNode):
@@ -12542,7 +12842,7 @@ class PartDischarge(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class ApprovalCondition(SchemaNode):
@@ -12668,7 +12968,7 @@ class TreesLocation(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class NoticeTreesInConArea(SchemaNode):
@@ -12981,7 +13281,7 @@ class UseWorksActivity(SchemaNode):
             reasons.append(f"One or more matches required for {self.node_path} in field(s): use")
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class SupportingApplications(SchemaNode):
@@ -13117,7 +13417,7 @@ class GroundsLdc(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class InfoSupportLdc(SchemaNode):
@@ -13177,7 +13477,7 @@ class InfoSupportLdc(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class LdcExistingUse(SchemaNode):
@@ -13405,7 +13705,7 @@ class AgriForestDevElig(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class BuildingDetails(SchemaNode):
@@ -13583,7 +13883,7 @@ class ProposedBuilding(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class PaBuildAgriForest(SchemaNode):
@@ -13721,7 +14021,7 @@ class LdcInterest(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class WasteManagementOutline(SchemaNode):
@@ -13923,7 +14223,7 @@ class WasteManagementOutline(SchemaNode):
             )
 
         if reasons:
-            raise SchemaValidationException(reasons)
+            raise SchemaValidationException(reasons, node_path=self.node_path)
 
 
 class ProcessesMachineryWasteOutline(SchemaNode):
