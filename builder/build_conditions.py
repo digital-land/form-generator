@@ -22,6 +22,12 @@ ContraintRule = namedtuple(
     defaults=("",),
 )
 
+ScopedContraintRule = namedtuple(
+    "ScopedContraintRule",
+    ("switch_field", "switch_value", "operand", "switch_method_call", "scope_field"),
+    defaults=("",),
+)
+
 # simple rule for comparison with 'Application type'. It's a simple case that doesn't easily fit
 # into `ContraintRule. Note that the template+render process assumes this hasn't been wrapped in
 # one of the subclasses of `RulesOpLogic`
@@ -179,6 +185,8 @@ class BuildConditions:
                 continue
             elif len(ruleset) == 1 and isinstance(ruleset[0], ApplicationTypeRule):
                 app_type_rule = ruleset[0]
+            elif len(ruleset) == 1 and isinstance(ruleset[0], ContraintRule):
+                other_rule = ScopedContraintRule(scope_field=field_x.ref, **ruleset[0]._asdict())
             elif len(ruleset) == 2:
                 if isinstance(ruleset[0], ApplicationTypeRule):
                     app_type_rule = ruleset[0]
@@ -192,7 +200,9 @@ class BuildConditions:
                 self.log_failure(msg)
                 return []
 
-            if other_rule is not None and not isinstance(other_rule, ContraintRule):
+            if other_rule is not None and not isinstance(
+                other_rule, (ContraintRule, ScopedContraintRule)
+            ):
                 # simplistic implementation
                 msg = f"Unsupported applies if secondary rule for {field_x.ref}. Template needs updating."
                 self.log_failure(msg)
@@ -320,7 +330,7 @@ class BuildConditions:
             return r, msg
 
         if "operator" in rule and rule["operator"] == "<":
-            msg = "TODO - implement this"
+            msg = "Less than inequality needs to be implemented"
             self.log_failure(msg)
             return None, None
 

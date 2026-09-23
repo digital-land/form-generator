@@ -86,12 +86,17 @@ class TestSchemaPlanning(unittest.TestCase):
 
         self.assertIn(target_failure_reason, ctx.exception.reasons, msg)
 
-    def test_required_if_when_answer_in_list(self):
+    @mock.patch("schema.planning_application_specification.SiteVisit._root_node")
+    def test_required_if_when_answer_in_list(self, mocked_site_visit):
         """
         Required when answer is in a list
         `required-if` + `field` + `in`
         Field is required when another field is one of several values.
         """
+        # Mock "submission-details.application-types", first is needed for test, 2nd for checking
+        # mock is working if breakpoint is set.
+        mocked_site_visit.by_ref.return_value = {"full", "mock_application_type"}
+
         payload = {"contact-type": "agent"}
         expected = 'site-visit.contact-reference requires value from ["applicant", "agent"] in site-visit.contact-type'
 

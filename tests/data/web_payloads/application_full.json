@@ -340,12 +340,7 @@
   "site-visit": {
     "can-be-seen-from": false,
     "contact-type": "applicant",
-    "contact-reference": "applicant-1",
-    "other-contact": {
-      "fullname": "Sam Riley",
-      "number": "020 7946 0000",
-      "email": "sam@example.com"
-    }
+    "contact-reference": "applicant-1"
   },
   "trade-effluent": {
     "is-disposal-required": false,

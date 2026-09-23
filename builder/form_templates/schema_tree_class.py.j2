@@ -65,9 +65,17 @@ class {{ class_name }}(SchemaNode):
         app_types = set(self._root_node.by_ref("submission-details.application-types"))
         
         {% for app_rule, other_rule in out_of_scope_rules %}
-        {% if other_rule is none %}if app_types.isdisjoint({{app_rule.app_type_match}}):{% else %}if not (not app_types.isdisjoint({{app_rule.app_type_match}}){% if other_rule %}and  {{validation_term(other_rule)}}{% endif %}):	{% endif %}
-        	    de_scoped.add("{{app_rule.switch_field}}")
-		{%endfor%}
+        {% if app_rule is not none and other_rule is none %}
+        if app_types.isdisjoint({{app_rule.app_type_match}}):
+            de_scoped.add("{{app_rule.switch_field}}")
+        {% elif app_rule is none and other_rule is not none %}
+        if not {{validation_term(other_rule)}}:
+            de_scoped.add("{{other_rule.scope_field}}")
+        {% else %}
+        if not (not app_types.isdisjoint({{app_rule.app_type_match}}){% if other_rule %}and  {{validation_term(other_rule)}}{% endif %}):
+            de_scoped.add("{{app_rule.switch_field}}")
+        {% endif %}
+        {%endfor%}
 
         return de_scoped
     {% endif %}
