@@ -503,18 +503,36 @@ class Bng(SchemaNode):
             de_scoped.add("bng-exempt")
 
         if app_types.isdisjoint(
-            {"full", "technical-details-consent", "outline", "demolition-con-area"}
+            {
+                "full",
+                "technical-details-consent",
+                "outline-all",
+                "outline-some",
+                "demolition-con-area",
+            }
         ):
             de_scoped.add("bng-condition-applies")
 
         if app_types.isdisjoint(
-            {"full", "technical-details-consent", "outline", "demolition-con-area"}
+            {
+                "full",
+                "technical-details-consent",
+                "outline-all",
+                "outline-some",
+                "demolition-con-area",
+            }
         ):
             de_scoped.add("bng-condition-exemption-reasons")
 
         if not (
             not app_types.isdisjoint(
-                {"full", "technical-details-consent", "outline", "demolition-con-area"}
+                {
+                    "full",
+                    "technical-details-consent",
+                    "outline-all",
+                    "outline-some",
+                    "demolition-con-area",
+                }
             )
             and self["bng-condition-applies"] == True
         ):
@@ -593,12 +611,14 @@ class ConflictOfInterest(SchemaNode):
                 "hh",
                 "full",
                 "technical-details-consent",
-                "outline",
+                "outline-all",
+                "outline-some",
                 "reserved-matters",
                 "demolition-con-area",
                 "lbc",
                 "advertising",
-                "ldc",
+                "ldc-prospective-use",
+                "ldc-existing-use",
                 "consent-under-tpo",
                 "non-material-amendment",
                 "pip",
@@ -613,12 +633,14 @@ class ConflictOfInterest(SchemaNode):
                 "hh",
                 "full",
                 "technical-details-consent",
-                "outline",
+                "outline-all",
+                "outline-some",
                 "reserved-matters",
                 "demolition-con-area",
                 "lbc",
                 "advertising",
-                "ldc",
+                "ldc-prospective-use",
+                "ldc-existing-use",
                 "consent-under-tpo",
                 "non-material-amendment",
                 "pip",
@@ -633,12 +655,14 @@ class ConflictOfInterest(SchemaNode):
                 "hh",
                 "full",
                 "technical-details-consent",
-                "outline",
+                "outline-all",
+                "outline-some",
                 "reserved-matters",
                 "demolition-con-area",
                 "lbc",
                 "advertising",
-                "ldc",
+                "ldc-prospective-use",
+                "ldc-existing-use",
                 "consent-under-tpo",
                 "non-material-amendment",
                 "pip",
@@ -1388,7 +1412,13 @@ class HrsOperation(SchemaNode):
         app_types = set(self._root_node.by_ref("submission-details.application-types"))
 
         if app_types.isdisjoint(
-            {"full", "technical-details-consent", "outline", "extraction-oil-gas"}
+            {
+                "full",
+                "technical-details-consent",
+                "outline-all",
+                "outline-some",
+                "extraction-oil-gas",
+            }
         ):
             de_scoped.add("hours-of-operation")
 
@@ -2102,19 +2132,19 @@ class NonResFloorspace(SchemaNode):
         if app_types.isdisjoint({"full", "technical-details-consent"}):
             de_scoped.add("non-residential-change")
 
-        if app_types.isdisjoint({"outline"}):
+        if app_types.isdisjoint({"outline-all", "outline-some"}):
             de_scoped.add("non-residential-change-outline")
 
         if app_types.isdisjoint({"full", "technical-details-consent"}):
             de_scoped.add("floorspace-details")
 
-        if app_types.isdisjoint({"outline"}):
+        if app_types.isdisjoint({"outline-all", "outline-some"}):
             de_scoped.add("floorspace-details-outline")
 
         if app_types.isdisjoint({"full", "technical-details-consent"}):
             de_scoped.add("room-details")
 
-        if app_types.isdisjoint({"outline"}):
+        if app_types.isdisjoint({"outline-all", "outline-some"}):
             de_scoped.add("room-details-outline")
 
         return de_scoped
@@ -2278,12 +2308,28 @@ class OwnershipCerts(SchemaNode):
         app_types = set(self._root_node.by_ref("submission-details.application-types"))
 
         if app_types.isdisjoint(
-            {"hh", "full", "technical-details-consent", "outline", "demolition-con-area", "s73"}
+            {
+                "hh",
+                "full",
+                "technical-details-consent",
+                "outline-all",
+                "outline-some",
+                "demolition-con-area",
+                "s73",
+            }
         ):
             de_scoped.add("agricultural-tenants")
 
         if app_types.isdisjoint(
-            {"hh", "full", "technical-details-consent", "outline", "demolition-con-area", "s73"}
+            {
+                "hh",
+                "full",
+                "technical-details-consent",
+                "outline-all",
+                "outline-some",
+                "demolition-con-area",
+                "s73",
+            }
         ):
             de_scoped.add("owners-and-tenants")
 
@@ -2745,14 +2791,15 @@ class ProposalDetails(SchemaNode):
                 "full",
                 "hh",
                 "lbc",
-                "outline",
+                "outline-all",
+                "outline-some",
                 "reserved-matters",
                 "technical-details-consent",
             }
         ):
             de_scoped.add("description")
 
-        if app_types.isdisjoint({"outline", "reserved-matters"}):
+        if app_types.isdisjoint({"outline-all", "outline-some", "reserved-matters"}):
             de_scoped.add("reserved-matters")
 
         if app_types.isdisjoint({"reserved-matters"}):
@@ -2765,7 +2812,8 @@ class ProposalDetails(SchemaNode):
                 "full",
                 "hh",
                 "lbc",
-                "outline",
+                "outline-all",
+                "outline-some",
                 "reserved-matters",
                 "technical-details-consent",
             }
@@ -2779,7 +2827,8 @@ class ProposalDetails(SchemaNode):
                 "full",
                 "hh",
                 "lbc",
-                "outline",
+                "outline-all",
+                "outline-some",
                 "reserved-matters",
                 "technical-details-consent",
             }
@@ -2793,7 +2842,8 @@ class ProposalDetails(SchemaNode):
                 "full",
                 "hh",
                 "lbc",
-                "outline",
+                "outline-all",
+                "outline-some",
                 "reserved-matters",
                 "technical-details-consent",
             }
@@ -2807,7 +2857,8 @@ class ProposalDetails(SchemaNode):
                 "full",
                 "hh",
                 "lbc",
-                "outline",
+                "outline-all",
+                "outline-some",
                 "reserved-matters",
                 "technical-details-consent",
             }
@@ -2908,7 +2959,14 @@ class UnitQuantities(SchemaNode):
         app_types = set(self._root_node.by_ref("submission-details.application-types"))
 
         if app_types.isdisjoint(
-            {"full", "outline", "outline-all", "outline-some", "technical-details-consent"}
+            {
+                "full",
+                "outline-all",
+                "outline-some",
+                "outline-all",
+                "outline-some",
+                "technical-details-consent",
+            }
         ):
             de_scoped.add("units-unknown")
 
@@ -5868,16 +5926,30 @@ class AccessRightsOfWay(SchemaNode):
         de_scoped = super().out_of_scope_fields
         app_types = set(self._root_node.by_ref("submission-details.application-types"))
 
-        if app_types.isdisjoint({"full", "hh", "outline", "technical-details-consent"}):
+        if app_types.isdisjoint(
+            {"full", "hh", "outline-all", "outline-some", "technical-details-consent"}
+        ):
             de_scoped.add("change-right-of-way")
 
         if app_types.isdisjoint(
-            {"full", "extraction-oil-gas", "outline", "technical-details-consent"}
+            {
+                "full",
+                "extraction-oil-gas",
+                "outline-all",
+                "outline-some",
+                "technical-details-consent",
+            }
         ):
             de_scoped.add("new-right-of-way")
 
         if app_types.isdisjoint(
-            {"full", "extraction-oil-gas", "outline", "technical-details-consent"}
+            {
+                "full",
+                "extraction-oil-gas",
+                "outline-all",
+                "outline-some",
+                "technical-details-consent",
+            }
         ):
             de_scoped.add("new-public-road")
 
@@ -6165,10 +6237,14 @@ class HazSubstances(SchemaNode):
         de_scoped = super().out_of_scope_fields
         app_types = set(self._root_node.by_ref("submission-details.application-types"))
 
-        if app_types.isdisjoint({"full", "technical-details-consent", "outline"}):
+        if app_types.isdisjoint(
+            {"full", "technical-details-consent", "outline-all", "outline-some"}
+        ):
             de_scoped.add("involves-hazardous-substances")
 
-        if app_types.isdisjoint({"full", "technical-details-consent", "outline"}):
+        if app_types.isdisjoint(
+            {"full", "technical-details-consent", "outline-all", "outline-some"}
+        ):
             de_scoped.add("substance-types")
 
         if app_types.isdisjoint({"extraction-oil-gas"}):
@@ -6674,13 +6750,13 @@ class WasteStorageCollection(SchemaNode):
         if app_types.isdisjoint({"full", "technical-details-consent"}):
             de_scoped.add("needs-waste-storage-area")
 
-        if app_types.isdisjoint({"outline"}):
+        if app_types.isdisjoint({"outline-all", "outline-some"}):
             de_scoped.add("needs-waste-storage-area-outline")
 
         if app_types.isdisjoint({"full", "technical-details-consent"}):
             de_scoped.add("separate-recycling-arrangements")
 
-        if app_types.isdisjoint({"outline"}):
+        if app_types.isdisjoint({"outline-all", "outline-some"}):
             de_scoped.add("separate-recycling-arrangements-outline")
 
         return de_scoped
