@@ -134,7 +134,7 @@ class TestBuildSchema(unittest.TestCase):
             ],
         )
 
-        validation_simplified = BuildConditions.required_if_rules(example_field)
+        validation_simplified = BuildConditions().required_if_rules(example_field)
 
         template_context = {
             "class_name": "TestX",
@@ -221,7 +221,7 @@ class TestBuildSchema(unittest.TestCase):
             ],
         )
 
-        validation_simplified = BuildConditions.required_if_rules(example_field)
+        validation_simplified = BuildConditions().required_if_rules(example_field)
 
         template_context = {
             "class_name": "TestX",

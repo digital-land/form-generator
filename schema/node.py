@@ -176,7 +176,7 @@ class SchemaNode:
 
     def validate_traverse(self):
         """
-        @return: list of str - reasons the tree isn't valid
+        @return: list of :class:`SchemaValidationException` - reasons the tree isn't valid
         """
 
         def _validate(node):
@@ -338,7 +338,7 @@ class SchemaNode:
             attr_name, _ = refs[key]
             return getattr(self, attr_name)
 
-        raise KeyError(f"Field '{key}' not found in '{self._ref}'")
+        raise KeyError(f"Field '{key}' not found in '{self.node_path}'")
 
     def __setitem__(self, key, value):
         """
@@ -360,7 +360,7 @@ class SchemaNode:
                 setattr(self, attr_name, value)
                 return
 
-        raise KeyError(f"Field '{key}' not found in '{self._ref}'")
+        raise KeyError(f"Field '{key}' not found in '{self.node_path}'")
 
     def by_ref(self, path):
         """
@@ -417,7 +417,7 @@ class SchemaNode:
 
         # Top level is the Application type, it's confusing to show this to user as
         # it isn't part of the submitted data's tree.
-        if len(node_lineage) > 0:
+        if len(node_lineage) > 1:
             del node_lineage[0]
 
         node_path = ".".join(node_lineage)
