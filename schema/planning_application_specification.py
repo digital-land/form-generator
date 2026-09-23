@@ -2527,10 +2527,10 @@ class WasteManagement(SchemaNode):
         description="Total capacity of void in cubic metres (or tonnes/litres)",
         required=True,
     )
-    unit_type = EnumField(
-        ref="unit-type",
-        display="Unit type",
-        description="Unit for capacity/throughput (e.g. cubic metres, tonnes, litres)",
+    capacity_unit = EnumField(
+        ref="capacity-unit",
+        display="Capacity unit",
+        description="Unit used to express the total capacity of a waste management facility",
         required=True,
         select_options=[
             EnumOption(
@@ -2548,10 +2548,10 @@ class WasteManagement(SchemaNode):
         description="Maximum annual operational throughput in tonnes/litres",
         required=True,
     )
-    unit_type = EnumField(
-        ref="unit-type",
-        display="Unit type",
-        description="Unit for capacity/throughput (e.g. cubic metres, tonnes, litres)",
+    throughput_unit = EnumField(
+        ref="throughput-unit",
+        display="Throughput unit",
+        description="Unit used to express the annual throughput of a waste management facility",
         required=True,
         select_options=[
             EnumOption(key="tonnes", label="Tonnes", description="Measured by mass in tonnes"),
@@ -3473,6 +3473,7 @@ class SiteVisit(SchemaNode):
         ref="other-contact",
         display="Other site visit contact",
         description="Details of specifically named contact for site visits",
+        required=True,
         schema_node_cls=OtherContact,
     )
 
@@ -3488,14 +3489,18 @@ class SiteVisit(SchemaNode):
                 f'{self.node_path}.contact-reference requires value from ["applicant", "agent"] in {self.node_path}.contact-type'
             )
 
-        if (self["contact-type"] == "other") and (self.is_empty_field("other-contact") == True):
-
-            reasons.append(
-                f"{self.node_path}.other-contact is needed for current value in {self.node_path}.contact-type"
-            )
-
         if reasons:
             raise SchemaValidationException(reasons, node_path=self.node_path)
+
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if not self["contact-type"] == "other":
+            de_scoped.add("other-contact")
+
+        return de_scoped
 
 
 class File(SchemaNode):
@@ -14229,10 +14234,10 @@ class WasteManagementOutline(SchemaNode):
         display="Total capacity",
         description="Total capacity of void in cubic metres (or tonnes/litres)",
     )
-    unit_type = EnumField(
-        ref="unit-type",
-        display="Unit type",
-        description="Unit for capacity/throughput (e.g. cubic metres, tonnes, litres)",
+    capacity_unit = EnumField(
+        ref="capacity-unit",
+        display="Capacity unit",
+        description="Unit used to express the total capacity of a waste management facility",
         select_options=[
             EnumOption(
                 key="cubic-metres",
@@ -14254,10 +14259,10 @@ class WasteManagementOutline(SchemaNode):
         display="Annual throughput",
         description="Maximum annual operational throughput in tonnes/litres",
     )
-    unit_type = EnumField(
-        ref="unit-type",
-        display="Unit type",
-        description="Unit for capacity/throughput (e.g. cubic metres, tonnes, litres)",
+    throughput_unit = EnumField(
+        ref="throughput-unit",
+        display="Throughput unit",
+        description="Unit used to express the annual throughput of a waste management facility",
         select_options=[
             EnumOption(key="tonnes", label="Tonnes", description="Measured by mass in tonnes"),
             EnumOption(key="litres", label="Litres", description="Measured by volume in litres"),
@@ -14276,10 +14281,12 @@ class WasteManagementOutline(SchemaNode):
                 f"{self.node_path}.total-capacity is needed for current value in {self.node_path}.is-total-capacity-known"
             )
 
-        if (self["is-total-capacity-known"] == True) and (self.is_empty_field("unit-type") == True):
+        if (self["is-total-capacity-known"] == True) and (
+            self.is_empty_field("capacity-unit") == True
+        ):
 
             reasons.append(
-                f"{self.node_path}.unit-type is needed for current value in {self.node_path}.is-total-capacity-known"
+                f"{self.node_path}.capacity-unit is needed for current value in {self.node_path}.is-total-capacity-known"
             )
 
         if (self["is-annual-throughput-known"] == True) and (
@@ -14291,11 +14298,11 @@ class WasteManagementOutline(SchemaNode):
             )
 
         if (self["is-annual-throughput-known"] == True) and (
-            self.is_empty_field("unit-type") == True
+            self.is_empty_field("throughput-unit") == True
         ):
 
             reasons.append(
-                f"{self.node_path}.unit-type is needed for current value in {self.node_path}.is-annual-throughput-known"
+                f"{self.node_path}.throughput-unit is needed for current value in {self.node_path}.is-annual-throughput-known"
             )
 
         if reasons:
