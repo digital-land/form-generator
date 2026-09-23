@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+from collections import defaultdict
 import csv
-import io
 from dataclasses import asdict, dataclass, field, fields, replace
 from functools import cached_property
 from glob import glob
+import io
 from pathlib import Path
 from typing import Any
 import warnings
@@ -289,15 +290,15 @@ class PlanningAppDataSpec:
         return self._hydrate_dataclasses(Field)
 
     @cached_property
-    def components(self) -> dict[str, Component]:
+    def components_literal(self) -> dict[str, Component]:
         return self._hydrate_dataclasses(Component)
 
     @cached_property
-    def modules(self) -> dict[str, Module]:
+    def modules_literal(self) -> dict[str, Module]:
         return self._hydrate_dataclasses(Module)
 
     @cached_property
-    def applications(self) -> dict[str, Application]:
+    def applications_literal(self) -> dict[str, Application]:
         return self._hydrate_dataclasses(Application)
 
     @cached_property
@@ -376,7 +377,9 @@ class PlanningAppDataResolved(PlanningAppDataSpec):
     def applications(self) -> dict[str, ApplicationResolved]:
 
         resolved = {}
-        applications = super().applications
+
+        # can't override subclass and use cached_property at same time so different method names
+        applications = self.applications_literal
 
         for app_ref, app in applications.items():
 
@@ -419,13 +422,38 @@ class PlanningAppDataResolved(PlanningAppDataSpec):
         return resolved
 
     @cached_property
+    def applications_inheritance_mapping(self):
+        """
+        applications can use the `extends` parameter in their specification to use an abstract base
+        definition. This property is a mapping from the parent ref to 'sub classes' of the abstract class.
+
+        @return: dict - (str -> list of str) - parent node's ref -> [child nodes refs]
+        """
+        r = defaultdict(list)
+
+        # unresolved applications
+        applications = super().applications_literal
+        for app_ref, app in applications.items():
+
+            if app.base_type and app_ref not in r:
+                # parent seen before any children.
+                # Make empty list as there might be a parent without children so empty list would
+                # be correct
+                r[app_ref] = []
+
+            if app.extends:
+                r[app.extends].append(app_ref)
+
+        return r
+
+    @cached_property
     def modules(self) -> dict[str, ModuleResolved]:
         """
         Load scalar values from spec file and resolve field names into :class:`Field` and
         :class:`Component` instances.
         """
         resolved = {}
-        modules = super().modules
+        modules = self.modules_literal
         for module_ref, module in modules.items():
 
             from_schema = asdict(module)
@@ -445,7 +473,7 @@ class PlanningAppDataResolved(PlanningAppDataSpec):
         :class:`Component` instances.
         """
         resolved = {}
-        components = super().components
+        components = self.components_literal
         for component_ref, component in components.items():
 
             from_schema = asdict(component)

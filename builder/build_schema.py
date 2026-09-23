@@ -89,6 +89,11 @@ def render_python(project_root, planning_spec):
     template = "schema_tree_class.py.j2"
     py_output = render.build(dict(document_header=True), template)
 
+    # creates structures that are more suitable for templates than the specification's YML
+    conditions_builder = BuildConditions(
+        application_inheritance_map=planning_spec.applications_inheritance_mapping
+    )
+
     # assumption - refs are primary keys
     segment_register = defaultdict(dict)
     segment_class_map = {}  # class_name -> schema_segment
@@ -152,7 +157,7 @@ def render_python(project_root, planning_spec):
 
             elif isinstance(field_x, Field):
 
-                field_rules = BuildConditions.required_if_rules(field_x)
+                field_rules = conditions_builder.required_if_rules(field_x)
                 validation_simplified.extend(field_rules)
 
                 if field_x.datatype == "string":
@@ -194,10 +199,10 @@ def render_python(project_root, planning_spec):
 
             # module + component rules
             if field_entry.origin != field_entry.target:
-                field_rules = BuildConditions.required_if_rules(field_entry.origin)
+                field_rules = conditions_builder.required_if_rules(field_entry.origin)
                 validation_simplified.extend(field_rules)
 
-            field_rules = BuildConditions.applies_if_rules(field_entry.origin)
+            field_rules = conditions_builder.applies_if_rules(field_entry.origin)
             out_of_scope_rules.extend(field_rules)
 
         # schema_base_item is ComponentResolved or Module or Application

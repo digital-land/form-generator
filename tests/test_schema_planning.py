@@ -33,10 +33,10 @@ class TestSchemaPlanning(unittest.TestCase):
         payload = {"advice-sought": True}
 
         expected = [
-            ".officer-name is needed for current value in .advice-sought",
-            ".reference is needed for current value in .advice-sought",
-            ".advice-date is needed for current value in .advice-sought",
-            ".advice-summary is needed for current value in .advice-sought",
+            "pre-app-advice.officer-name is needed for current value in pre-app-advice.advice-sought",
+            "pre-app-advice.reference is needed for current value in pre-app-advice.advice-sought",
+            "pre-app-advice.advice-date is needed for current value in pre-app-advice.advice-sought",
+            "pre-app-advice.advice-summary is needed for current value in pre-app-advice.advice-sought",
         ]
 
         node = PreAppAdvice()
@@ -93,7 +93,7 @@ class TestSchemaPlanning(unittest.TestCase):
         Field is required when another field is one of several values.
         """
         payload = {"contact-type": "agent"}
-        expected = '.contact-reference requires value from ["applicant", "agent"] in .contact-type'
+        expected = 'site-visit.contact-reference requires value from ["applicant", "agent"] in site-visit.contact-type'
 
         node = SiteVisit()
         with self.assertRaises(SchemaValidationException) as ctx:
@@ -109,7 +109,7 @@ class TestSchemaPlanning(unittest.TestCase):
         """
 
         payload = {"use": "sui"}
-        expected = "One or more matches required for  in field(s): use"
+        expected = "One or more matches required for floorspace-details in field(s): use"
 
         node = FloorspaceDetails()
         with self.assertRaises(SchemaValidationException) as ctx:
@@ -136,7 +136,7 @@ class TestSchemaPlanning(unittest.TestCase):
         }
 
         payload = {"operational-times": [], "hours-not-known": True}
-        target_reason = ".operational-times is needed for current value in .hours-not-known"
+        target_reason = "hours-of-operation.operational-times is needed for current value in hours-of-operation.hours-not-known"
 
         node = HoursOfOperation()
         with self.assertRaises(SchemaValidationException) as ctx:
@@ -162,7 +162,9 @@ class TestSchemaPlanning(unittest.TestCase):
         Field is required when another value has been provided.
         """
         payload = {"known-constraints": ["conservation-area"]}
-        expected = ".supporting-documents requires non-empty value in .known-constraints"
+        expected = (
+            "site-info.supporting-documents requires non-empty value in site-info.known-constraints"
+        )
 
         node = SiteInfo()
         with self.assertRaises(SchemaValidationException) as ctx:
@@ -180,9 +182,7 @@ class TestSchemaPlanning(unittest.TestCase):
             "applicant-owns-land": False,
             "permission-obtained": False,
         }
-        expected = (
-            "All fields need to match for  with field(s): applicant-owns-land, permission-obtained"
-        )
+        expected = "All fields need to match for interest-in-land with field(s): applicant-owns-land, permission-obtained"
 
         node = InterestInLand()
         with self.assertRaises(SchemaValidationException) as ctx:
@@ -240,7 +240,7 @@ class TestSchemaPlanning(unittest.TestCase):
         with self.assertRaises(SchemaValidationException) as ctx:
             node.load_payload(payload)
 
-        expected = ".decision-date is needed when application type is in [non-material-amendment]"
+        expected = "related-application-details.decision-date is needed when application type is in [non-material-amendment]"
         self.assertIn(expected, ctx.exception.reasons)
 
     def test_missing_module_errors_grouped(self):

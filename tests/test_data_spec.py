@@ -29,10 +29,10 @@ class TestDataSpec(unittest.TestCase):
         spec_literal, spec_resolved = self.planning_app_specs("a")
 
         expected_app_ref = "ldc-existing-use"
-        self.assertIn(expected_app_ref, spec_literal.applications)
+        self.assertIn(expected_app_ref, spec_literal.applications_literal)
         self.assertIn(expected_app_ref, spec_resolved.applications)
 
-        ldc_existing_literal = spec_literal.applications[expected_app_ref]
+        ldc_existing_literal = spec_literal.applications_literal[expected_app_ref]
         ldc_existing_resolved = spec_resolved.applications[expected_app_ref]
 
         msg = (
@@ -76,3 +76,17 @@ class TestDataSpec(unittest.TestCase):
         tenure_type = spec_resolved.codelist["tenure-type"]
         # check known value in one field
         self.assertEqual("data/codelist/tenure-type.csv", tenure_type.source)
+
+    def test_applications_inheritance_mapping(self):
+        """
+        Inheritance map from parent node to subclass.
+        """
+        _, spec_resolved = self.planning_app_specs("a")
+
+        expected = {"ldc": {"ldc-existing-use"}}
+
+        # use sets instead of lists to ignore order of refs
+        resolved_result = {
+            k: set(v) for k, v in spec_resolved.applications_inheritance_mapping.items()
+        }
+        self.assertEqual(expected, resolved_result)

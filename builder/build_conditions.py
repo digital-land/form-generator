@@ -65,20 +65,40 @@ class BuildConditions:
     SHOW_WARNINGS = False
     EXCEPTION_ON_UNPROCESSABLE = False
 
-    @classmethod
-    def log_failure(cls, msg):
+    def __init__(self, application_inheritance_map=None):
+        """
+        @param application_inheritance_map: (dict) parent_node_ref -> list of child node refs
+
+            The specification files use the parent node's ref. This should be substituted with all
+            known child nodes.
+
+            'base_type' applications are like non-concrete abstract classes. They aren't actual
+            application types so shouldn't be in the rules. Their subclasses take the place of
+            the parent.
+
+            It would be more logical and consistent to resolve this in
+            :class:`PlanningAppDataResolved` but that results in a really complex and repeated
+            chunk of code as application_types are in .required_if and .applies_if ; they could
+            be standalone or within a conjunction or a disjunction. The current class has already
+            dealt with all that.
+        """
+        if application_inheritance_map:
+            self.application_inheritance_map = application_inheritance_map
+        else:
+            self.application_inheritance_map = {}
+
+    def log_failure(self, msg):
         """
         Alert when the specification couldn't be parsed. Either exception in strict mode or issue
         a warning and carry on parsing.
         """
-        if cls.EXCEPTION_ON_UNPROCESSABLE:
+        if self.EXCEPTION_ON_UNPROCESSABLE:
             raise NotImplementedError(msg)
 
-        if cls.SHOW_WARNINGS:
+        if self.SHOW_WARNINGS:
             warnings.warn(msg)
 
-    @classmethod
-    def required_if_rules(cls, field_x):
+    def required_if_rules(self, field_x):
         """
         Build validation rules used by the template to create the `SchemaNode.valid_node` method.
 
@@ -93,7 +113,7 @@ class BuildConditions:
 
         if not isinstance(field_x.required_if, list):
             msg = f"Can't build rule for {field_x.ref} - required_if isn't a list"
-            cls.log_failure(msg)
+            self.log_failure(msg)
             return []
 
         # Rule saying that field_x doesn't have a value
@@ -105,7 +125,7 @@ class BuildConditions:
         )
 
         field_rules = []
-        for ruleset, msg in cls.build_rule_block(field_x.required_if, field_x):
+        for ruleset, msg in self.build_rule_block(field_x.required_if, field_x):
 
             # Application type check is rendered by the template in a different way so
             # shouldn't have the empty field check
@@ -120,7 +140,7 @@ class BuildConditions:
                         f"Unexpected specification format. {field_x.ref}'s required_if not "
                         "supported in template"
                     )
-                    cls.log_failure(msg)
+                    self.log_failure(msg)
 
             else:
                 r_op = RuleConjunction(msg, *ruleset, field_empty_rule)
@@ -128,8 +148,7 @@ class BuildConditions:
 
         return field_rules
 
-    @classmethod
-    def applies_if_rules(cls, field_x):
+    def applies_if_rules(self, field_x):
         """
         Build rules for `out_of_scope_fields` method built by templating.
 
@@ -145,11 +164,11 @@ class BuildConditions:
         # Check and complain if they don't match the expected formats.
         if not isinstance(field_x.applies_if, dict):
             msg = f"Can't build rule for {field_x.ref} - applies_if isn't a dictionary"
-            cls.log_failure(msg)
+            self.log_failure(msg)
             return []
 
         field_rules = []
-        for ruleset, msg in cls.build_rule_block([field_x.applies_if], field_x):
+        for ruleset, msg in self.build_rule_block([field_x.applies_if], field_x):
 
             # see method doc. string. This is about simplification rather than completeness of
             # template
@@ -170,21 +189,20 @@ class BuildConditions:
             else:
                 # simplistic implementation - template assumes conjunction
                 msg = f"Unsupported applies if rules for {field_x.ref}. Template needs updating."
-                cls.log_failure(msg)
+                self.log_failure(msg)
                 return []
 
             if other_rule is not None and not isinstance(other_rule, ContraintRule):
                 # simplistic implementation
                 msg = f"Unsupported applies if secondary rule for {field_x.ref}. Template needs updating."
-                cls.log_failure(msg)
+                self.log_failure(msg)
                 return []
 
             field_rules.append((app_type_rule, other_rule))
 
         return field_rules
 
-    @classmethod
-    def build_rule_block(cls, conditions_section, field_x):
+    def build_rule_block(self, conditions_section, field_x):
         """
         Take a section from the specification and build `ContraintRule` + `ApplicationTypeRule` +
         `RuleDisjunction` + `RuleConjunction` objects that can be used by the template system.
@@ -196,14 +214,14 @@ class BuildConditions:
                 logical_op = "any" if "any" in rule else "all"
                 if not isinstance(rule[logical_op], list):
                     msg = f"Can't build rule for {field_x.ref} - '{logical_op}' field isn't a list"
-                    cls.log_failure(msg)
+                    self.log_failure(msg)
                     return
 
                 # ditch 'msg' return from :meth:`build_contraint_rule` and ignore fields that can't
                 # currently be rendered (rule is None)
                 equality_rules = []
                 for rule in rule[logical_op]:
-                    c_rule = cls.build_contraint_rule(field_x.ref, rule)[0]
+                    c_rule = self.build_contraint_rule(field_x.ref, rule)[0]
                     if c_rule is not None:
                         equality_rules.append(c_rule)
 
@@ -227,14 +245,13 @@ class BuildConditions:
                     rule_blocks.append((equality_rules, msg))
 
             else:
-                c_rule, msg = cls.build_contraint_rule(field_x.ref, rule)
+                c_rule, msg = self.build_contraint_rule(field_x.ref, rule)
                 if c_rule:
                     rule_blocks.append(([c_rule], msg))
 
         return rule_blocks
 
-    @classmethod
-    def build_contraint_rule(cls, field_ref, rule):
+    def build_contraint_rule(self, field_ref, rule):
         """
         @param field_ref: (str) - name of field
         @param rule: (dict) - block from specification doc. describing conditions around a field
@@ -253,7 +270,7 @@ class BuildConditions:
                 operand="==",
             )
             # will be rendered into python
-            field_path = cls.node_path_absolute(rule["field"])
+            field_path = self.node_path_absolute(rule["field"])
             msg = f"f'{{self.node_path}}.{field_ref} is needed for current value in {field_path}'"
             return r, msg
 
@@ -268,7 +285,7 @@ class BuildConditions:
                 operand="in",
             )
             # will be rendered into python
-            field_path = cls.node_path_absolute(rule["field"])
+            field_path = self.node_path_absolute(rule["field"])
             msg = (
                 f"f'{{self.node_path}}.{field_ref} requires value from {v_members} in {field_path}'"
             )
@@ -284,7 +301,7 @@ class BuildConditions:
                 operand="==",
             )
             # will be rendered into python
-            field_path = cls.node_path_absolute(rule["field"])
+            field_path = self.node_path_absolute(rule["field"])
             msg = f"f'{{self.node_path}}.{field_ref} requires non-empty value in {field_path}'"
             return r, msg
 
@@ -298,13 +315,13 @@ class BuildConditions:
             )
 
             # will be rendered into python
-            field_path = cls.node_path_absolute(rule["field"])
+            field_path = self.node_path_absolute(rule["field"])
             msg = f"f'{{self.node_path}}.{field_ref} requires empty value in {field_path}'"
             return r, msg
 
         if "operator" in rule and rule["operator"] == "<":
             msg = "TODO - implement this"
-            cls.log_failure(msg)
+            self.log_failure(msg)
             return None, None
 
         if "contains" in rule and isinstance(rule["contains"], str):
@@ -317,7 +334,7 @@ class BuildConditions:
                 operand="in",
             )
             # will be rendered into python
-            field_path = cls.node_path_absolute(rule["field"])
+            field_path = self.node_path_absolute(rule["field"])
             msg = (
                 f"f'{{self.node_path}}.{field_ref} requires value from {v_members} in {field_path}'"
             )
@@ -335,7 +352,7 @@ class BuildConditions:
                 operand="in",
             )
             # will be rendered into python
-            field_path = cls.node_path_absolute(rule["field"])
+            field_path = self.node_path_absolute(rule["field"])
             msg = (
                 f"f'{{self.node_path}}.{field_ref} requires value from {v_members} in {field_path}'"
             )
@@ -347,11 +364,17 @@ class BuildConditions:
             and "in" in rule["application-type"]
         ):
 
-            members = [safe_literal(v) for v in rule["application-type"]["in"]]
+            # see detailed explanation in constructor doc. for `application_inheritance_map`
+            members = []
+            for app_type in rule["application-type"]["in"]:
+                # either use m or substitute in all children of m
+                for app_type_resolved in self.application_inheritance_map.get(app_type, [app_type]):
+                    members.append(safe_literal(app_type_resolved))
+
             m = ", ".join(members)
             v_members = f"{{{m}}}"
             # will be rendered into python
-            field_path = cls.node_path_absolute(field_ref)
+            field_path = self.node_path_absolute(field_ref)
             msg = f"f'{{self.node_path}}.{field_ref} is needed when application type is in [{v_members}]'"
 
             r = ApplicationTypeRule(
@@ -364,12 +387,11 @@ class BuildConditions:
         # can't build rule - is serious as there will be a missing rule(s) in the output. In strict
         # mode will result in an exception
         msg = f"Can't build rule for {field_ref}"
-        cls.log_failure(msg)
+        self.log_failure(msg)
 
         return None, None
 
-    @classmethod
-    def node_path_absolute(cls, field_name):
+    def node_path_absolute(self, field_name):
         """
         Macro type function to return 'python string' for use by template.
 

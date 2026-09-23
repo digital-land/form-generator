@@ -66,5 +66,5 @@ class TestSchemaTreeParser(unittest.TestCase):
         with self.assertRaises(SchemaValidationException) as ctx:
             parser.load_json('{"location": ["Aquarium"]}')
 
-        expected = "Field 'animal-name' is required"
+        expected = "Field 'animal.animal-name' is required"
         self.assertIn(expected, ctx.exception.reasons)
