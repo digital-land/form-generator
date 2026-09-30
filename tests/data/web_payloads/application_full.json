@@ -62,8 +62,8 @@
       }
     ],
     "fee": {
-      "amount": "462",
-      "amount-paid": "462"
+      "amount": 462,
+      "amount-paid": 462
     }
   },
   "access-rights-of-way": {
@@ -135,10 +135,10 @@
     "bng-condition-exemption-reasons": [],
     "bng-details": {
       "pre-development-date": "2020-07-08",
-      "pre-development-biodiversity-value": "10",
+      "pre-development-biodiversity-value": 10,
       "habitat-loss-details": {
         "loss-date": "2020-07-08",
-        "pre-loss-biodiversity-value": "10"
+        "pre-loss-biodiversity-value": 10
       },
       "metric-publication-date": "2020-07-08",
       "irreplaceable-habitats": false,
@@ -316,8 +316,8 @@
   "res-units": {
     "will-residential-units-change": false,
     "residential-unit-summary": [],
-    "total-existing-units": "1",
-    "total-proposed-units": "1",
+    "total-existing-units": 1,
+    "total-proposed-units": 1,
     "net-change": 0
   },
   "site-area": {
@@ -331,9 +331,7 @@
         "site-address": {"address-text": "Flat A, 26 Albion Road, Hackney, London",
         "postcode": "N16 9PH"},
         "easting": 532891,
-        "northing": 185566,
-        "latitude": "",
-        "longitude": ""
+        "northing": 185566
       }
     ]
   },

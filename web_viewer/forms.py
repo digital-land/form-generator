@@ -1,16 +1,20 @@
 from flask_wtf import FlaskForm
 from wtforms import BooleanField as WTFBooleanField
+from wtforms import DecimalField as WTFDecimalField
 from wtforms import FieldList as WTFFieldList
 from wtforms import Form as WTFForm
 from wtforms import FormField as WTFFormField
 from wtforms import HiddenField as WTFHiddenField
+from wtforms import IntegerField as WTFIntegerField
 from wtforms import RadioField as WTFRadioField
 from wtforms import StringField as WTFStringField
 
 from schema import SchemaValidationException
 from schema.fields import BooleanField as SchemaBooleanField
+from schema.fields import DecimalField as SchemaDecimalField
 from schema.fields import EnumField as SchemaEnumField
 from schema.fields import HiddenStringField as SchemaHiddenStringField
+from schema.fields import IntegerField as SchemaIntegerField
 from schema.fields import RepeatedField as SchemaRepeatedField
 from schema.fields import StringField as SchemaStringField
 from schema.fields import SchemaNodeField as SchemaSchemaNodeField
@@ -39,6 +43,10 @@ class FormFabricate:
 
         if isinstance(schema_field, SchemaBooleanField):
             return WTFBooleanField(label, render_kw=render_kw)
+        if isinstance(schema_field, SchemaDecimalField):
+            return WTFDecimalField(label, render_kw=render_kw)
+        if isinstance(schema_field, SchemaIntegerField):
+            return WTFIntegerField(label, render_kw=render_kw)
         elif isinstance(schema_field, SchemaHiddenStringField):
             # subclass of SchemaStringField - must be checked first
             return WTFHiddenField(label, render_kw=render_kw)

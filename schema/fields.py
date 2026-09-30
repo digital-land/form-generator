@@ -1,5 +1,5 @@
 from collections import namedtuple
-
+import decimal
 
 from . import SchemaValidationException, tidy_string
 
@@ -134,6 +134,20 @@ class AbstractSchemaField:
         or where validation is needed override this.
 
         @return: value to store on the node instance
+        @raise SchemaValidationException when value can't be cast into type representation
+        """
+        return value
+
+    @classmethod
+    def as_primative(cls, value):
+        """
+        Helper function to cast `value` into into simple 'primative' native Python data object that
+        is safe to serialise into JSON or similar.
+
+        `value` must be the internal representation of the data. i.e. the object returned by
+        :meth:`prepare_value`.
+
+        Hook method optionally implemented by subclasses.
         """
         return value
 
@@ -224,6 +238,62 @@ class BooleanField(AbstractSchemaField):
         super().validate()
         if self._value is not None and not isinstance(self._value, bool):
             msg = f"Field '{self.node_path}' isn't a boolean"
+            raise SchemaValidationException([msg], node_path=self.node_path)
+
+
+class DecimalField(AbstractSchemaField):
+    def prepare_value(self, value):
+
+        if value is None:
+            return value
+
+        if not isinstance(value, (int, float)):
+            msg = f"Field '{self.node_path}' isn't a numeric type"
+            raise SchemaValidationException([msg], node_path=self.node_path)
+
+        try:
+            v = decimal.Decimal(value)
+        except:
+            msg = f"Field '{self.node_path}' can't be converted into a decimal number"
+            raise SchemaValidationException([msg], node_path=self.node_path)
+
+        return v
+
+    @classmethod
+    def as_primative(cls, value):
+        """
+        @see :meth:`AbstractSchemaField.as_primative`
+        """
+        if value is None:
+            return value
+
+        return float(value)
+
+    def validate(self):
+        super().validate()
+
+        if self._value is not None and not isinstance(self._value, decimal.Decimal):
+            msg = f"Field '{self.node_path}' isn't a decimal number"
+            raise SchemaValidationException([msg], node_path=self.node_path)
+
+
+class IntegerField(AbstractSchemaField):
+    def prepare_value(self, value):
+
+        if value is None:
+            return value
+
+        if not isinstance(value, int):
+            msg = f"Field '{self.node_path}' isn't a whole number"
+            raise SchemaValidationException([msg], node_path=self.node_path)
+
+        return value
+
+    def validate(self):
+        super().validate()
+
+        if self._value is not None and not isinstance(self._value, int):
+            msg = f"Field '{self.node_path}' isn't an integer"
             raise SchemaValidationException([msg], node_path=self.node_path)
 
 

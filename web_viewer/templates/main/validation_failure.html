@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% from "main/macros.html" import show_validation_failures %}
+{% block title %}Validation Failure{% endblock %}
+{% block content %}
+
+
+<h3 class="mb-4">{{title}}</h3>
+
+<p>{{description}}</p>
+
+{{ show_validation_failures(reasons) }}
+
+
+{% endblock %}

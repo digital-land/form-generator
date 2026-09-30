@@ -68,3 +68,37 @@ class TestSchemaTreeParser(unittest.TestCase):
 
         expected = "Field 'animal.animal-name' is required"
         self.assertIn(expected, ctx.exception.reasons)
+
+    def test_integer_field_type(self):
+        parser = SchemaTreeParser(schema_node_cls=Animal)
+
+        for payload in [
+            '{"animal-name": "Tiger", "numb-teeth": "lots"}',
+            '{"animal-name": "Tiger", "numb-teeth": "30"}',
+        ]:
+            with self.assertRaises(SchemaValidationException) as ctx:
+                parser.load_json(payload)
+
+            expected = "Field 'animal.numb-teeth' isn't a whole number"
+            self.assertIn(expected, ctx.exception.reasons)
+
+        msg = "Failed check on prepare int to int"
+        node = parser.load_json('{"animal-name": "Tiger", "numb-teeth": 30}')
+        self.assertEqual(30, node.teeth, msg)
+
+    def test_decimal_field_type(self):
+        parser = SchemaTreeParser(schema_node_cls=Animal)
+
+        for payload in [
+            '{"animal-name": "Tiger", "weight": "very heavy"}',
+            '{"animal-name": "Tiger", "weight": "220.5"}',
+        ]:
+            with self.assertRaises(SchemaValidationException) as ctx:
+                parser.load_json(payload)
+
+            expected = "Field 'animal.weight' isn't a numeric type"
+            self.assertIn(expected, ctx.exception.reasons)
+
+        msg = "Failed check on prepare json numeric to Decimal"
+        node = parser.load_json('{"animal-name": "Tiger", "weight": 220.5}')
+        self.assertEqual(220.5, node.weight, msg)

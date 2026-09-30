@@ -226,10 +226,12 @@ class SchemaNode:
         failure_reasons = _validate(self)
         return failure_reasons
 
-    def as_native(self):
+    def as_primatives(self):
         """
-        Serialise this node and its descendants into native Python data structures (dict, list and
-        scalars), keyed by schema ref.
+        Serialise this node and its descendants into simple 'primative' native Python data
+        structures (dict, list and scalars) that are safe to serialise into JSON or similar.
+
+        Dicts are keyed by schema ref.
 
         The inverse of :meth:`load_payload`; the structure mirrors the schema tree rather than the
         form layout, so this reflects what the schema actually holds.
@@ -239,7 +241,7 @@ class SchemaNode:
 
         def native(value):
             if isinstance(value, SchemaNode):
-                return value.as_native()
+                return value.as_primatives()
             if isinstance(value, list):
                 return [native(item) for item in value]
             return value
@@ -254,7 +256,7 @@ class SchemaNode:
             if field.is_empty_value(value):
                 continue
 
-            payload[ref] = value
+            payload[ref] = field.as_primative(value)
 
         return payload
 

@@ -174,9 +174,9 @@ class TestSchemaTree(unittest.TestCase):
         expected = ["Field 'location' out of scope in 'animal'"]
         self.assertEqual(expected, ctx.exception.reasons)
 
-    def test_as_native_removes_empty(self):
+    def test_as_primatives_removes_empty(self):
         """
-        SchemaNode().as_native shouldn't include empty fields.
+        SchemaNode().as_primatives shouldn't include empty fields.
         """
         input_payload = {
             "person-a": {"email": "me@somewhere.co.uk", "fax-number": {"number": "0123"}},
@@ -189,7 +189,7 @@ class TestSchemaTree(unittest.TestCase):
             "person-a": {"email": "me@somewhere.co.uk", "fax-number": {"number": "0123"}}
         }
 
-        output_payload = node.as_native()
+        output_payload = node.as_primatives()
         self.assertEqual(expected_payload, output_payload)
 
     def test_out_of_scope_node_emptiness_recurses_into_descendant(self):
@@ -215,6 +215,4 @@ class TestSchemaTree(unittest.TestCase):
                 }
             )
 
-        self.assertIn(
-            "Field 'person-b' out of scope in 'two-people'", ctx.exception.reasons
-        )
+        self.assertIn("Field 'person-b' out of scope in 'two-people'", ctx.exception.reasons)
