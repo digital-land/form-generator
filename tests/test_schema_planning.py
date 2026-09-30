@@ -4,13 +4,16 @@ from unittest import mock
 from schema import SchemaValidationException
 from schema.planning_application import gla_planning_app_roots
 from schema.planning_application_specification import (
+    AccessRightsOfWay,
     Bng,
     FloorspaceDetails,
     HoursOfOperation,
     InterestInLand,
     Lbc,
+    PhoneNumber,
     PreAppAdvice,
     RelatedApplicationDetails,
+    ResidentialUnitSummary,
     SiteInfo,
     SiteVisit,
 )
@@ -275,3 +278,93 @@ class TestSchemaPlanning(unittest.TestCase):
         target_failure_reason = "Module 'agent-details' is required"
         msg = "Expecting just the module level validation error message"
         self.assertIn(target_failure_reason, failure_reasons, msg)
+
+    @mock.patch("schema.planning_application_specification.AccessRightsOfWay._root_node")
+    def test_permitted_enum_values(self, mocked_root_node):
+        """
+        Enum fields are only valid if the value is in the 'select_options'.
+        """
+        # Mock "submission-details.application-types", first is needed for test, 2nd for checking
+        # mock is working if breakpoint is set.
+        mocked_root_node.by_ref.return_value = {
+            "full",
+            "mock_application_type",
+        }
+
+        payload = {
+            "new-altered-vehicle": False,
+            "new-altered-pedestrian": "something_unexpected",
+            "change-right-of-way": "false",
+            "new-right-of-way": "True",
+            "new-public-road": "unknown",
+            "supporting-documents": [],
+        }
+        node = AccessRightsOfWay()
+
+        failure_reasons = []
+        try:
+            node.load_payload(payload)
+        except SchemaValidationException as e:
+            failure_reasons.extend(e.reasons)
+
+        msg = "Value not in allowed enum values"
+        for expected_failure_reason in [
+            "Field 'access-rights-of-way.new-altered-vehicle' should be one of ['true', 'false', 'unknown']",
+            "Field 'access-rights-of-way.new-altered-pedestrian' should be one of ['true', 'false', 'unknown']",
+            "Field 'access-rights-of-way.new-right-of-way' should be one of ['true', 'false', 'unknown']",
+        ]:
+            self.assertIn(expected_failure_reason, failure_reasons, msg)
+
+    @mock.patch("schema.planning_application_specification.ResidentialUnitSummary._root_node")
+    def test_permitted_dynamic_enum_values(self, mocked_node):
+        """
+        Check dynamic enum fields are using the value they depend on..
+        """
+
+        mocked_node.__getitem__.return_value = {"specification-profile": "gla"}
+
+        payload = {
+            "tenure_type": "market-housing",  # only for "mhclg-core"
+            "housing_type": "xxxx",  # not allowed for any specification profile
+        }
+
+        node = ResidentialUnitSummary()
+
+        failure_reasons = []
+        try:
+            node.load_payload(payload)
+        except SchemaValidationException as e:
+            failure_reasons.extend(e.reasons)
+
+        msg = "Value not in allowed enum values"
+        for expected_failure_reason in [
+            "Field 'residential-unit-summary.tenure-type' should be one of "
+            "['starter-homes', 'custom-build', 'market-for-sale', 'market-for-rent', "
+            "'shared-equity', 'affordable-rent-not-lar-bm', 'discount-market-sale', "
+            "'discount-market-rent', 'social-rent', 'intermediate-other', "
+            "'discount-market-llr', 'london-living-rent', 'london-shared-ownership', "
+            "'london-affordable-rent']",
+            "Field 'residential-unit-summary.housing-type' should be one of ['bedsit-studio', "
+            "'cluster-flats', 'other', 'live-work-units', 'terraced-home', 'house-or-bungalow', "
+            "'semi-detached-home', 'flat-apartment-maisonette', 'co-living-unit', 'hmo', "
+            "'student-accommodation', 'communal-space']",
+        ]:
+            self.assertIn(expected_failure_reason, failure_reasons, msg)
+
+    def test_permitted_string_values(self):
+        """
+        Strings are validated to not contain non-string values.
+        """
+
+        payload = {"number": 123}
+
+        node = PhoneNumber()
+
+        failure_reasons = []
+        try:
+            node.load_payload(payload)
+        except SchemaValidationException as e:
+            failure_reasons.extend(e.reasons)
+
+        msg = "Value isn't a string so shouldn't be allowed"
+        self.assertIn("Field 'phone-number.number' isn't a string", failure_reasons, msg)

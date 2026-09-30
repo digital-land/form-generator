@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Forms Generator — Example Payloads{% endblock %}
+{% block content %}
+<h1 class="mb-4">Example Planning applications</h1>
+
+{% if not planning_app_spec_repo_available %}
+<p>Example payloads are available in the <a href="https://github.com/digital-land/planning-application-data-specification/tree/main/specification/example">planning-application-data-specification</a> github repo.</p>
+{% endif %}
+
+
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+  {% for example_ref, details in examples.items() %}
+  <div class="col">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">{{ details.title }}</h5>
+        <p class="card-text text-muted small">{{ details.description }}</p>
+        <ul>
+           <li>
+           	<a class="card-action-link" href="{{ url_for('main.example_payload', example_ref=example_ref, view_format='web')}}">
+            <img src="{{ url_for('static', filename='icons/pencil-square.svg') }}" width="18" height="18" alt="" class="me-2">Web form</a>
+          </li>
+          <li>
+             <a class="card-action-link" href="{{ url_for('main.example_payload', example_ref=example_ref, view_format='evaluate')}}">
+             <img src="{{ url_for('static', filename='icons/journal-check.svg') }}" width="18" height="18" alt="" class="me-2">Evaluate</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

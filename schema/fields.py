@@ -202,6 +202,14 @@ class StringField(AbstractSchemaField):
             return self.empty_value()
         return value
 
+    def validate(self):
+        super().validate()
+
+        if self._value is not None and not isinstance(self._value, str):
+
+            msg = f"Field '{self.node_path}' isn't a string"
+            raise SchemaValidationException([msg], node_path=self.node_path)
+
 
 class HiddenStringField(StringField):
     """
@@ -212,7 +220,11 @@ class HiddenStringField(StringField):
 
 
 class BooleanField(AbstractSchemaField):
-    pass
+    def validate(self):
+        super().validate()
+        if self._value is not None and not isinstance(self._value, bool):
+            msg = f"Field '{self.node_path}' isn't a boolean"
+            raise SchemaValidationException([msg], node_path=self.node_path)
 
 
 EnumOption = namedtuple("EnumOption", ("key", "label", "description"))
@@ -247,12 +259,26 @@ class EnumField(AbstractSchemaField):
         Hook method that can be overridden by subclasses as an easy way to filter available
         select options.
 
-        Typically a subclass could consider other parts of the shema node tree in order to
+        Typically a subclass could consider other parts of the schema node tree in order to
         change available options.
 
         @return (list of `EnumOption`)
         """
         return self._select_options
+
+    def validate(self):
+        """
+        Value must be one of the select_options' values.
+        """
+        super().validate()
+
+        permitted_values = [o.key for o in self.select_options]
+        if self._value is not None and self._value not in permitted_values:
+
+            pvals = ", ".join([f"'{v}'" for v in permitted_values])
+            raise SchemaValidationException(
+                [f"Field '{self.node_path}' should be one of [{pvals}]"], node_path=self.node_path
+            )
 
 
 # SelectFilter
