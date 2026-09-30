@@ -67,11 +67,11 @@
     }
   },
   "access-rights-of-way": {
-    "new-altered-vehicle": false,
-    "new-altered-pedestrian": false,
-    "change-right-of-way": false,
-    "new-right-of-way": false,
-    "new-public-road": false,
+    "new-altered-vehicle": "false",
+    "new-altered-pedestrian": "false",
+    "change-right-of-way": "false",
+    "new-right-of-way": "false",
+    "new-public-road": "false",
     "supporting-documents": []
   },
   "agent-contact": {
@@ -126,9 +126,9 @@
     ]
   },
   "bio-geo-arch-con": {
-    "protected-species-impact": "no",
-    "biodiversity-features-impact": "no",
-    "geological-features-impact": "no"
+    "protected-species-impact": "on-development-site",
+    "biodiversity-features-impact": "on-development-site",
+    "geological-features-impact": "on-development-site"
   },
   "bng": {
     "bng-condition-applies": true,
@@ -196,7 +196,7 @@
   },
   "flood-risk-assessment": {
     "flood-risk-area": false,
-    "data-provided-by": "",
+    "data-provided-by": "applicant",
     "within-20m-watercourse": false,
     "increases-flood-risk": false,
     "surface-water-disposal": [
@@ -208,11 +208,11 @@
     "foul-sewage-disposal-types": [
       "mains-sewer"
     ],
-    "connect-to-drainage-system": "",
+    "connect-to-drainage-system": false,
     "supporting-documents": []
   },
   "haz-substances": {
-    "involves-hazardous-substances": false,
+    "involves-hazardous-substances": "not-applicable",
     "substance-types": []
   },
   "hrs-operation": {
@@ -311,7 +311,7 @@
     "description": "single storey rear extension",
     "proposal-started": false,
     "proposal-completed": false,
-    "is-psi": ""
+    "is-psi": false
   },
   "res-units": {
     "will-residential-units-change": false,
