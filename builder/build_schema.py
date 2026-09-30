@@ -14,9 +14,11 @@ from builder.planning_app_data_spec import (
 from schema import valid_class_name, valid_field_name, tidy_string
 from schema.fields import (
     BooleanField,
+    DecimalField,
     DynamicEnumField,
     EnumField,
     EnumOption,
+    IntegerField,
     RepeatedField,
     SelectFilter,
     SchemaNodeField,
@@ -164,6 +166,10 @@ def render_python(project_root, planning_spec):
                     schema_field = StringField(**field_info)
                 elif field_x.datatype == "boolean":
                     schema_field = BooleanField(**field_info)
+                elif field_x.datatype == "decimal":
+                    schema_field = DecimalField(**field_info)
+                elif field_x.datatype == "integer":
+                    schema_field = IntegerField(**field_info)
                 elif field_x.datatype == "enum":
                     schema_field = build_enum_field(planning_spec, field_info, field_x.codelist)
 

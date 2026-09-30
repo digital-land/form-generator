@@ -12,9 +12,11 @@ this project.
 from schema import SchemaValidationException
 from schema.fields import (
     BooleanField,
+    DecimalField,
     DynamicEnumField,
     EnumField,
     EnumOption,
+    IntegerField,
     RepeatedField,
     SchemaNodeField,
     SelectFilter,
@@ -139,6 +141,8 @@ class Animal(SchemaNode):
     keeper = SchemaNodeField(ref="keeper", schema_node_cls=ContactDetail)
     animal_name = StringField(ref="animal-name", required=True)
     where = RepeatedField(schema_field=StringField(ref="location"))
+    weight = DecimalField("weight")
+    teeth = IntegerField("numb-teeth")
     classification = DynamicEnumField(
         ref="classification",
         display="Scientific Classification",

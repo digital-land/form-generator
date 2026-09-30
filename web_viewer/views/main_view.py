@@ -109,7 +109,7 @@ def application(application_ref):
             reasons = e.reasons
 
         # the displayed payload comes from the schema node, not the raw form data
-        schema_payload = node.as_native()
+        schema_payload = node.as_primatives()
         payload = json.dumps(schema_payload, indent=2, ensure_ascii=False)
 
         return render_template(
@@ -182,7 +182,7 @@ def evaluate_payload():
         # payload is valid, return the schema built version instead (as the application view does)
         payload = serialised_payload
         if simplify and not reasons and node is not None:
-            payload = json.dumps(node.as_native(), indent=2, ensure_ascii=False)
+            payload = json.dumps(node.as_primatives(), indent=2, ensure_ascii=False)
 
         page_vars.update({"payload": payload, "reasons": reasons, "simplify": simplify})
 
@@ -274,7 +274,19 @@ def example_payload(example_ref=None, view_format=None):
 
         form_tree = FormTree(root_node=root_schema_class)
         form_tree.load(example_payload)
-        forms = form_tree.collection()
+
+        try:
+            forms = form_tree.collection()
+        except SchemaValidationException as e:
+
+            return render_template(
+                "main/validation_failure.html",
+                **page_vars,
+                reasons=e.reasons,
+                title="Mal-formed payload",
+                description="The web form can only be built with payloads containing valid fields.",
+            )
+
         return render_template(
             "main/application.html",
             application_ref=application_ref,

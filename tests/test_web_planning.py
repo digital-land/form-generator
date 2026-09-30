@@ -131,7 +131,6 @@ class TestWebPlanning(WebTestCase):
         ]:
             self.assertIn(expected, response.text)
 
-    @unittest.skip("Known issues to be fixed in separate ticket")
     def test_evaluate_full_application_is_valid(self):
         """
         POST the full application payload to the evaluate view and confirm it reports valid.
@@ -143,7 +142,6 @@ class TestWebPlanning(WebTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("The payload is valid.", response.text)
 
-    @unittest.skip("Known issues to be fixed in separate ticket")
     def test_evaluate_simplify_returns_schema_payload_when_valid(self):
         """
         With 'simplify' ticked and a valid payload, the evaluate view returns the schema built
@@ -238,5 +236,8 @@ class TestWebPlanning(WebTestCase):
         self.assertIn(expected_error_msg, response.text, msg)
 
     def test_example_application_web(self):
+        """
+        Check the page loads something. No check for valid web form.
+        """
         response = self.client.get("/example_payload/test_full/web")
         self.assertEqual(response.status_code, 200)

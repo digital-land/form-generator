@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "main/macros.html" import show_validation_failures %}
 {% block title %}{%if application_ref %}{{ application_ref }} payload{%else%}Evaulate payload{%endif%}{% endblock %}
 {% block content %}
 
@@ -18,26 +19,7 @@
 {% endif %}
 
 {% if reasons is defined %}
-<div class="card mb-4">
-  <div class="card-header">
-    <h5 class="mb-0">Validation</h5>
-  </div>
-  <div class="card-body">
-    {% if reasons %}
-    <ul class="list-unstyled mb-0">
-      {% for reason in reasons %}
-      <li class="mb-2">
-        <span class="text-danger fw-bold me-2">&#10007;</span>{{ reason }}
-      </li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <p class="mb-0">
-      <span class="text-success fw-bold me-2">&#10003;</span>The payload is valid.
-    </p>
-    {% endif %}
-  </div>
-</div>
+{{ show_validation_failures(reasons) }}
 {% endif %}
 
 <form method="post" action="{{ url_for('main.evaluate_payload') }}">

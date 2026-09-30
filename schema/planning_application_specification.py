@@ -4,9 +4,11 @@
 from schema import SchemaValidationException
 from schema.fields import (
     BooleanField,
+    DecimalField,
     EnumField,
     DynamicEnumField,
     EnumOption,
+    IntegerField,
     RepeatedField,
     SelectFilter,
     SchemaNodeField,
@@ -319,7 +321,7 @@ class HabitatLossDetails(SchemaNode):
         description="Date the activity causing habitat loss or degradation occurred",
         required=True,
     )
-    pre_loss_biodiversity_value = StringField(
+    pre_loss_biodiversity_value = DecimalField(
         ref="pre-loss-biodiversity-value",
         display="Pre loss biodiversity value",
         description="Biodiversity value immediately before habitat loss or degradation occurred, measured in Habitat Biodiversity Units",
@@ -371,7 +373,7 @@ class BngDetails(SchemaNode):
         description="Date of pre-development biodiversity value calculation, must align with application or justified earlier date",
         required=True,
     )
-    pre_development_biodiversity_value = StringField(
+    pre_development_biodiversity_value = DecimalField(
         ref="pre-development-biodiversity-value",
         display="Pre development biodiversity value",
         description="Calculated biodiversity value in Habitat Biodiversity Units",
@@ -705,19 +707,19 @@ class Employees(SchemaNode):
     _display = "Employees"
     _description = "Employee count information including full-time, part-time, and total full-time equivalent (FTE) calculations "
 
-    full_time = StringField(
+    full_time = IntegerField(
         ref="full-time",
         display="Full-time",
         description="Number of full-time employees",
         required=True,
     )
-    part_time = StringField(
+    part_time = IntegerField(
         ref="part-time",
         display="Part-time",
         description="Number of part-time employees",
         required=True,
     )
-    total_fte = StringField(
+    total_fte = DecimalField(
         ref="total-fte",
         display="Total FTE",
         description="Total full-time equivalent (FTE)",
@@ -1593,25 +1595,25 @@ class FloorspaceDetails(SchemaNode):
         display="Specified use",
         description="A specified use if no applicable use class is available",
     )
-    existing_gross_floorspace = StringField(
+    existing_gross_floorspace = DecimalField(
         ref="existing-gross-floorspace",
         display="Existing gross floorspace",
         description="Existing gross internal floorspace, in sqm",
         required=True,
     )
-    floorspace_lost = StringField(
+    floorspace_lost = DecimalField(
         ref="floorspace-lost",
         display="Floorspace lost",
         description="Gross floorspace to be lost by change of use, in sqm",
         required=True,
     )
-    total_gross_proposed = StringField(
+    total_gross_proposed = DecimalField(
         ref="total-gross-proposed",
         display="Total gross proposed",
         description="Total gross internal floorspace proposed, in sqm",
         required=True,
     )
-    net_additional_floorspace = StringField(
+    net_additional_floorspace = DecimalField(
         ref="net-additional-floorspace",
         display="Net additional floorspace",
         description="Net additional gross internal floorspace, in sqm",
@@ -1797,7 +1799,7 @@ class FloorspaceDetailsOutline(SchemaNode):
         display="Specified use",
         description="A specified use if no applicable use class is available",
     )
-    existing_gross_floorspace = StringField(
+    existing_gross_floorspace = DecimalField(
         ref="existing-gross-floorspace",
         display="Existing gross floorspace",
         description="Existing gross internal floorspace, in sqm",
@@ -1808,7 +1810,7 @@ class FloorspaceDetailsOutline(SchemaNode):
         display="Is floorspace lost known",
         description="Whether the amount of floorspace to be lost is known",
     )
-    floorspace_lost = StringField(
+    floorspace_lost = DecimalField(
         ref="floorspace-lost",
         display="Floorspace lost",
         description="Gross floorspace to be lost by change of use, in sqm",
@@ -1818,12 +1820,12 @@ class FloorspaceDetailsOutline(SchemaNode):
         display="Is total gross proposed known",
         description="Whether the total gross proposed floorspace is known",
     )
-    total_gross_proposed = StringField(
+    total_gross_proposed = DecimalField(
         ref="total-gross-proposed",
         display="Total gross proposed",
         description="Total gross internal floorspace proposed, in sqm",
     )
-    net_additional_floorspace = StringField(
+    net_additional_floorspace = DecimalField(
         ref="net-additional-floorspace",
         display="Net additional floorspace",
         description="Net additional gross internal floorspace, in sqm",
@@ -1896,19 +1898,19 @@ class RoomDetails(SchemaNode):
     use_other = StringField(
         ref="use-other", display="Use other", description='Specify use if use is "other"'
     )
-    existing_rooms_lost = StringField(
+    existing_rooms_lost = IntegerField(
         ref="existing-rooms-lost",
         display="Existing rooms lost",
         description="Existing rooms to be lost by change of use",
         required=True,
     )
-    total_rooms_proposed = StringField(
+    total_rooms_proposed = IntegerField(
         ref="total-rooms-proposed",
         display="Total rooms proposed",
         description="Total rooms proposed (including change of use)",
         required=True,
     )
-    net_additional_rooms = StringField(
+    net_additional_rooms = IntegerField(
         ref="net-additional-rooms",
         display="Net additional rooms",
         description="Net additional rooms following development",
@@ -1972,7 +1974,7 @@ class RoomDetailsOutline(SchemaNode):
         display="Is existing rooms lost known",
         description="Whether the total existing rooms that will be lost is known",
     )
-    existing_rooms_lost = StringField(
+    existing_rooms_lost = IntegerField(
         ref="existing-rooms-lost",
         display="Existing rooms lost",
         description="Existing rooms to be lost by change of use",
@@ -1982,12 +1984,12 @@ class RoomDetailsOutline(SchemaNode):
         display="Is total rooms proposed known",
         description="Whether the total rooms proposed is known",
     )
-    total_rooms_proposed = StringField(
+    total_rooms_proposed = IntegerField(
         ref="total-rooms-proposed",
         display="Total rooms proposed",
         description="Total rooms proposed (including change of use)",
     )
-    net_additional_rooms = StringField(
+    net_additional_rooms = IntegerField(
         ref="net-additional-rooms",
         display="Net additional rooms",
         description="Net additional rooms following development",
@@ -2521,7 +2523,7 @@ class WasteManagement(SchemaNode):
             ),
         ],
     )
-    total_capacity = StringField(
+    total_capacity = DecimalField(
         ref="total-capacity",
         display="Total capacity",
         description="Total capacity of void in cubic metres (or tonnes/litres)",
@@ -2542,7 +2544,7 @@ class WasteManagement(SchemaNode):
             EnumOption(key="litres", label="Litres", description="Measured by volume in litres"),
         ],
     )
-    annual_throughput = StringField(
+    annual_throughput = DecimalField(
         ref="annual-throughput",
         display="Annual throughput",
         description="Maximum annual operational throughput in tonnes/litres",
@@ -2565,22 +2567,22 @@ class WasteStreams(SchemaNode):
     _display = "Waste streams"
     _description = "Annual throughput for different types of waste streams "
 
-    municipal = StringField(
+    municipal = DecimalField(
         ref="municipal",
         display="Municipal",
         description="Maximum throughput for municipal waste (annual throughput in tonnes/litres)",
     )
-    construction_demolition = StringField(
+    construction_demolition = DecimalField(
         ref="construction-demolition",
         display="Construction demolition",
         description="Maximum throughput for construction and demolition waste (annual throughput in tonnes/litres)",
     )
-    commercial_industrial = StringField(
+    commercial_industrial = DecimalField(
         ref="commercial-industrial",
         display="Commercial industrial",
         description="Maximum throughput for commercial and industrial waste (annual throughput in tonnes/litres)",
     )
-    hazardous = StringField(
+    hazardous = DecimalField(
         ref="hazardous",
         display="Hazardous",
         description="Maximum throughput for hazardous waste (annual throughput in tonnes/litres)",
@@ -2887,12 +2889,12 @@ class BedroomCount(SchemaNode):
         description="Set to true when counting units where bedroom number is unknown",
         required=True,
     )
-    no_of_bedrooms = StringField(
+    no_of_bedrooms = IntegerField(
         ref="no-of-bedrooms",
         display="Number of bedrooms",
         description="The number of bedrooms in unit",
     )
-    units = StringField(
+    units = IntegerField(
         ref="units",
         display="Units",
         description="The number of units of that bedroom count",
@@ -2934,7 +2936,7 @@ class UnitQuantities(SchemaNode):
             schema_node_cls=BedroomCount,
         )
     )
-    total_units = StringField(
+    total_units = IntegerField(
         ref="total-units", display="Total units", description="Total number of units"
     )
 
@@ -3263,19 +3265,19 @@ class ResUnits(SchemaNode):
             schema_node_cls=ResidentialUnitSummary,
         )
     )
-    total_existing_units = StringField(
+    total_existing_units = IntegerField(
         ref="total-existing-units",
         display="Total existing units",
         description="The total number of existing units",
         required=True,
     )
-    total_proposed_units = StringField(
+    total_proposed_units = IntegerField(
         ref="total-proposed-units",
         display="Total proposed units",
         description="The total number of proposed units",
         required=True,
     )
-    net_change = StringField(
+    net_change = IntegerField(
         ref="net-change",
         display="Net change",
         description="Calculated net change in units",
@@ -3303,7 +3305,7 @@ class SiteArea(SchemaNode):
     _display = "Site area"
     _description = "How big the site is including relevant measurements"
 
-    site_area_in_hectares = StringField(
+    site_area_in_hectares = DecimalField(
         ref="site-area-in-hectares",
         display="Site area in hectares",
         description="The size of the site in hectares",
@@ -3376,12 +3378,12 @@ class SiteLocation(SchemaNode):
         required=True,
         schema_node_cls=SiteAddress,
     )
-    easting = StringField(
+    easting = DecimalField(
         ref="easting",
         display="Easting",
         description="Easting coordinate in British National Grid (EPSG:27700)",
     )
-    northing = StringField(
+    northing = DecimalField(
         ref="northing",
         display="Northing",
         description="Northing coordinate in British National Grid (EPSG:27700)",
@@ -3524,7 +3526,7 @@ class File(SchemaNode):
         display="MIME type",
         description="The file's MIME type such as application/pdf or image/jpeg",
     )
-    file_size = StringField(
+    file_size = IntegerField(
         ref="file-size",
         display="File size",
         description="Size of the file in bytes that can be used to enforce limits",
@@ -3871,10 +3873,10 @@ class Fee(SchemaNode):
     _display = "Fee"
     _description = "Structure for application fees including amounts due, amounts paid, and transaction references "
 
-    amount = StringField(
+    amount = DecimalField(
         ref="amount", display="Amount", description="The total amount due for the application fee"
     )
-    amount_paid = StringField(
+    amount_paid = DecimalField(
         ref="amount-paid",
         display="Amount paid",
         description="The amount paid towards the application fee",
@@ -6149,7 +6151,7 @@ class HazardousSubstance(SchemaNode):
         display="Hazardous substance other",
         description="The specific name of the hazardous substance if other is selected",
     )
-    amount = StringField(
+    amount = DecimalField(
         ref="amount",
         display="Amount",
         description="The total amount due for the application fee",
@@ -6598,13 +6600,13 @@ class ParkingSpace(SchemaNode):
         display="Vehicle type other",
         description="Vehicle type when parking space type is 'other'",
     )
-    total_existing = StringField(
+    total_existing = IntegerField(
         ref="total-existing",
         display="Total existing",
         description="Total number of existing parking spaces",
         required=True,
     )
-    total_proposed = StringField(
+    total_proposed = IntegerField(
         ref="total-proposed",
         display="Total proposed",
         description="Total number of proposed parking spaces",
@@ -6615,7 +6617,7 @@ class ParkingSpace(SchemaNode):
         display="Unknown proposed",
         description="If proposed parking spaces is unknown",
     )
-    difference_in_spaces = StringField(
+    difference_in_spaces = IntegerField(
         ref="difference-in-spaces",
         display="Difference in spaces",
         description="Net change in parking spaces (proposed minus existing)",
@@ -7022,12 +7024,12 @@ class Demolition(SchemaNode):
         display="Demolition part",
         description="True or False indicating whether the proposal involves partial demolition of a listed building",
     )
-    listed_building_volume = StringField(
+    listed_building_volume = DecimalField(
         ref="listed-building-volume",
         display="Listed building volume",
         description="Volume of listed building in cubic metres",
     )
-    demolition_volume = StringField(
+    demolition_volume = DecimalField(
         ref="demolition-volume",
         display="Demolition volume",
         description="Volume of part to be demolished in cubic metres",
@@ -7693,7 +7695,7 @@ class HedgerowRemoval(SchemaNode):
             schema_node_cls=SupportingDocument,
         ),
     )
-    hedgerow_length = StringField(
+    hedgerow_length = DecimalField(
         ref="hedgerow-length",
         display="Hedgerow length",
         description="Total length, in metres, of hedgerow proposed for removal",
@@ -9148,7 +9150,7 @@ class MaWorksImpacts(SchemaNode):
         description="Details of the provision of adequate natural light in all habitable rooms of the proposed dwellinghouses.",
         required=True,
     )
-    net_dwellings_increase = StringField(
+    net_dwellings_increase = IntegerField(
         ref="net-dwellings-increase",
         display="Net increase in dwellings",
         description="The number of dwellinghouses proposed by the development minus the number of dwellinghouses in the existing building.",
@@ -9504,13 +9506,13 @@ class DescWorkImpactsRisks(SchemaNode):
         description="Description of proposed development including details of proposed work and external appearance",
         required=True,
     )
-    dwellinghouse_height = StringField(
+    dwellinghouse_height = DecimalField(
         ref="dwellinghouse-height",
         display="Dwellinghouse height",
         description="Height from ground to highest point of roof in metres",
         required=True,
     )
-    proposed_height = StringField(
+    proposed_height = DecimalField(
         ref="proposed-height",
         display="Proposed height",
         description="Height once the additional storeys have been added in metres",
@@ -9793,15 +9795,15 @@ class NonResidentialUse(SchemaNode):
             ),
         ],
     )
-    exact_value = StringField(
+    exact_value = DecimalField(
         ref="exact-value", display="Exact value", description="Exact figure of non-residential use"
     )
-    min = StringField(
+    min = DecimalField(
         ref="min",
         display="Minimum value",
         description="Lower bound of non-residential use for ranges",
     )
-    max = StringField(
+    max = DecimalField(
         ref="max",
         display="Maximum value",
         description="Upper bound of non-residential use for ranges",
@@ -9821,13 +9823,13 @@ class ProposalDetailsIncNonResidential(SchemaNode):
         description="Description of proposed development including non-residential development",
         required=True,
     )
-    net_dwellings_min = StringField(
+    net_dwellings_min = IntegerField(
         ref="net-dwellings-min",
         display="Net dwellings minimum",
         description="The minimum number of net additional dwellings proposed as part of the development, accounting for any existing dwellings lost and new dwellings created",
         required=True,
     )
-    net_dwellings_max = StringField(
+    net_dwellings_max = IntegerField(
         ref="net-dwellings-max",
         display="Net dwellings maximum",
         description="The maximum number of net additional dwellings proposed as part of the development, allowing for flexibility in the final housing numbers",
@@ -9849,7 +9851,7 @@ class SiteAreacomponentresolved(SchemaNode):
     _display = "Site area"
     _description = "Information about the total area of a development site, including the measured size, unit, and source of the measurement "
 
-    size = StringField(
+    size = DecimalField(
         ref="size", display="Size", description="Size of the development site area", required=True
     )
     unit = StringField(
@@ -10074,7 +10076,7 @@ class ExistingUsecomponentresolved(SchemaNode):
             schema_node_cls=Use,
         ),
     )
-    floorspace = StringField(
+    floorspace = DecimalField(
         ref="floorspace",
         display="Floorspace",
         description="Total floorspace for a use in square metres",
@@ -10262,7 +10264,7 @@ class DescYourProposal(SchemaNode):
         schema_node_cls=RelatedApplicationDetails,
     )
     condition_numbers = RepeatedField(
-        schema_field=StringField(
+        schema_field=IntegerField(
             ref="condition-numbers",
             display="Condition numbers",
             description="List of condition numbers related to this application",
@@ -11501,13 +11503,13 @@ class DevType(SchemaNode):
         description="Brief description of the development, including main oils, gases, and machinery",
         required=True,
     )
-    quantity_cubic_metres = StringField(
+    quantity_cubic_metres = DecimalField(
         ref="quantity-cubic-metres",
         display="Quantity cubic metres",
         description="Quantity of oil or gas involved in cubic metres",
         required=True,
     )
-    permission_period_years = StringField(
+    permission_period_years = IntegerField(
         ref="permission-period-years",
         display="Permission period years",
         description="Period of permission sought in years",
@@ -11518,7 +11520,7 @@ class DevType(SchemaNode):
         description="Hydrocarbon licence block where the development is located",
         required=True,
     )
-    surface_site_area_hectares = StringField(
+    surface_site_area_hectares = DecimalField(
         ref="surface-site-area-hectares",
         display="Surface site area hectares",
         description="Surface site area in hectares",
@@ -12109,7 +12111,7 @@ class AdvertisementProposalType(SchemaNode):
             EnumOption(key="other", label="Other", description=""),
         ],
     )
-    advertisement_count = StringField(
+    advertisement_count = IntegerField(
         ref="advertisement-count",
         display="Advertisement count",
         description="Number of this type of advertisement",
@@ -12214,23 +12216,23 @@ class Advertisement(SchemaNode):
         "Details of a proposed advertisement including dimensions, materials, and illumination"
     )
 
-    height_from_ground = StringField(
+    height_from_ground = DecimalField(
         ref="height-from-ground",
         display="Height from ground",
         description="Height, in metres, from ground to the base of the advertisement",
     )
-    height = StringField(
+    height = DecimalField(
         ref="height",
         display="Height",
         description="Height, in metres, of dimensions of advertisement",
     )
-    width = StringField(
+    width = DecimalField(
         ref="width", display="Width", description="Width of dimensions of advertisement"
     )
-    depth = StringField(
+    depth = DecimalField(
         ref="depth", display="Depth", description="Depth, in metres, of dimensions of advertisement"
     )
-    symbol_height_max = StringField(
+    symbol_height_max = DecimalField(
         ref="symbol-height-max",
         display="Symbol height max",
         description="Maximum height, in metres, of any individual letters or symbols",
@@ -12239,7 +12241,7 @@ class Advertisement(SchemaNode):
     materials = StringField(
         ref="materials", display="Materials", description="Materials of proposed sign"
     )
-    max_projection = StringField(
+    max_projection = DecimalField(
         ref="max-projection",
         display="Max projection",
         description="Maximum projection, in metres, of the advertisement from the face of the building",
@@ -12264,7 +12266,7 @@ class Advertisement(SchemaNode):
             ),
         ],
     )
-    illuminance_level = StringField(
+    illuminance_level = DecimalField(
         ref="illuminance-level",
         display="Illuminance level",
         description="Level of illuminance for the advertisement",
@@ -12662,19 +12664,19 @@ class DescProposedWorks(SchemaNode):
         description="Description of the proposed works including detailed explanation of the work",
         required=True,
     )
-    extension_depth = StringField(
+    extension_depth = DecimalField(
         ref="extension-depth",
         display="Extension depth",
         description="How far the extension extends beyond the rear wall, measured externally in metres",
         required=True,
     )
-    max_extension_height = StringField(
+    max_extension_height = DecimalField(
         ref="max-extension-height",
         display="Maximum extension height",
         description="Maximum height of the extension, measured externally from natural ground level in metres",
         required=True,
     )
-    eaves_height = StringField(
+    eaves_height = DecimalField(
         ref="eaves-height",
         display="Eaves height",
         description="Height at the eaves of the extension, measured externally from natural ground level in metres",
@@ -12711,7 +12713,7 @@ class EligibilityExtension(SchemaNode):
         description="Will the extension extend beyond the rear wall of the original dwelling",
         required=True,
     )
-    extension_length = StringField(
+    extension_length = DecimalField(
         ref="extension-length",
         display="Extension length",
         description="Length of rear extension in metres",
@@ -13676,7 +13678,7 @@ class AgriForestDevElig(SchemaNode):
     _display = "Agricultural and forestry development eligibility"
     _description = "Information needed to assess agricultural unit, land parcel, agricultural purpose and wider site constraints "
 
-    agri_unit_area = StringField(
+    agri_unit_area = DecimalField(
         ref="agri-unit-area",
         display="Agricultural unit area",
         description="Total area of the entire agricultural unit",
@@ -13743,7 +13745,7 @@ class AgriForestDevElig(SchemaNode):
         description="Whether the proposed development is within 3 kilometres of an aerodrome",
         required=True,
     )
-    proposed_height = StringField(
+    proposed_height = DecimalField(
         ref="proposed-height",
         display="Proposed height",
         description="Height of the proposed agricultural or forestry development in metres",
@@ -13800,25 +13802,25 @@ class BuildingDetails(SchemaNode):
         description="A description of the proposed agricultural or forestry building type",
         required=True,
     )
-    building_length = StringField(
+    building_length = DecimalField(
         ref="building-length",
         display="Building length",
         description="Length of the proposed agricultural or forestry building in metres.",
         required=True,
     )
-    eaves_height = StringField(
+    eaves_height = DecimalField(
         ref="eaves-height",
         display="Eaves height",
         description="Height at the eaves of the extension, measured externally from natural ground level in metres",
         required=True,
     )
-    building_breadth = StringField(
+    building_breadth = DecimalField(
         ref="building-breadth",
         display="Building breadth",
         description="Breadth of the proposed agricultural or forestry building in metres",
         required=True,
     )
-    building_ridge_height = StringField(
+    building_ridge_height = DecimalField(
         ref="building-ridge-height",
         display="Building ridge height",
         description="Height to the ridge of the proposed agricultural or forestry building (in metres)",
@@ -13880,12 +13882,12 @@ class ProposedBuilding(SchemaNode):
         description="Whether an agricultural building has been constructed on the agricultural unit within the last two years",
         required=True,
     )
-    agri_building_area = StringField(
+    agri_building_area = DecimalField(
         ref="agri-building-area",
         display="Agricultural building ground area",
         description="Overall ground area of the agricultural building constructed within the last two years, in square metres",
     )
-    agri_building_distance = StringField(
+    agri_building_distance = DecimalField(
         ref="agri-building-distance",
         display="Agricultural building distance",
         description="Distance from the recent agricultural building to the proposed new building (in metres)",
@@ -14229,7 +14231,7 @@ class WasteManagementOutline(SchemaNode):
         description="Whether the total capacity is known",
         required=True,
     )
-    total_capacity = StringField(
+    total_capacity = DecimalField(
         ref="total-capacity",
         display="Total capacity",
         description="Total capacity of void in cubic metres (or tonnes/litres)",
@@ -14254,7 +14256,7 @@ class WasteManagementOutline(SchemaNode):
         description="Whether the annual throughput is known",
         required=True,
     )
-    annual_throughput = StringField(
+    annual_throughput = DecimalField(
         ref="annual-throughput",
         display="Annual throughput",
         description="Maximum annual operational throughput in tonnes/litres",
