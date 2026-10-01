@@ -18,7 +18,6 @@ from web_viewer.forms import FormTree
 
 # Example payloads from unittest data
 TEST_DATA_PATH = Path(__file__).parent.parent.parent / "tests" / "data" / "web_payloads"
-assert TEST_DATA_PATH.is_dir(), "Example payloads in unittest data not found"
 
 main_blueprint = Blueprint("main", __name__)
 
@@ -211,13 +210,13 @@ def example_payload(example_ref=None, view_format=None):
     #                         'path' : filesystem location of JSON file
     #                         'title' : (str)
     #                         'description': (str)
-    examples = {
-        "test_full": {
+    examples = {}
+    if TEST_DATA_PATH.is_dir():
+        examples["test_full"] = {
             "path": TEST_DATA_PATH / "application_full.json",
             "title": "Full Application",
             "description": "Example full planning application taken from unittest data.",
         }
-    }
 
     # When PLANNING_APPLICATION_DATA_SPECIFICATION_REPO is available use all example application
     # types as examples.
