@@ -10,6 +10,7 @@ COPY schema schema/
 COPY requirements_web_app_only.txt .
 COPY settings/global_config.py settings/
 COPY settings/container_config.py settings/
+COPY tests/data tests/data/
 COPY entrypoint.sh .
 
 RUN pip install --break-system-packages -r requirements_web_app_only.txt \
