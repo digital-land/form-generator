@@ -187,7 +187,7 @@ class FormFabricate:
     @staticmethod
     def field_form_data(schema_field, value):
         """
-        @see :func:`_node_form_data` - scalars pass through unchanged, node values are
+        @see :meth:`node_form_data` - scalars pass through unchanged, node values are
         translated recursively.
         """
         if isinstance(schema_field, SchemaSchemaNodeField):
@@ -282,9 +282,12 @@ class FormTree:
             if key_errors:
                 raise SchemaValidationException(key_errors)
 
-        return self._collection(
-            node_cls=root_node.__class__, node_obj=root_node, payload=self.loaded_values
+        c = self._collection(
+            node_cls=root_node.__class__,
+            node_obj=root_node,
+            payload=self.loaded_values,
         )
+        return c
 
     def _collection(self, node_cls, node_obj, prefix=None, out_of_scope=False, payload=None):
         """
@@ -308,23 +311,52 @@ class FormTree:
         if payload is None:
             payload = {}
 
+        if out_of_scope:
+            return []
+
         form = FormFabricate.schema_auto_form(node_cls)(prefix=prefix)
+        form._out_of_scope = out_of_scope
+        results = [form]
+
+        node_schema = node_cls.schema_refs()
+
+        # first pass loads non-node (i.e. normal field) data, values of which might be needed in
+        # scope rules
+        for ref, (attr_name, field) in node_schema.items():
+
+            if isinstance(field, SchemaSchemaNodeField):
+                continue
+
+            # `process` handles every field type, including rebuilding the entries of a
+            # `FieldList` from a list of values
+            wt_field = form[attr_name]
+            if isinstance(wt_field, WTFFieldList):
+                # FieldList.process empties `entries` but keeps counting `last_index`
+                # from the construction-time entries; reset so entries are 0-indexed
+                wt_field.last_index = -1
+
+            loaded_value = payload.get(ref, payload.get(attr_name))
+            if loaded_value is not None:
+                # override form values with payload values
+                v = FormFabricate.field_form_data(field, loaded_value)
+                wt_field.process(None, v)
+
+            # values into node obj. so they can be used by out_of_scope rules
+            setattr(node_obj, attr_name, wt_field.data)
 
         # Fields/nodes the loaded context puts out of scope. These are flagged rather than removed
         # so the structure stays defined by the class; the template skips flagged fields and cards.
         descoped_refs = node_obj.out_of_scope_fields
-        form._out_of_scope = out_of_scope
 
-        results = [form]
-
-        for ref, (attr_name, field) in node_cls.schema_refs().items():
+        # second pass loads child nodes and sets wtf-field attributes to mark descoped fields
+        for ref, (attr_name, field) in node_schema.items():
 
             descoped = ref in descoped_refs
-            loaded_value = payload.get(ref, payload.get(attr_name))
 
             if isinstance(field, SchemaSchemaNodeField):
                 # fusion nodes = user interface + specification
                 child_prefix = f"{prefix}.{ref}" if prefix else ref
+                loaded_value = payload.get(ref, payload.get(attr_name))
                 results.extend(
                     self._collection(
                         field.schema_node_cls,
@@ -335,17 +367,6 @@ class FormTree:
                     )
                 )
                 continue
-
-            # every other field kind (repeated nodes included) lives on this node's form
-            if loaded_value is not None:
-                # `process` handles every field type, including rebuilding the entries of a
-                # `FieldList` from a list of values
-                wt_field = form[attr_name]
-                if isinstance(wt_field, WTFFieldList):
-                    # FieldList.process empties `entries` but keeps counting `last_index`
-                    # from the construction-time entries; reset so entries are 0-indexed
-                    wt_field.last_index = -1
-                wt_field.process(None, FormFabricate.field_form_data(field, loaded_value))
 
             if descoped:
                 # flag it so the template drops it from the visible fields
@@ -396,6 +417,11 @@ class FormTree:
 
                 # CSRF token is a transport concern, not part of the schema payload
                 if field.type == "CSRFTokenField":
+                    continue
+
+                render_kw = getattr(field, "render_kw", None)
+                if isinstance(render_kw, dict) and render_kw.get("data-out-of-scope") == "true":
+                    # de-scoped at field level
                     continue
 
                 assert field.short_name not in d, "Coding assumption to not override existing"

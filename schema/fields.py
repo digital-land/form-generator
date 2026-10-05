@@ -247,17 +247,19 @@ class DecimalField(AbstractSchemaField):
         if value is None:
             return value
 
-        if not isinstance(value, (int, float)):
-            msg = f"Field '{self.node_path}' isn't a numeric type"
-            raise SchemaValidationException([msg], node_path=self.node_path)
+        if isinstance(value, (int, float)):
 
-        try:
-            v = decimal.Decimal(value)
-        except:
-            msg = f"Field '{self.node_path}' can't be converted into a decimal number"
-            raise SchemaValidationException([msg], node_path=self.node_path)
+            try:
+                return decimal.Decimal(value)
+            except:
+                msg = f"Field '{self.node_path}' can't be converted into a decimal number"
+                raise SchemaValidationException([msg], node_path=self.node_path)
 
-        return v
+        if isinstance(value, decimal.Decimal):
+            return value
+
+        msg = f"Field '{self.node_path}' isn't a numeric type"
+        raise SchemaValidationException([msg], node_path=self.node_path)
 
     @classmethod
     def as_primative(cls, value):
