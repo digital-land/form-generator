@@ -5982,6 +5982,11 @@ class BioGeoArchCon(SchemaNode):
         select_options=[
             EnumOption(key="on-development-site", label="On development site", description=""),
             EnumOption(key="adjacent-to-site", label="On adjacent site", description=""),
+            EnumOption(
+                key="no",
+                label="No likely impact",
+                description="No likelihood of the feature being affected",
+            ),
         ],
     )
     biodiversity_features_impact = EnumField(
@@ -5992,6 +5997,11 @@ class BioGeoArchCon(SchemaNode):
         select_options=[
             EnumOption(key="on-development-site", label="On development site", description=""),
             EnumOption(key="adjacent-to-site", label="On adjacent site", description=""),
+            EnumOption(
+                key="no",
+                label="No likely impact",
+                description="No likelihood of the feature being affected",
+            ),
         ],
     )
     geological_features_impact = EnumField(
@@ -6002,6 +6012,11 @@ class BioGeoArchCon(SchemaNode):
         select_options=[
             EnumOption(key="on-development-site", label="On development site", description=""),
             EnumOption(key="adjacent-to-site", label="On adjacent site", description=""),
+            EnumOption(
+                key="no",
+                label="No likely impact",
+                description="No likelihood of the feature being affected",
+            ),
         ],
     )
     archaeological_features_impact = EnumField(
@@ -6012,6 +6027,11 @@ class BioGeoArchCon(SchemaNode):
         select_options=[
             EnumOption(key="on-development-site", label="On development site", description=""),
             EnumOption(key="adjacent-to-site", label="On adjacent site", description=""),
+            EnumOption(
+                key="no",
+                label="No likely impact",
+                description="No likelihood of the feature being affected",
+            ),
         ],
     )
 
@@ -7227,10 +7247,16 @@ class LbGrade(SchemaNode):
     _display = "Listed building grade"
     _description = "The grade of any listed building affected by the proposed development."
 
+    listed_building_grade_known = BooleanField(
+        ref="listed-building-grade-known",
+        display="Listed building grade known",
+        description="Set to true if the applicant knows the listed building grade. Set to false if they do not know it.",
+        required=True,
+    )
     listed_building_grade = EnumField(
         ref="listed-building-grade",
         display="Listed building grade",
-        description='The grade of the listed building, selected from the listed-building-grade codelist or "don\'t know"',
+        description="The grade of the listed building, selected from the listed-building-grade codelist",
         required=True,
         select_options=[
             EnumOption(key="I", label="I", description=""),
@@ -7260,6 +7286,16 @@ class LbGrade(SchemaNode):
             ),
         ],
     )
+
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if not self["listed-building-grade-known"] == True:
+            de_scoped.add("listed-building-grade")
+
+        return de_scoped
 
 
 class RelatedApplications(SchemaNode):
