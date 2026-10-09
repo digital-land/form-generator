@@ -94,7 +94,12 @@ class ContactDetail(SchemaNode):
     _ref = "contact-details"
 
     email = EmailField(ref="email")
-    fax = SchemaNodeField(ref="fax-number", schema_node_cls=FaxNumber)
+    fax = SchemaNodeField(
+        ref="fax-number",
+        display="Facsimile device",
+        description="Pushes paper through phone lines",
+        schema_node_cls=FaxNumber,
+    )
 
     phones = RepeatedField(
         ref="phones",
