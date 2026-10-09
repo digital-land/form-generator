@@ -289,7 +289,7 @@ class FormTree:
         )
         return c
 
-    def _collection(self, node_cls, node_obj, prefix=None, out_of_scope=False, payload=None):
+    def _collection(self, node_cls, node_obj, prefix=None, payload=None):
         """
         Schema node tree traverse. Build a form from each schema node.
 
@@ -301,8 +301,6 @@ class FormTree:
 
         @param node_cls: subclass of `SchemaNode`, not object - defines the form structure
         @param node_obj: (SchemaNode) loaded instance of `node_cls`.
-        @param out_of_scope: (bool) True when an ancestor node put this whole node out of scope.
-            The form (and its descendants) are flagged so the template skips rendering them.
         @param payload: (dict) values given to :meth:`load` belonging to this node. Applied
             after construction so they override anything the form bound from a POST.
         """
@@ -311,11 +309,8 @@ class FormTree:
         if payload is None:
             payload = {}
 
-        if out_of_scope:
-            return []
-
         form = FormFabricate.schema_auto_form(node_cls)(prefix=prefix)
-        form._out_of_scope = out_of_scope
+        form._out_of_scope = False  # legacy flag - confirmation needed if this can be removed
         results = [form]
 
         node_schema = node_cls.schema_refs()
@@ -354,18 +349,30 @@ class FormTree:
             descoped = ref in descoped_refs
 
             if isinstance(field, SchemaSchemaNodeField):
+
+                if descoped:
+                    continue
+
                 # fusion nodes = user interface + specification
                 child_prefix = f"{prefix}.{ref}" if prefix else ref
                 loaded_value = payload.get(ref, payload.get(attr_name))
-                results.extend(
-                    self._collection(
-                        field.schema_node_cls,
-                        node_obj=getattr(node_obj, attr_name),
-                        prefix=child_prefix,
-                        out_of_scope=out_of_scope or descoped,
-                        payload=loaded_value or {},
-                    )
+
+                descendants = self._collection(
+                    field.schema_node_cls,
+                    node_obj=getattr(node_obj, attr_name),
+                    prefix=child_prefix,
+                    payload=loaded_value or {},
                 )
+
+                # field level overloads of form
+                # first node will be the form for `field`
+                if field.display:
+                    descendants[0]._display = field.display
+
+                if field.description:
+                    descendants[0]._description = field.description
+
+                results.extend(descendants)
                 continue
 
             if descoped:

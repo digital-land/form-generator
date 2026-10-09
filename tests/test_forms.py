@@ -228,3 +228,14 @@ class TestForms(WebTestCase):
 
         self.assertNotIn(bob_expected, html)
         self.assertIn(tim_expected, html)
+
+    def test_schema_node_forms_display_copy(self):
+        """
+        Rendered HTML should use SchemaNodeField's 'display' not that from the schema_node_cls.
+        """
+        form_tree = FormTree(root_node=ContactDetail)
+        html = self.render_forms(form_tree.collection())
+
+        msg = "Field level values should override those in the field's `schema_node_cls`"
+        for expected_snippet in ["Facsimile device", "Pushes paper through phone lines"]:
+            self.assertIn(expected_snippet, html, msg)
