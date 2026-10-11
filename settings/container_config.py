@@ -6,3 +6,4 @@ class Config(BaseConfig):
     WTF_CSRF_ENABLED = True
     # CSRF is in place but fully public open data without auth so not actually needed yet
     SECRET_KEY = "not-actually-secret"
+    PLANNING_APPLICATION_DATA_SPECIFICATION_REPO = "/app/planning-application-data-specification"

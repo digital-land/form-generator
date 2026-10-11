@@ -1,12 +1,17 @@
 # Forms Generator
 
-Example implementation of the [planning application data schema](https://github.com/digital-land/planning-application-data-specification). 
+This project is a prototype to demonstrate an example implementation of the [planning application data specification](https://github.com/digital-land/planning-application-data-specification). 
 
-This repo demonstrates how to go from [schema specification files](https://github.com/digital-land/planning-application-data-specification/tree/main/specification) writen in yaml+mark down to Python classes.
+This project demonstrates-
 
-These Python classes are used with a [Flask](https://flask.palletsprojects.com/en/stable/) app to build HTML forms (using [WTForms](https://wtforms.readthedocs.io/en/3.2.x/)), a schema validator (to determine if a JSON documnet conforms with the schema) and a PDF generator for paper based forms.
+1. A transform from the [schema specification files](https://github.com/digital-land/planning-application-data-specification/tree/main/specification) written in YML to Python classes. This step makes the other parts of the project easier to understand as Python is more widely understood by developers and tooling.  
+1. How changes to the specification can be incorporated into the software. In many cases this is analogous to a compilation step so is without further software development.
+1. A [Flask](https://flask.palletsprojects.com/en/stable/) app to build HTML forms (using [WTForms](https://wtforms.readthedocs.io/en/3.2.x/)).
+1. A PDF generator - To demonstrate how paper based forms could be built.
+1. A payload validator - to determine if a JSON document conforms with the specification
 
-This project is a prototype to demonstrate the structure of the planning application data schema. The forms produced have not had input from a content designer and the validate hasn't been through quality assurance.
+
+The forms produced have not had input from a content designer and the validator hasn't been through quality assurance.
 
 This project is hosted publically at [https://form-generator.prototype.development.planning.data.gov.uk/](https://form-generator.prototype.development.planning.data.gov.uk/).
 
