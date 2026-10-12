@@ -5,5 +5,5 @@ class BaseConfig:
     WTF_CSRF_ENABLED = True
 
     # filesystem path to local copy of https://github.com/digital-land/planning-application-data-specification
-    # Only needed by `builder/build_schema.py`
+    # Only needed by `builder/build_schema.py` and optionally by /example_payload/ view.
     PLANNING_APPLICATION_DATA_SPECIFICATION_REPO = None
