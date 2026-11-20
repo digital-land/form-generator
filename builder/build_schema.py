@@ -19,6 +19,7 @@ from schema.fields import (
     EnumField,
     EnumOption,
     IntegerField,
+    ObjectField,
     RepeatedField,
     SelectFilter,
     SchemaNodeField,
@@ -170,6 +171,8 @@ def render_python(project_root, planning_spec):
                     schema_field = DecimalField(**field_info)
                 elif field_x.datatype == "integer":
                     schema_field = IntegerField(**field_info)
+                elif field_x.datatype == "object":
+                    schema_field = ObjectField(**field_info)
                 elif field_x.datatype == "enum":
                     schema_field = build_enum_field(planning_spec, field_info, field_x.codelist)
 

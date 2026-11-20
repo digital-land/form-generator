@@ -15,6 +15,7 @@ from schema.fields import DecimalField as SchemaDecimalField
 from schema.fields import EnumField as SchemaEnumField
 from schema.fields import HiddenStringField as SchemaHiddenStringField
 from schema.fields import IntegerField as SchemaIntegerField
+from schema.fields import ObjectField as SchemaObjectField
 from schema.fields import RepeatedField as SchemaRepeatedField
 from schema.fields import StringField as SchemaStringField
 from schema.fields import SchemaNodeField as SchemaSchemaNodeField
@@ -48,10 +49,15 @@ class FormFabricate:
         if isinstance(schema_field, SchemaIntegerField):
             return WTFIntegerField(label, render_kw=render_kw)
         elif isinstance(schema_field, SchemaHiddenStringField):
-            # subclass of SchemaStringField - must be checked first
+            # subclass of SchemaStringField so condition must be before SchemaStringField
             return WTFHiddenField(label, render_kw=render_kw)
         elif isinstance(schema_field, SchemaStringField):
             return WTFStringField(label, render_kw=render_kw)
+        elif isinstance(schema_field, SchemaObjectField):
+            # :class:`ObjectField` is expected to contain `additional-data` that falls outside of
+            # the specification. Unknown uses for this part of payload so don't display this or
+            # make it editable to users.
+            return WTFHiddenField(label, render_kw=render_kw)
         elif isinstance(schema_field, SchemaEnumField):
 
             # Optional description field

@@ -47,6 +47,7 @@ class Field(SchemaBase):
     start_date: str | None = None
     replacement_field: str | None = None
     minimum_items: int | None = None
+    allow_additional_properties: bool = False
 
 
 @dataclass

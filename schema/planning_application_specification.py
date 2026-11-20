@@ -9,6 +9,7 @@ from schema.fields import (
     DynamicEnumField,
     EnumOption,
     IntegerField,
+    ObjectField,
     RepeatedField,
     SelectFilter,
     SchemaNodeField,
@@ -5681,12 +5682,22 @@ class OutlineAll(SchemaNode):
     _display = "Outline Planning Permission with All Matters Reserved"
     _description = "Outline planning permission with all matters reserved"
 
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
+    )
     submission_details = SchemaNodeField(
         ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including how it is identified, routed, validated, handled and traced",
         required=True,
         schema_node_cls=SubmissionDetails,
+    )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
     )
     agent_contact = SchemaNodeField(
         ref="agent-contact",
@@ -6801,6 +6812,11 @@ class TechnicalDetailsConsent(SchemaNode):
         required=True,
         schema_node_cls=SubmissionDetails,
     )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
+    )
     access_rights_of_way = SchemaNodeField(
         ref="access-rights-of-way",
         display="Access and rights of way",
@@ -7346,6 +7362,11 @@ class Lbc(SchemaNode):
         required=True,
         schema_node_cls=SubmissionDetails,
     )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
+    )
     agent_contact = SchemaNodeField(
         ref="agent-contact",
         display="Agent contact details",
@@ -7625,6 +7646,11 @@ class LdcProposedWorkLb(SchemaNode):
         required=True,
         schema_node_cls=SubmissionDetails,
     )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
+    )
     agent_contact = SchemaNodeField(
         ref="agent-contact",
         display="Agent contact details",
@@ -7789,6 +7815,11 @@ class HedgerowRemovalapplicationresolved(SchemaNode):
         description="Details about the submitted payload, including how it is identified, routed, validated, handled and traced",
         required=True,
         schema_node_cls=SubmissionDetails,
+    )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
     )
     applicant_contact = SchemaNodeField(
         ref="applicant-contact",
@@ -8340,12 +8371,22 @@ class LdcProspectiveUse(SchemaNode):
     _display = "Lawful development certificate: Proposed use or development"
     _description = "An application for a certificate confirming that a proposed use of buildings or other land, or operations proposed to be carried out in, on, over or under land, would be lawful for planning purposes. "
 
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
+    )
     submission_details = SchemaNodeField(
         ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including how it is identified, routed, validated, handled and traced",
         required=True,
         schema_node_cls=SubmissionDetails,
+    )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
     )
     proposal_details_ldc = SchemaNodeField(
         ref="proposal-details-ldc",
@@ -8542,6 +8583,11 @@ class ReservedMatters(SchemaNode):
         required=True,
         schema_node_cls=SubmissionDetails,
     )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
+    )
     agent_contact = SchemaNodeField(
         ref="agent-contact",
         display="Agent contact details",
@@ -8640,6 +8686,11 @@ class DemolitionConArea(SchemaNode):
         description="Details about the submitted payload, including how it is identified, routed, validated, handled and traced",
         required=True,
         schema_node_cls=SubmissionDetails,
+    )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
     )
     applicant_contact = SchemaNodeField(
         ref="applicant-contact",
@@ -8969,6 +9020,11 @@ class ConsentUnderTpo(SchemaNode):
         required=True,
         schema_node_cls=SubmissionDetails,
     )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
+    )
     agent_contact = SchemaNodeField(
         ref="agent-contact",
         display="Agent contact details",
@@ -9250,12 +9306,22 @@ class ChoCommercialToDwh(SchemaNode):
         required=True,
         schema_node_cls=SubmissionDetails,
     )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
+    )
     submission_details = SchemaNodeField(
         ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including how it is identified, routed, validated, handled and traced",
         required=True,
         schema_node_cls=SubmissionDetails,
+    )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
     )
     agricultural_tenancy_consent = SchemaNodeField(
         ref="agricultural-tenancy-consent",
@@ -9342,12 +9408,22 @@ class OutlineSome(SchemaNode):
     _display = "Outline Planning Permission with Some Matters Reserved"
     _description = "Outline planning permission with some matters reserved"
 
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
+    )
     submission_details = SchemaNodeField(
         ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including how it is identified, routed, validated, handled and traced",
         required=True,
         schema_node_cls=SubmissionDetails,
+    )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
     )
     access_rights_of_way = SchemaNodeField(
         ref="access-rights-of-way",
@@ -9729,12 +9805,22 @@ class PaStorey(SchemaNode):
     _display = "Prior approval: Additional storeys"
     _description = "Enlargement of a dwellinghouse by construction of additional storeys"
 
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
+    )
     submission_details = SchemaNodeField(
         ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including how it is identified, routed, validated, handled and traced",
         required=True,
         schema_node_cls=SubmissionDetails,
+    )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
     )
     desc_work_impacts_risks = SchemaNodeField(
         ref="desc-work-impacts-risks",
@@ -10205,6 +10291,11 @@ class Pip(SchemaNode):
         required=True,
         schema_node_cls=SubmissionDetails,
     )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
+    )
     agent_details = SchemaNodeField(
         ref="agent-details",
         display="Agent details",
@@ -10406,6 +10497,11 @@ class S73(SchemaNode):
         required=True,
         schema_node_cls=SubmissionDetails,
     )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
+    )
     agent_contact = SchemaNodeField(
         ref="agent-contact",
         display="Agent contact details",
@@ -10532,6 +10628,11 @@ class Hh(SchemaNode):
         description="Details about the submitted payload, including how it is identified, routed, validated, handled and traced",
         required=True,
         schema_node_cls=SubmissionDetails,
+    )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
     )
     access_rights_of_way = SchemaNodeField(
         ref="access-rights-of-way",
@@ -11651,6 +11752,11 @@ class ExtractionOilGas(SchemaNode):
         required=True,
         schema_node_cls=SubmissionDetails,
     )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
+    )
     agent_contact = SchemaNodeField(
         ref="agent-contact",
         display="Agent contact details",
@@ -11959,6 +12065,11 @@ class NonMaterialAmendment(SchemaNode):
         description="Details about the submitted payload, including how it is identified, routed, validated, handled and traced",
         required=True,
         schema_node_cls=SubmissionDetails,
+    )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
     )
     agent_contact = SchemaNodeField(
         ref="agent-contact",
@@ -12379,6 +12490,11 @@ class Advertising(SchemaNode):
         required=True,
         schema_node_cls=SubmissionDetails,
     )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
+    )
     advert_location = SchemaNodeField(
         ref="advert-location",
         display="Advertisement location",
@@ -12488,6 +12604,11 @@ class Full(SchemaNode):
         description="Details about the submitted payload, including how it is identified, routed, validated, handled and traced",
         required=True,
         schema_node_cls=SubmissionDetails,
+    )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
     )
     access_rights_of_way = SchemaNodeField(
         ref="access-rights-of-way",
@@ -12843,12 +12964,22 @@ class PaExtension(SchemaNode):
     _display = "Prior approval: Larger Home Extension"
     _description = "An application for prior approval for a proposed larger single-storey rear extension to a dwellinghouse under permitted development rights. "
 
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
+    )
     submission_details = SchemaNodeField(
         ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including how it is identified, routed, validated, handled and traced",
         required=True,
         schema_node_cls=SubmissionDetails,
+    )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
     )
     adj_premises = SchemaNodeField(
         ref="adj-premises",
@@ -12976,6 +13107,11 @@ class ApprovalCondition(SchemaNode):
         required=True,
         schema_node_cls=SubmissionDetails,
     )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
+    )
     agent_contact = SchemaNodeField(
         ref="agent-contact",
         display="Agent contact details",
@@ -13101,6 +13237,11 @@ class NoticeTreesInConArea(SchemaNode):
         description="Details about the submitted payload, including how it is identified, routed, validated, handled and traced",
         required=True,
         schema_node_cls=SubmissionDetails,
+    )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
     )
     agent_contact = SchemaNodeField(
         ref="agent-contact",
@@ -13604,12 +13745,22 @@ class LdcExistingUse(SchemaNode):
     _display = "Lawful development certificate: Existing use or development"
     _description = "An application for a certificate confirming that an existing use of land, operational development or an activity being carried out in breach of a planning condition is lawful for planning purposes "
 
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
+    )
     submission_details = SchemaNodeField(
         ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including how it is identified, routed, validated, handled and traced",
         required=True,
         schema_node_cls=SubmissionDetails,
+    )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
     )
     desc_existing_use = SchemaNodeField(
         ref="desc-existing-use",
@@ -13706,6 +13857,451 @@ class LdcExistingUse(SchemaNode):
         display="Site Visit Details",
         description="Information to help the planning authority arrange a site visit",
         schema_node_cls=SiteVisit,
+    )
+
+
+class ClsQAgriTenancies(SchemaNode):
+    _ref = "cls-q-agri-tenancies"
+    _display = "Class Q agricultural tenancies"
+    _description = "Current agricultural tenancy consent and agreements about agricultural need following recent tenancy termination for a prior approval change of use from agricultural buildings to dwellinghouses."
+
+    agricultural_tenants = BooleanField(
+        ref="agricultural-tenants",
+        display="Agricultural tenants",
+        description="Whether the site is currently occupied under any agricultural tenancy agreements.",
+        required=True,
+    )
+    tenancy_parties_consent = BooleanField(
+        ref="tenancy-parties-consent",
+        display="Consent of all tenancy parties",
+        description="Whether all parties to the agricultural tenancy agreements have consented to the proposed change of use.",
+        required=True,
+    )
+    cls_q_tenancy_terminated = BooleanField(
+        ref="cls-q-tenancy-terminated",
+        display="Agricultural tenancy terminated for proposed change of use",
+        description="Whether any agricultural tenancy agreements have been terminated in the year before development is proposed to begin for the purpose of carrying out the proposed change of use.",
+        required=True,
+    )
+    cls_q_agri_use_not_required = BooleanField(
+        ref="cls-q-agri-use-not-required",
+        display="Agreement that site is no longer required for agricultural use",
+        description="Whether all parties to all relevant terminated agricultural tenancy agreements have agreed that the site is no longer required for agricultural use.",
+        required=True,
+    )
+
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if not self["agricultural-tenants"] == True:
+            de_scoped.add("tenancy-parties-consent")
+
+        if not self["cls-q-tenancy-terminated"] == True:
+            de_scoped.add("cls-q-agri-use-not-required")
+
+        return de_scoped
+
+
+class ClsQCurrentUnitEligib(SchemaNode):
+    _ref = "cls-q-current-unit-eligib"
+    _display = "Class Q current agricultural unit eligibility"
+    _description = "Agricultural unit membership history for a prior approval change of use from agricultural buildings to dwellinghouses where the site is currently part of an established agricultural unit."
+
+    cls_q_unit_on_2023_07_24 = BooleanField(
+        ref="cls-q-unit-on-2023-07-24",
+        display="Agricultural unit on 24 July 2023",
+        description="Whether the site was part of an established agricultural unit on 24 July 2023.",
+    )
+    cls_q_unit_10_years = EnumField(
+        ref="cls-q-unit-10-years",
+        display="Agricultural unit membership for 10 years",
+        description="Whether the site will have been part of the established agricultural unit for at least 10 years before development begins.",
+        required=True,
+        select_options=[
+            EnumOption(key="yes", label="Yes", description="Affirmative response"),
+            EnumOption(key="no", label="No", description="Negative response"),
+            EnumOption(
+                key="not-applicable",
+                label="Not Applicable",
+                description="Response not applicable or not provided",
+            ),
+        ],
+    )
+
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if (self._root_node.by_ref("cls-q-eligib.cls-q-current-agri-unit") == True) and (
+            self.is_empty_field("cls-q-unit-on-2023-07-24") == True
+        ):
+
+            reasons.append(
+                f"{self.node_path}.cls-q-unit-on-2023-07-24 is needed for current value in cls-q-eligib.cls-q-current-agri-unit"
+            )
+
+        if reasons:
+            raise SchemaValidationException(reasons, node_path=self.node_path)
+
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if not self["cls-q-unit-on-2023-07-24"] == False:
+            de_scoped.add("cls-q-unit-10-years")
+
+        return de_scoped
+
+
+class ClsQDwellingLimits(SchemaNode):
+    _ref = "cls-q-dwelling-limits"
+    _display = "Class Q dwellinghouses and floor space"
+    _description = "Proposed net dwelling increase, individual dwelling size and cumulative dwelling counts and floor space for prior approval of agricultural buildings to dwellinghouses."
+
+    net_dwellings_increase = IntegerField(
+        ref="net-dwellings-increase",
+        display="Net increase in dwellings",
+        description="The number of dwellinghouses proposed by the development additional to the number on the site immediately prior to development.",
+        required=True,
+    )
+    single_dwelling_over_150sqm = BooleanField(
+        ref="single-dwelling-over-150sqm",
+        display="Single proposed dwelling over 150 square metres",
+        description="Whether the floor space of any single proposed dwellinghouse exceeds 150 square metres.",
+        required=True,
+    )
+    cls_q_previous_dwellings = IntegerField(
+        ref="cls-q-previous-dwellings",
+        display="Dwellinghouses previously created under Class Q",
+        description="The number of dwellinghouses previously created under Class Q on the established or former agricultural unit.",
+        required=True,
+    )
+    floorspace = DecimalField(
+        ref="floorspace",
+        display="Floorspace",
+        description="Total combined floor space, in square metres, previously and now proposed to be changed to dwellinghouses under Class Q on this established or former agricultural unit.",
+        required=True,
+    )
+
+
+class ClsQEligib(SchemaNode):
+    _ref = "cls-q-eligib"
+    _display = "Class Q general eligibility"
+    _description = "General agricultural unit, building, extension, access and location eligibility information for a Class Q change of use to dwellinghouses."
+
+    cls_q_current_agri_unit = BooleanField(
+        ref="cls-q-current-agri-unit",
+        display="Current agricultural unit",
+        description="Whether the site is currently part of an established agricultural unit.",
+        required=True,
+    )
+    cls_q_agri_pd_10_years = BooleanField(
+        ref="cls-q-agri-pd-10-years",
+        display="Agricultural permitted development in preceding 10 years",
+        description="Whether agricultural permitted development work has been carried out on the agricultural unit during the 10 years before development begins.",
+        required=True,
+    )
+    cls_q_dimensions_exceeded = BooleanField(
+        ref="cls-q-dimensions-exceeded",
+        display="External dimension limits exceeded",
+        description="Whether the resulting building extends beyond the existing building within the scope of the Class Q external dimensions question.",
+        required=True,
+    )
+    cls_q_extension_exceeded = EnumField(
+        ref="cls-q-extension-exceeded",
+        display="Extension limits exceeded",
+        description="Whether a proposed extension exceeds any of the listed Class Q extension limits, or no extension is proposed.",
+        required=True,
+        select_options=[
+            EnumOption(key="yes", label="Yes", description="Affirmative response"),
+            EnumOption(key="no", label="No", description="Negative response"),
+            EnumOption(
+                key="not-applicable",
+                label="Not Applicable",
+                description="Response not applicable or not provided",
+            ),
+        ],
+    )
+    has_suitable_highway_access = BooleanField(
+        ref="has-suitable-highway-access",
+        display="Has suitable public highway access",
+        description="Whether the building has suitable access to a public highway.",
+        required=True,
+    )
+    cls_q_existing_space_capable = BooleanField(
+        ref="cls-q-existing-space-capable",
+        display="Existing building space-standard capability",
+        description="Whether the existing building, including permitted building work or operations but excluding any proposed extension, is capable of complying with the nationally described space standard.",
+        required=True,
+    )
+    has_location_restriction = BooleanField(
+        ref="has-location-restriction",
+        display="Has location restriction",
+        description="Whether any part of the land, site or building is affected by a location restriction listed for Class Q.",
+        required=True,
+    )
+
+
+class ClsQFormerUnitEligib(SchemaNode):
+    _ref = "cls-q-former-unit-eligib"
+    _display = "Class Q former agricultural unit eligibility"
+    _description = "Agricultural unit membership history and subsequent use for a prior approval change of use from agricultural buildings to dwellinghouses where the site was formerly part of an established agricultural unit."
+
+    cls_q_unit_on_2023_07_24 = BooleanField(
+        ref="cls-q-unit-on-2023-07-24",
+        display="Agricultural unit on 24 July 2023",
+        description="Whether the site was part of an established agricultural unit on 24 July 2023.",
+    )
+    cls_q_ceased_10_years = EnumField(
+        ref="cls-q-ceased-10-years",
+        display="Ceased agricultural unit membership at least 10 years before development",
+        description="Whether at least 10 years will have passed since the site ceased to be part of an established agricultural unit before development begins.",
+        required=True,
+        select_options=[
+            EnumOption(key="yes", label="Yes", description="Affirmative response"),
+            EnumOption(key="no", label="No", description="Negative response"),
+            EnumOption(
+                key="not-applicable",
+                label="Not Applicable",
+                description="Response not applicable or not provided",
+            ),
+        ],
+    )
+    cls_q_non_agri_use = BooleanField(
+        ref="cls-q-non-agri-use",
+        display="Non-agricultural use since leaving agricultural unit",
+        description="Whether the site has been used for any non-agricultural purpose since ceasing to be part of the agricultural unit.",
+    )
+
+    def valid_node(self):
+        super().valid_node()
+        reasons = []
+
+        if (self._root_node.by_ref("cls-q-eligib.cls-q-current-agri-unit") == False) and (
+            self.is_empty_field("cls-q-unit-on-2023-07-24") == True
+        ):
+
+            reasons.append(
+                f"{self.node_path}.cls-q-unit-on-2023-07-24 is needed for current value in cls-q-eligib.cls-q-current-agri-unit"
+            )
+
+        if (self._root_node.by_ref("cls-q-eligib.cls-q-current-agri-unit") == False) and (
+            self.is_empty_field("cls-q-non-agri-use") == True
+        ):
+
+            reasons.append(
+                f"{self.node_path}.cls-q-non-agri-use is needed for current value in cls-q-eligib.cls-q-current-agri-unit"
+            )
+
+        if reasons:
+            raise SchemaValidationException(reasons, node_path=self.node_path)
+
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if not self["cls-q-unit-on-2023-07-24"] == True:
+            de_scoped.add("cls-q-ceased-10-years")
+
+        return de_scoped
+
+
+class ClsQWorksImpacts(SchemaNode):
+    _ref = "cls-q-works-impacts"
+    _display = "Class Q works, impacts and risks"
+    _description = "Proposed development, building works and impact and risk details for prior approval of agricultural buildings to dwellinghouses."
+
+    proposal_description = StringField(
+        ref="proposal-description",
+        display="Proposal description",
+        description="Description of the proposed development, including the siting and location of the building or buildings.",
+        required=True,
+    )
+    natural_light_details = StringField(
+        ref="natural-light-details",
+        display="Natural light details",
+        description="Details of the provision of adequate natural light in all habitable rooms of the proposed dwellinghouses.",
+        required=True,
+    )
+    buildings_extended = BooleanField(
+        ref="buildings-extended",
+        display="Buildings extended",
+        description="Whether the buildings will be extended as part of the proposed development.",
+        required=True,
+    )
+    impact_on_amenity = StringField(
+        ref="impact-on-amenity",
+        display="Impact on amenity",
+        description="Details of any impact of the proposed extension on the amenity of adjoining premises.",
+        required=True,
+    )
+    cls_q_building_works_required = BooleanField(
+        ref="cls-q-building-works-required",
+        display="Building works required for change of use",
+        description="Whether associated building works or other operations are required to convert the buildings to dwellinghouses under Class Q.",
+        required=True,
+    )
+    design_details = StringField(
+        ref="design-details",
+        display="Design details",
+        description="Details of the design and external appearance of the buildings for the associated building works or other operations, including partial demolition.",
+        required=True,
+    )
+    transport_impacts = StringField(
+        ref="transport-impacts",
+        display="Transport impacts",
+        description="Details of transport and highways impacts of the proposed development and how they will be mitigated.",
+        required=True,
+    )
+    noise_impacts = StringField(
+        ref="noise-impacts",
+        display="Noise impacts",
+        description="Details of noise impacts associated with the proposed development and how they will be mitigated.",
+        required=True,
+    )
+    contamination_risks = StringField(
+        ref="contamination-risks",
+        display="Contamination risks",
+        description="Details of contamination risks associated with the proposed development and how they will be mitigated.",
+        required=True,
+    )
+    flooding_risks = StringField(
+        ref="flooding-risks",
+        display="Flooding risks",
+        description="Details of flooding risks associated with the proposed development and how they will be mitigated.",
+        required=True,
+    )
+
+    @property
+    def out_of_scope_fields(self):
+        de_scoped = super().out_of_scope_fields
+        app_types = set(self._root_node.by_ref("submission-details.application-types"))
+
+        if not self["buildings-extended"] == True:
+            de_scoped.add("impact-on-amenity")
+
+        if not self["cls-q-building-works-required"] == True:
+            de_scoped.add("design-details")
+
+        return de_scoped
+
+
+class ChoAgriToDwh(SchemaNode):
+    _ref = "cho-agri-to-dwh"
+    _display = "Prior approval: Agricultural or former agricultural buildings to dwellinghouses"
+    _description = "Prior approval for a change of use from agricultural or former agricultural buildings to dwellinghouses under Class Q, including associated building works."
+
+    submission_details = SchemaNodeField(
+        ref="submission-details",
+        display="Submission details",
+        description="Details about the submitted payload, including how it is identified, routed, validated, handled and traced",
+        required=True,
+        schema_node_cls=SubmissionDetails,
+    )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
+    )
+    submission_details = SchemaNodeField(
+        ref="submission-details",
+        display="Submission details",
+        description="Details about the submitted payload, including how it is identified, routed, validated, handled and traced",
+        required=True,
+        schema_node_cls=SubmissionDetails,
+    )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
+    )
+    cls_q_agri_tenancies = SchemaNodeField(
+        ref="cls-q-agri-tenancies",
+        display="Class Q agricultural tenancies",
+        description="Current agricultural tenancy consent and agreements about agricultural need following recent tenancy termination for a prior approval change of use from agricultural buildings to dwellinghouses.",
+        schema_node_cls=ClsQAgriTenancies,
+    )
+    cls_q_current_unit_eligib = SchemaNodeField(
+        ref="cls-q-current-unit-eligib",
+        display="Class Q current agricultural unit eligibility",
+        description="Agricultural unit membership history for a prior approval change of use from agricultural buildings to dwellinghouses where the site is currently part of an established agricultural unit.",
+        schema_node_cls=ClsQCurrentUnitEligib,
+    )
+    cls_q_dwelling_limits = SchemaNodeField(
+        ref="cls-q-dwelling-limits",
+        display="Class Q dwellinghouses and floor space",
+        description="Proposed net dwelling increase, individual dwelling size and cumulative dwelling counts and floor space for prior approval of agricultural buildings to dwellinghouses.",
+        schema_node_cls=ClsQDwellingLimits,
+    )
+    cls_q_eligib = SchemaNodeField(
+        ref="cls-q-eligib",
+        display="Class Q general eligibility",
+        description="General agricultural unit, building, extension, access and location eligibility information for a Class Q change of use to dwellinghouses.",
+        schema_node_cls=ClsQEligib,
+    )
+    cls_q_former_unit_eligib = SchemaNodeField(
+        ref="cls-q-former-unit-eligib",
+        display="Class Q former agricultural unit eligibility",
+        description="Agricultural unit membership history and subsequent use for a prior approval change of use from agricultural buildings to dwellinghouses where the site was formerly part of an established agricultural unit.",
+        schema_node_cls=ClsQFormerUnitEligib,
+    )
+    cls_q_works_impacts = SchemaNodeField(
+        ref="cls-q-works-impacts",
+        display="Class Q works, impacts and risks",
+        description="Proposed development, building works and impact and risk details for prior approval of agricultural buildings to dwellinghouses.",
+        schema_node_cls=ClsQWorksImpacts,
+    )
+    agent_contact = SchemaNodeField(
+        ref="agent-contact",
+        display="Agent contact details",
+        description="Name and contact information if an agent is being used.",
+        schema_node_cls=AgentContact,
+    )
+    agent_details = SchemaNodeField(
+        ref="agent-details",
+        display="Agent details",
+        description="Name and contact information if an agent is being used.",
+        schema_node_cls=AgentDetails,
+    )
+    applicant_contact = SchemaNodeField(
+        ref="applicant-contact",
+        display="Applicant contact details",
+        description="Telephone number and email address of the applicant.",
+        schema_node_cls=ApplicantContact,
+    )
+    applicant_details = SchemaNodeField(
+        ref="applicant-details",
+        display="Applicant details",
+        description="Name and contact information for the parties making the application.",
+        schema_node_cls=ApplicantDetails,
+    )
+    conflict_of_interest = SchemaNodeField(
+        ref="conflict-of-interest",
+        display="Conflict of interest",
+        description="Details of any conflict of interest that may exist between the applicant and planning authority.",
+        schema_node_cls=ConflictOfInterest,
+    )
+    checklist = SchemaNodeField(
+        ref="checklist",
+        display="Checklist",
+        description="Checking whether all the requirements of the form have been met, such as proof of payment or supporting documentation.",
+        schema_node_cls=Checklist,
+    )
+    declaration = SchemaNodeField(
+        ref="declaration",
+        display="Declaration",
+        description="Signed and dated verification of the application's accuracy.",
+        schema_node_cls=Declaration,
+    )
+    site_details = SchemaNodeField(
+        ref="site-details",
+        display="Site details",
+        description="Where the proposed development will be built.",
+        schema_node_cls=SiteDetails,
     )
 
 
@@ -14012,12 +14608,22 @@ class PaBuildAgriForest(SchemaNode):
         "Prior apporval for building development related to agricultural and forestry buildings"
     )
 
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
+    )
     submission_details = SchemaNodeField(
         ref="submission-details",
         display="Submission details",
         description="Details about the submitted payload, including how it is identified, routed, validated, handled and traced",
         required=True,
         schema_node_cls=SubmissionDetails,
+    )
+    additional_data = ObjectField(
+        ref="additional-data",
+        display="Additional data",
+        description="Additional information supplied with an application outside the nationally defined fields and modules",
     )
     agri_forest_dev_elig = SchemaNodeField(
         ref="agri-forest-dev-elig",
