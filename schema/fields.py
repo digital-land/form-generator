@@ -299,6 +299,33 @@ class IntegerField(AbstractSchemaField):
             raise SchemaValidationException([msg], node_path=self.node_path)
 
 
+class ObjectField(AbstractSchemaField):
+    """
+    JSON meaning of the word object - dictionary in Python.
+
+    This field type is used to hold 'additional-data' structured data that isn't described by the
+    specification but is held within a payload.
+    """
+
+    def prepare_value(self, value):
+
+        if value is None:
+            return value
+
+        if not isinstance(value, dict):
+            msg = f"Field '{self.node_path}' isn't a JSON object"
+            raise SchemaValidationException([msg], node_path=self.node_path)
+
+        return value
+
+    def validate(self):
+        super().validate()
+
+        if self._value is not None and not isinstance(self._value, dict):
+            msg = f"Field '{self.node_path}' isn't a JSON object"
+            raise SchemaValidationException([msg], node_path=self.node_path)
+
+
 EnumOption = namedtuple("EnumOption", ("key", "label", "description"))
 
 

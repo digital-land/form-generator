@@ -1,4 +1,7 @@
 {
+  "additional-data": {
+    "notes": "a test note in the additional data block"
+  },
   "submission-details": {
     "submission-reference": "2020/2026",
     "application-types": [

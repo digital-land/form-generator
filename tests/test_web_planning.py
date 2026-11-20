@@ -241,3 +241,20 @@ class TestWebPlanning(WebTestCase):
         """
         response = self.client.get("/example_payload/test_full/web")
         self.assertEqual(response.status_code, 200)
+
+    def test_additional_data_isnt_object(self):
+        """
+        The 'field: additional-data' should be a JSON object, i.e. a python dict.
+        """
+        payload = (DATA_PATH / "web_payloads" / "application_full.json").read_text()
+        payload_native = json.loads(payload)
+
+        payload_native["additional-data"] = "this isn't a dict"
+        response = self.client.post("/evaluate", data={"payload": json.dumps(payload_native)})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("The payload is valid.", response.text, "This payload should be invalid")
+
+        msg = "Specific error about JSON object should be displayed"
+        expected_error_msg = "Field &#39;full.additional-data&#39; isn&#39;t a JSON object"
+        self.assertIn(expected_error_msg, response.text, msg)
