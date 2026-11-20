@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Heroku Python buildpack hook - runs after dependencies are installed.
+# Bundles a copy of the planning application data specification repo into the slug so the
+# /example_payload view can list its example applications (mirrors the Dockerfile's git clone).
+set -euo pipefail
+
+SPEC_DIR="planning-application-data-specification"
+SPEC_TARBALL="https://github.com/digital-land/planning-application-data-specification/archive/refs/heads/main.tar.gz"
+
+echo "-----> Downloading planning-application-data-specification"
+rm -rf "$SPEC_DIR"
+mkdir -p "$SPEC_DIR"
+curl --fail --silent --show-error --location "$SPEC_TARBALL" | tar -xz --strip-components=1 -C "$SPEC_DIR"
