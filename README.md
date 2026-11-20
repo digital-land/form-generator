@@ -85,3 +85,13 @@ docker run -p 2121:2121 forms-generator
 The software in this project is open source and covered by the [LICENSE](LICENSE) file.
 
 Individual datasets copied into this repository may have specific copyright and licensing, otherwise all content and data in this repository is [© Crown copyright](http://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/copyright-and-re-use/crown-copyright/) and available under the terms of the [Open Government 3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/) licence.
+
+
+### Heroku
+
+The app is also deployable to Heroku using the Python buildpack-
+
+- `Procfile` runs gunicorn against `web_viewer/wsgi.py`, bound to Heroku's `$PORT`.
+- `settings/container_config.py` is the default config, shared with the Docker build (override with the `FLASK_CONFIG` config var). Set a `SECRET_KEY` config var.
+- `bin/post_compile` downloads the [planning application data specification](https://github.com/digital-land/planning-application-data-specification) at build time so its example payloads are available.
+- Dependencies are installed from `Pipfile.lock` and the Python version is set by `.python-version`. Run `pipenv lock` after changing the `Pipfile`.
